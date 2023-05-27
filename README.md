@@ -3,7 +3,7 @@
 This game is paying an homage to the SEGA's arcade game, Code Of Joker.
 
 JavascriptをDartの中から呼ぶ方法については以下のREADMEに記載しています。<br>
-https://github.com/PlaythinkDev/lab_webapp_dart/tree/development/es6_to_script
+https://github.com/temt-ceo/CODE-of-flow/tree/develop/es6_to_script
 <br>
 
 <h4>amplify-cliをインストールする</h4>

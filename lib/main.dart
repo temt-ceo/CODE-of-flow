@@ -16,6 +16,7 @@ import 'package:CodeOfFlow/bloc/counter/counter_bloc.dart';
 import 'package:CodeOfFlow/bloc/counter/counter_event.dart';
 import 'package:CodeOfFlow/component/draggableCardWidget.dart';
 import 'package:CodeOfFlow/component/dragTargetWidget.dart';
+import 'package:CodeOfFlow/component/battleInfo.dart';
 import 'package:js/js.dart';
 
 @JS('authenticate')
@@ -145,106 +146,7 @@ class HomePageState extends State<HomePage> {
                 DragBox('', 'image/unit/card_3.jpeg'),
               ])),
         ]),
-        const Positioned(
-            left: 20.0,
-            top: 10.0,
-            child: Text('Opponent Life: 7 🔷🔷🔷🔷🔷🔷🔷',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 70.0,
-            top: 50.0,
-            child: Text('CP 04',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 70.0,
-            top: 80.0,
-            child: Text('Dead 0',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 400.0,
-            top: 10.0,
-            child: Text('Deck 22',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 320.0,
-            top: 50.0,
-            child: Text('Hand 5 🔶🔶🔶🔶🔶',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 320.0,
-            top: 80.0,
-            child: Text('Trigger Zone: 🔲🔲🔳🔳',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 20.0,
-            top: 120.0,
-            child: Text('You Life: 7 🔷🔷🔷🔷🔷🔷🔷',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 70.0,
-            top: 160.0,
-            child: Text('CP 04',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 1250.0,
-            bottom: 140.0,
-            child: Text('Deck 22',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 1250.0,
-            bottom: 100.0,
-            child: Text('Dead 0',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 22.0,
-                ))),
-        const Positioned(
-            left: 30.0,
-            bottom: 100.0,
-            width: 270.0,
-            child: Text('テキストテキストテキストテキストテキストテキストテキストテキスト',
-                style: TextStyle(
-                  color: Colors.white,
-                  decoration: TextDecoration.none,
-                  fontSize: 16.0,
-                ))),
+        const BattleInfo(''),
       ]),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton:
@@ -287,13 +189,13 @@ class HomePageState extends State<HomePage> {
         // const SizedBox(width: 20),
         FloatingActionButton(
           onPressed: () => createPlayer('test'),
-          tooltip: 'CreatePlayer',
+          tooltip: 'Create Player',
           child: const Icon(Icons.add),
         ),
         const SizedBox(width: 20),
         FloatingActionButton(
           onPressed: () => unauthenticate(),
-          tooltip: 'Decrement',
+          tooltip: 'Sign Out',
           child: const Icon(Icons.logout),
         ),
       ]), // This trailing comma makes auto-formatting nicer for build methods.

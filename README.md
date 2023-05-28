@@ -2,9 +2,19 @@
 
 This game is paying an homage to the SEGA's arcade game, Code Of Joker.
 
-JavascriptをDartの中から呼ぶ方法については以下のREADMEに記載しています。<br>
+<h3>JavascriptをDartの中から呼ぶ方法については以下のREADMEに記載しています。</h3>
 https://github.com/temt-ceo/CODE-of-flow/tree/develop/es6_to_script
 <br>
+
+<h3>Flutter SDKのインストール</h3>
+以下よりダウンロード<br>
+https://docs.flutter.dev/get-started/install/macos
+
+<h3>Webアプリビルド方法</h3>
+
+```
+flutter build web
+```
 
 <h4>amplify-cliをインストールする</h4>
 

@@ -85,10 +85,16 @@ npm run build
 しかし、このファイルを使用する前にindex.jsの中の以下のパートを変更する必要があります。
 
   queueMicrotask__default["default"]
-から
+  から
 
   const queueMicrotask = queueMicrotask__default["default"];
   queueMicrotask(
+
+  return fetchTransport__default["default"]
+  から
+  const fetchT = fetchTransport__default["default"];
+  return fetchT
+
 この変更を行わなければInvalid Invocationエラーがブラウザ上で発生します。
 
 11. index.jsをFlutterプロジェクトフォルダの下のwebフォルダの下にあるindex.htmlが存在する場所に持っていきます。

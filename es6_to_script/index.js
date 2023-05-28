@@ -8,11 +8,11 @@ fcl.config({
 
 window.authenticate = fcl.authenticate;
 window.subscribe = fcl.currentUser.subscribe;
-
+// transactions
 window.createPlayer = async (playerName) => {
   const transactionId = await fcl.mutate({
     cadence: `
-      import CodeOfFlowAlpha6 from 0xCOF
+      import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
 
       transaction(nickname: String) {
         prepare(acct: AuthAccount) {

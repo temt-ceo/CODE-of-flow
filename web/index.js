@@ -18,10 +18,10 @@ fcl.config({
 
 window.authenticate = fcl.authenticate;
 window.subscribe = fcl.currentUser.subscribe;
-
+// transactions
 window.createPlayer = async function (playerName) {
   var transactionId = await fcl.mutate({
-    cadence: "\n      import CodeOfFlowAlpha6 from 0xCOF\n\n      transaction(nickname: String) {\n        prepare(acct: AuthAccount) {\n          // Step1\n          acct.save(<- CodeOfFlowAlpha6.createPlayer(nickname: nickname), to: CodeOfFlowAlpha6.PlayerStoragePath)\n          // Step2\n          acct.link<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath, target: CodeOfFlowAlpha6.PlayerStoragePath)\n          }\n        execute {\n          log(\"success\")\n        }\n      }\n    ",
+    cadence: "\n      import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6\n\n      transaction(nickname: String) {\n        prepare(acct: AuthAccount) {\n          // Step1\n          acct.save(<- CodeOfFlowAlpha6.createPlayer(nickname: nickname), to: CodeOfFlowAlpha6.PlayerStoragePath)\n          // Step2\n          acct.link<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath, target: CodeOfFlowAlpha6.PlayerStoragePath)\n          }\n        execute {\n          log(\"success\")\n        }\n      }\n    ",
     args: function args(arg, t) {
       return [arg(playerName ? playerName : 'Test Player', t.String)];
     },
@@ -1303,7 +1303,8 @@ function _httpDocumentResolver() {
             utilInvariant.invariant(typeof url !== "undefined", "retrieve({ url }) -- url must be defined");
             _context.prev = 2;
             _context.next = 5;
-            return fetchTransport__default["default"](url);
+            const fetchT = fetchTransport__default["default"];
+            return fetchT(url);
 
           case 5:
             res = _context.sent;
@@ -11650,7 +11651,8 @@ function _httpRequest() {
             };
 
             makeRequest = function _makeRequest() {
-              return fetchTransport__default["default"]("".concat(hostname).concat(path), {
+              const fetchT = fetchTransport__default["default"];
+              return fetchT("".concat(hostname).concat(path), {
                 method: method,
                 body: bodyJSON,
                 headers: headers

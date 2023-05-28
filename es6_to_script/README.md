@@ -84,7 +84,7 @@ npm run build
 10. index.jsがdistフォルダの下に作成されます。
 しかし、このファイルを使用する前にindex.jsの中の以下のパートを変更する必要があります。
 
-icrotask__default["default"]
+  queueMicrotask__default["default"]
 から
 
   const queueMicrotask = queueMicrotask__default["default"];

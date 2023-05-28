@@ -19,7 +19,7 @@ class DragTargetState extends State<DragTargetWidget> {
         left: 225.0,
         top: 30.0,
         child: Text(
-          "Drag Here!",
+          "",
           style: TextStyle(color: Colors.white, fontSize: 28.0),
         )),
   ];

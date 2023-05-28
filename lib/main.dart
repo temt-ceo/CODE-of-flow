@@ -24,6 +24,9 @@ external void authenticate();
 @JS('subscribe')
 external void subscribe(dynamic user);
 
+@JS('createPlayer')
+external void createPlayer(String? name);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await _configureAmplify();
@@ -130,13 +133,13 @@ class HomePageState extends State<HomePage> {
                             fit: BoxFit.cover),
                       ),
                     )),
-                DragBox('Unit', 'image/unit/card_16.jpeg'),
-                DragBox('Trigger', 'image/trigger/card_17.jpeg'),
-                DragBox('Trigger', 'image/trigger/card_18.jpeg'),
-                DragBox('Trigger', 'image/trigger/card_19.jpeg'),
-                DragBox('Unit', 'image/unit/card_1.jpeg'),
-                DragBox('Unit', 'image/unit/card_2.jpeg'),
-                DragBox('Unit', 'image/unit/card_3.jpeg'),
+                DragBox('', 'image/unit/card_16.jpeg'),
+                DragBox('', 'image/trigger/card_17.jpeg'),
+                DragBox('', 'image/trigger/card_18.jpeg'),
+                DragBox('', 'image/trigger/card_19.jpeg'),
+                DragBox('', 'image/unit/card_1.jpeg'),
+                DragBox('', 'image/unit/card_2.jpeg'),
+                DragBox('', 'image/unit/card_3.jpeg'),
               ])),
         ]),
         const Positioned(
@@ -213,7 +216,7 @@ class HomePageState extends State<HomePage> {
                 ))),
         const Positioned(
             right: 90.0,
-            bottom: 150.0,
+            bottom: 140.0,
             child: Text('Deck 22',
                 style: TextStyle(
                   color: Colors.white,
@@ -222,7 +225,7 @@ class HomePageState extends State<HomePage> {
                 ))),
         const Positioned(
             right: 100.0,
-            bottom: 110.0,
+            bottom: 100.0,
             child: Text('Dead 0',
                 style: TextStyle(
                   color: Colors.white,
@@ -280,8 +283,8 @@ class HomePageState extends State<HomePage> {
         // ),
         // const SizedBox(width: 20),
         FloatingActionButton(
-          onPressed: () => _counterBloc.counterEventSink.add(IncrementEvent()),
-          tooltip: 'Increment',
+          onPressed: () => createPlayer('test'),
+          tooltip: 'CreatePlayer',
           child: const Icon(Icons.add),
         ),
         const SizedBox(width: 20),

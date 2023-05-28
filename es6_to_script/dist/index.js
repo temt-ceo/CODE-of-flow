@@ -5,18 +5,35 @@ var _fcl = require("@onflow/fcl");
 
 var fcl = _interopRequireWildcard(_fcl);
 
+var _types = require("@onflow/types");
+
+var types = _interopRequireWildcard(_types);
+
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 fcl.config({
+  "accessNode.api": "https://rest-testnet.onflow.org",
   "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn"
 });
 
-window.authenticate = function () {
-  return fcl.authenticate();
-};
+window.authenticate = fcl.authenticate;
 window.subscribe = fcl.currentUser.subscribe;
 
-},{"@onflow/fcl":37}],2:[function(require,module,exports){
+window.createPlayer = async function (playerName) {
+  var transactionId = await fcl.mutate({
+    cadence: "\n      import CodeOfFlowAlpha6 from 0xCOF\n\n      transaction(nickname: String) {\n        prepare(acct: AuthAccount) {\n          // Step1\n          acct.save(<- CodeOfFlowAlpha6.createPlayer(nickname: nickname), to: CodeOfFlowAlpha6.PlayerStoragePath)\n          // Step2\n          acct.link<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath, target: CodeOfFlowAlpha6.PlayerStoragePath)\n          }\n        execute {\n          log(\"success\")\n        }\n      }\n    ",
+    args: function args(arg, t) {
+      return [arg(playerName ? playerName : 'Test Player', t.String)];
+    },
+    proposer: fcl.authz,
+    payer: fcl.authz,
+    authorizations: [fcl.authz],
+    limit: 999
+  });
+  console.log("TransactionId: " + transactionId);
+};
+
+},{"@onflow/fcl":37,"@onflow/types":41}],2:[function(require,module,exports){
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;
   for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];

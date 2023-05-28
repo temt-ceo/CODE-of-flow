@@ -7,7 +7,9 @@ fcl.config({
 })
 
 window.authenticate = fcl.authenticate;
+window.unauthenticate = fcl.unauthenticate;
 window.subscribe = fcl.currentUser.subscribe;
+
 // transactions
 window.createPlayer = async (playerName) => {
   const transactionId = await fcl.mutate({
@@ -16,9 +18,7 @@ window.createPlayer = async (playerName) => {
 
       transaction(nickname: String) {
         prepare(acct: AuthAccount) {
-          // Step1
           acct.save(<- CodeOfFlowAlpha6.createPlayer(nickname: nickname), to: CodeOfFlowAlpha6.PlayerStoragePath)
-          // Step2
           acct.link<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath, target: CodeOfFlowAlpha6.PlayerStoragePath)
           }
         execute {

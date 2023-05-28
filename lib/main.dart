@@ -21,6 +21,9 @@ import 'package:js/js.dart';
 @JS('authenticate')
 external void authenticate();
 
+@JS('unauthenticate')
+external void unauthenticate();
+
 @JS('subscribe')
 external void subscribe(dynamic user);
 
@@ -215,7 +218,7 @@ class HomePageState extends State<HomePage> {
                   fontSize: 22.0,
                 ))),
         const Positioned(
-            right: 90.0,
+            left: 1250.0,
             bottom: 140.0,
             child: Text('Deck 22',
                 style: TextStyle(
@@ -224,7 +227,7 @@ class HomePageState extends State<HomePage> {
                   fontSize: 22.0,
                 ))),
         const Positioned(
-            right: 100.0,
+            left: 1250.0,
             bottom: 100.0,
             child: Text('Dead 0',
                 style: TextStyle(
@@ -289,9 +292,9 @@ class HomePageState extends State<HomePage> {
         ),
         const SizedBox(width: 20),
         FloatingActionButton(
-          onPressed: () => _counterBloc.counterEventSink.add(DecrementEvent()),
+          onPressed: () => unauthenticate(),
           tooltip: 'Decrement',
-          child: const Icon(Icons.remove),
+          child: const Icon(Icons.logout),
         ),
       ]), // This trailing comma makes auto-formatting nicer for build methods.
     );

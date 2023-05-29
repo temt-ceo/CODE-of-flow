@@ -1,9 +1,3 @@
-@JS()
-library index;
-
-import 'dart:js_util';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
@@ -11,25 +5,8 @@ import 'package:amplify_authenticator/amplify_authenticator.dart';
 // import 'package:amplify_datastore/amplify_datastore.dart';
 import 'package:amplify_api/amplify_api.dart';
 // import 'amplifyconfiguration.dart';
-// import 'models/ModelProvider.dart';
-import 'package:CodeOfFlow/bloc/counter/counter_bloc.dart';
-import 'package:CodeOfFlow/bloc/counter/counter_event.dart';
-import 'package:CodeOfFlow/component/draggableCardWidget.dart';
-import 'package:CodeOfFlow/component/dragTargetWidget.dart';
-import 'package:CodeOfFlow/component/battleInfo.dart';
+import 'package:CodeOfFlow/pages/homePage.dart';
 import 'package:js/js.dart';
-
-@JS('authenticate')
-external void authenticate();
-
-@JS('unauthenticate')
-external void unauthenticate();
-
-@JS('subscribe')
-external void subscribe(dynamic user);
-
-@JS('createPlayer')
-external void createPlayer(String? name);
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -58,6 +35,7 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    String imagePath = env_flavor == 'prod' ? 'assets/image/' : 'image/';
     // return Authenticator(
     //   child: MaterialApp(
     return MaterialApp(
@@ -67,144 +45,14 @@ class App extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
             image: DecorationImage(
-                image: AssetImage('image/unit/bg-2.jpg'), fit: BoxFit.cover)),
+                image: AssetImage('${imagePath}unit/bg-2.jpg'),
+                fit: BoxFit.cover)),
         child: HomePage(
             title: '\\ Welcome to the Virtual Arcade! / | CODE-Of-Flow'),
       ),
     );
     // );
-  }
-}
-
-class HomePage extends StatefulWidget {
-  HomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<HomePage> createState() => HomePageState();
-}
-
-class HomePageState extends State<HomePage> {
-  final CounterBloc _counterBloc = CounterBloc();
-
-  @override
-  Widget build(BuildContext context) {
-    void setupWallet(map) {
-      print(map?.addr);
-    }
-
-    subscribe(allowInterop(setupWallet));
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(widget.title, style: TextStyle(color: Color(0xFFFFFFFF))),
-      ),
-      body: Stack(children: <Widget>[
-        Stack(fit: StackFit.expand, children: <Widget>[
-          const Positioned(
-              left: 10.0,
-              top: 30.0,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(30.0, 130.0, 30.0, 10.0),
-                      child: DragTargetWidget(
-                          'trigger', 'image/trigger/trigger.png'),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(30.0),
-                      child: DragTargetWidget('unit', 'image/unit/bg-2.jpg'),
-                    ),
-                  ])),
-          Positioned(
-              left: 10.0,
-              top: 480.0,
-              child: Row(children: <Widget>[
-                Padding(
-                    padding: const EdgeInsets.only(left: 15.0),
-                    child: Container(
-                      width: 280.0,
-                      height: 160.0,
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage('image/unit/bg-2.jpg'),
-                            fit: BoxFit.cover),
-                      ),
-                    )),
-                DragBox('', 'image/unit/card_16.jpeg'),
-                DragBox('', 'image/trigger/card_17.jpeg'),
-                DragBox('', 'image/trigger/card_18.jpeg'),
-                DragBox('', 'image/trigger/card_19.jpeg'),
-                DragBox('', 'image/unit/card_1.jpeg'),
-                DragBox('', 'image/unit/card_2.jpeg'),
-                DragBox('', 'image/unit/card_3.jpeg'),
-              ])),
-        ]),
-        const BattleInfo(''),
-      ]),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton:
-          Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-        StreamBuilder(
-          stream: _counterBloc.counter,
-          initialData: 0,
-          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-            return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    '${snapshot.data}',
-                    style: const TextStyle(color: Colors.white, fontSize: 30.0),
-                  ),
-                ]);
-          },
-        ),
-        const SizedBox(width: 20),
-        FloatingActionButton(
-          onPressed: () => authenticate(),
-          tooltip: 'Authenticate',
-          child: const Icon(Icons.key_outlined),
-        ),
-        const SizedBox(width: 20),
-        // FloatingActionButton(
-        //   onPressed: () => () {
-        //     final newEntry = Todo(
-        //       name: "sample",
-        //       description: "test",
-        //     );
-        //     final request = ModelMutations.create(newEntry);
-        //     final response = await Amplify.API.mutate(request: request).response;
-        //     Print('Create result: $response');
-        //     Amplify.DataStore.save(newEntry);
-        //   },
-        //   tooltip: 'Authenticate',
-        //   child: const Icon(Icons.key_outlined),
-        // ),
-        // const SizedBox(width: 20),
-        FloatingActionButton(
-          onPressed: () => createPlayer('test'),
-          tooltip: 'Create Player',
-          child: const Icon(Icons.add),
-        ),
-        const SizedBox(width: 20),
-        FloatingActionButton(
-          onPressed: () => unauthenticate(),
-          tooltip: 'Sign Out',
-          child: const Icon(Icons.logout),
-        ),
-      ]), // This trailing comma makes auto-formatting nicer for build methods.
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _counterBloc.dispose();
   }
 }

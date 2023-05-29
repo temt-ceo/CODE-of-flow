@@ -15,8 +15,7 @@ class DragBoxState extends State<DragBox> {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-        child: Draggable(
+    return Draggable(
       maxSimultaneousDrags: 1,
       data: widget.imageUrl,
       feedback: Container(
@@ -66,6 +65,6 @@ class DragBoxState extends State<DragBox> {
                         ))),
               ),
             ),
-    ));
+    );
   }
 }

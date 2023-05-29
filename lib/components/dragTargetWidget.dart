@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_bloc.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
-import 'package:CodeOfFlow/component/droppedCardWidget.dart';
+import 'package:CodeOfFlow/components/droppedCardWidget.dart';
+
+const env_flavor = String.fromEnvironment('flavor');
 
 class DragTargetWidget extends StatefulWidget {
   final String label;
@@ -14,6 +16,7 @@ class DragTargetWidget extends StatefulWidget {
 }
 
 class DragTargetState extends State<DragTargetWidget> {
+  String imagePath = env_flavor == 'prod' ? 'assets/image/' : 'image/';
   List<Widget> dropedList = [
     const Positioned(
         left: 225.0,
@@ -34,11 +37,11 @@ class DragTargetState extends State<DragTargetWidget> {
       ));
       _dropBloc.counterEventSink.add(DropLeaveEvent());
     }, onWillAccept: (String? imageUrl) {
-      if (widget.label == 'unit' && imageUrl!.startsWith('image/unit')) {
+      if (widget.label == 'unit' && imageUrl!.startsWith('${imagePath}unit')) {
         _dropBloc.counterEventSink.add(DropAllowedEvent());
         return true;
       } else if (widget.label == 'trigger' &&
-          imageUrl!.startsWith('image/trigger')) {
+          imageUrl!.startsWith('${imagePath}trigger')) {
         _dropBloc.counterEventSink.add(DropAllowedEvent());
         return true;
       } else {

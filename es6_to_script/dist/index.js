@@ -19,6 +19,9 @@ fcl.config({
 window.authenticate = fcl.authenticate;
 window.unauthenticate = fcl.unauthenticate;
 window.subscribe = fcl.currentUser.subscribe;
+window.getAddr = function(user) {
+  return user.addr;
+};
 
 // transactions
 window.createPlayer = async function (playerName) {
@@ -15034,7 +15037,7 @@ var spawn = function spawn(fn) {
   };
   if (_typeof__default["default"](fn) === "object") fn = fromHandlers(fn);
   const queueMicrotask = queueMicrotask__default["default"];
-  queueMicrotask(( /*#__PURE__*/_asyncToGenerator__default["default"]( /*#__PURE__*/_regeneratorRuntime__default["default"].mark(function _callee2() {
+  queueMicrotask( /*#__PURE__*/_asyncToGenerator__default["default"]( /*#__PURE__*/_regeneratorRuntime__default["default"].mark(function _callee2() {
     return _regeneratorRuntime__default["default"].wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {

@@ -19,6 +19,9 @@ fcl.config({
 window.authenticate = fcl.authenticate;
 window.unauthenticate = fcl.unauthenticate;
 window.subscribe = fcl.currentUser.subscribe;
+window.getAddr = function(user) {
+  return user.addr;
+};
 
 // transactions
 window.createPlayer = async function (playerName) {

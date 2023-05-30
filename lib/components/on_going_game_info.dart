@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:CodeOfFlow/models/on_going_info_model.dart';
 
-class BattleInfo extends StatefulWidget {
-  final String label;
+class OnGoingGameInfo extends StatefulWidget {
+  final GameInfo info;
+  final String cardText;
 
-  const BattleInfo(this.label);
+  const OnGoingGameInfo(this.info, this.cardText);
 
   @override
-  DragBoxState createState() => DragBoxState();
+  OnGoingGameInfoState createState() => OnGoingGameInfoState();
 }
 
-class DragBoxState extends State<BattleInfo> {
+class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   // Offset position = const Offset(0.0, 0.0);
 
   @override
@@ -20,7 +22,7 @@ class DragBoxState extends State<BattleInfo> {
 
   @override
   Widget build(BuildContext context) {
-    return const Stack(children: <Widget>[
+    return Stack(children: <Widget>[
       Positioned(
           left: 20.0,
           top: 10.0,
@@ -95,7 +97,7 @@ class DragBoxState extends State<BattleInfo> {
               ))),
       Positioned(
           left: 1250.0,
-          bottom: 140.0,
+          top: 540.0,
           child: Text('Deck 22',
               style: TextStyle(
                 color: Colors.white,
@@ -104,7 +106,7 @@ class DragBoxState extends State<BattleInfo> {
               ))),
       Positioned(
           left: 1250.0,
-          bottom: 100.0,
+          top: 500.0,
           child: Text('Dead 0',
               style: TextStyle(
                 color: Colors.white,
@@ -113,9 +115,9 @@ class DragBoxState extends State<BattleInfo> {
               ))),
       Positioned(
           left: 30.0,
-          bottom: 100.0,
+          top: 490.0,
           width: 270.0,
-          child: Text('テキストテキストテキストテキストテキストテキストテキストテキスト',
+          child: Text(widget.info.cardText,
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
-import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
-import 'package:amplify_authenticator/amplify_authenticator.dart';
-// import 'package:amplify_datastore/amplify_datastore.dart';
+// import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
+// import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:amplify_api/amplify_api.dart';
-// import 'amplifyconfiguration.dart';
-import 'package:CodeOfFlow/pages/homePage.dart';
-import 'package:js/js.dart';
+import 'amplifyconfiguration.dart';
+import 'package:CodeOfFlow/models/ModelProvider.dart';
+import 'package:CodeOfFlow/pages/home_page.dart';
+
+const envFlavor = String.fromEnvironment('flavor');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,16 +17,15 @@ Future<void> main() async {
 
 Future<void> _configureAmplify() async {
   try {
-    final auth = AmplifyAuthCognito();
+    // final auth = AmplifyAuthCognito();
     // final datastore = AmplifyDataStore(modelProvider: ModelProvider.instance);
-    // final api = AmplifyAPI(modelProvider: ModelProvider.instance);
-    await Amplify.addPlugins([auth]);
-    // await Amplify.addPlugins([api]);
+    final api = AmplifyAPI(modelProvider: ModelProvider.instance);
+    await Amplify.addPlugins([api]);
     // await Amplify.addPlugins([api, auth]);
 
-    // await Amplify.configure(amplifyconfig)
+    await Amplify.configure(amplifyconfig);
   } catch (e) {
-    print('Amplify Configure error: $e');
+    debugPrint('Amplify Configure error: $e');
   }
 }
 
@@ -35,7 +35,7 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    String imagePath = env_flavor == 'prod' ? 'assets/image/' : 'image/';
+    String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
     // return Authenticator(
     //   child: MaterialApp(
     return MaterialApp(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_bloc.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
-import 'package:CodeOfFlow/components/droppedCardWidget.dart';
+import 'package:CodeOfFlow/components/dropped_card_widget.dart';
 
 const env_flavor = String.fromEnvironment('flavor');
 

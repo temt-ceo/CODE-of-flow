@@ -38,6 +38,31 @@ window.createPlayer = async function (playerName) {
   console.log("TransactionId: " + transactionId);
 };
 
+// scripts
+window.isRegistered = async (address) => {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address): &CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}? {
+        return getAccount(address).getCapability<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath).borrow()
+    }
+    `,
+    args: (arg, t) => [
+      arg(address, t.Address)
+    ]
+  })
+  return result;
+}
+window.getPlayerName = function(player) {
+  return player.nickname;
+};
+window.getPlayerId = function(player) {
+  return player.player_id;
+};
+window.getPlayerUUId = function(player) {
+  return player.uuid;
+};
+
 },{"@onflow/fcl":37,"@onflow/types":41}],2:[function(require,module,exports){
 function _arrayLikeToArray(arr, len) {
   if (len == null || len > arr.length) len = arr.length;

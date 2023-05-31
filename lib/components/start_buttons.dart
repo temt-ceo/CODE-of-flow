@@ -4,6 +4,10 @@ library index;
 import 'dart:async';
 import 'package:js/js.dart';
 import 'package:flutter/material.dart';
+import 'package:CodeOfFlow/services/api_service.dart';
+import 'package:CodeOfFlow/models/on_going_info_model.dart';
+
+const envFlavor = String.fromEnvironment('flavor');
 
 @JS('authenticate')
 external void authenticate();
@@ -23,6 +27,12 @@ external String? getAddr(dynamic user);
 @JS('isRegistered')
 external dynamic isRegistered(String? address);
 
+@JS('getCurrentStatus')
+external dynamic getCurrentStatus(String? address);
+
+@JS('getMariganCards')
+external dynamic getMariganCards(String? address, int playerId);
+
 @JS('getPlayerUUId')
 external String? getPlayerUUId(dynamic player);
 
@@ -32,7 +42,8 @@ external String? getPlayerId(dynamic player);
 @JS('getPlayerName')
 external String? getPlayerName(dynamic player);
 
-typedef void StringCallback(String val);
+typedef void StringCallback(
+    String val, GameObject? data, List<dynamic>? mariganCards);
 
 class StartButtons extends StatefulWidget {
   final StringCallback callback;
@@ -56,17 +67,23 @@ class PlayerResource {
 }
 
 class StartButtonsState extends State<StartButtons> {
-  // Offset position = const Offset(0.0, 0.0);
   final nameController = TextEditingController();
+  APIService apiService = APIService();
   WalletUser walletUser = WalletUser('');
   PlayerResource player = PlayerResource('', '', '');
+  String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool onTyping = false;
   bool onClickButton = false;
+  int _counter = 0;
+  double imagePosition = 0.0;
+  late StreamController<int> _events;
+  late StreamController<bool> _wait;
 
   @override
   void initState() {
     super.initState();
-    // position = widget.initPos;
+    _events = StreamController<int>();
+    _wait = StreamController<bool>();
   }
 
   void setupWallet(user) {
@@ -77,23 +94,186 @@ class StartButtonsState extends State<StartButtons> {
       } else {
         setState(() => walletUser = WalletUser(addr));
         if (player.uuid == '') {
-          getPlayerInfo(addr);
-          widget.callback('game-is-ready');
+          getPlayerInfo();
+          widget.callback('game-is-ready', null, null);
         }
       }
     }
   }
 
-  void getPlayerInfo(addr) async {
-    await isRegistered(addr).then((ret) {
+  void getPlayerInfo() async {
+    print(1);
+    var ret = await isRegistered(walletUser.addr);
+    print(2);
+    print(ret);
+    print(3);
+    await isRegistered(walletUser.addr).then((ret) {
       if (ret != null) {
         String? playerId = getPlayerId(ret);
         String? playerName = getPlayerName(ret);
         String? playerUUId = getPlayerUUId(ret);
+        debugPrint('PlayerId: $playerId');
         setState(
             () => player = PlayerResource(playerUUId!, playerId!, playerName!));
       }
     });
+  }
+
+  void showGameLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Container(
+          color: Colors.transparent,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void closeGameLoading() {
+    Navigator.pop(context);
+  }
+
+  Future<void> gameStart() async {
+    showGameLoading();
+    var ret = await apiService.saveGameServerProcess(
+        'player_matching', '', player.playerId);
+    closeGameLoading();
+    debugPrint('transaction published');
+    if (ret != null) {
+      debugPrint(ret.message);
+    }
+  }
+
+  late Timer _timer;
+  void _startTimer() {
+    _counter = 60;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      (_counter > 0)
+          ? _counter--
+          : () {
+              _timer.cancel();
+              closeGameLoading();
+            };
+      _events.add(_counter);
+    });
+  }
+
+  void countdown() {
+    _events.add(60);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StreamBuilder<int>(
+              stream: _events.stream,
+              builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                return Container(
+                    width: 200.0,
+                    height: 60.0,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage('${imagePath}unit/bg-2.jpg'),
+                          fit: BoxFit.contain),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(snapshot.data ?? 0xFFFFFFFF),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset:
+                              const Offset(2, 5), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                        child: Text(
+                      '00:${snapshot.data.toString()}',
+                      style:
+                          const TextStyle(color: Colors.black, fontSize: 46.0),
+                    )));
+              });
+        });
+    _startTimer();
+  }
+
+  void battleStartAnimation() {
+    _wait.add(true);
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) {
+          return StreamBuilder<bool>(
+              stream: _wait.stream,
+              builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+                return AnimatedContainer(
+                    margin: EdgeInsetsDirectional.only(top: imagePosition),
+                    duration: const Duration(milliseconds: 700),
+                    curve: Curves.easeInQuart,
+                    child: Container(
+                      width: 200.0,
+                      height: 60.0,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                            image: AssetImage(
+                                snapshot.data != null && snapshot.data == true
+                                    ? '${imagePath}unit/battleStart.png'
+                                    : '${imagePath}unit/battleStart2.png'),
+                            fit: BoxFit.cover),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0xFFFFFFFF),
+                            spreadRadius: 5,
+                            blurRadius: 7,
+                            offset: Offset(2, 5), // changes position of shadow
+                          ),
+                        ],
+                      ),
+                    ));
+              });
+        });
+    setState(() => imagePosition = 80.0);
+    Future.delayed(const Duration(milliseconds: 1800), () {
+      setState(() => imagePosition = 0.0);
+      _wait.add(false);
+    });
+    Future.delayed(const Duration(milliseconds: 3000), () {
+      closeGameLoading();
+    });
+  }
+
+  GameObject setGameInfo(obj) {
+    return GameObject(
+      int.parse(obj.turn),
+      obj.is_first,
+      obj.is_first_turn,
+      obj.matched_time,
+      obj.game_started,
+      obj.last_time_turnend,
+      obj.enemy_attacking_cards,
+      int.parse(obj.your_cp),
+      obj.your_field_unit,
+      obj.your_field_unit_action,
+      obj.your_field_unit_bp_amount_of_change,
+      obj.your_hand,
+      int.parse(obj.your_life),
+      obj.your_remain_deck,
+      obj.your_trigger_cards,
+      int.parse(obj.opponent),
+      int.parse(obj.opponent_cp),
+      obj.opponent_field_unit,
+      obj.opponent_field_unit_action,
+      obj.opponent_field_unit_bp_amount_of_change,
+      int.parse(obj.opponent_hand),
+      int.parse(obj.opponent_life),
+      int.parse(obj.opponent_remain_deck),
+      int.parse(obj.opponent_trigger_cards),
+    );
   }
 
   void signout() {
@@ -119,7 +299,8 @@ class StartButtonsState extends State<StartButtons> {
           ),
         ],
       ),
-      const SizedBox(width: 20),
+      Visibility(
+          visible: walletUser.addr == '', child: const SizedBox(width: 20)),
       Visibility(
           visible: walletUser.addr == '',
           child: const FloatingActionButton(
@@ -127,7 +308,9 @@ class StartButtonsState extends State<StartButtons> {
             tooltip: 'Authenticate',
             child: Icon(Icons.key_outlined),
           )),
-      const SizedBox(width: 20),
+      Visibility(
+          visible: walletUser.addr != '' && player.uuid == '',
+          child: const SizedBox(width: 20)),
       Visibility(
           visible: walletUser.addr != '' && player.uuid == '',
           child: FloatingActionButton(
@@ -201,14 +384,15 @@ class StartButtonsState extends State<StartButtons> {
                                         Timer.periodic(
                                             const Duration(seconds: 2),
                                             (timer) {
-                                          getPlayerInfo(walletUser.addr);
+                                          getPlayerInfo();
                                           debugPrint(timer.tick.toString());
                                           if (player.uuid != '') {
                                             timer.cancel();
                                             setState(
                                                 () => onClickButton = false);
                                             Navigator.of(context).pop();
-                                            widget.callback('game-is-ready');
+                                            widget.callback(
+                                                'game-is-ready', null, null);
                                           }
                                         });
                                       }
@@ -238,11 +422,57 @@ class StartButtonsState extends State<StartButtons> {
             tooltip: 'Create Player',
             child: const Icon(Icons.add),
           )),
-      const SizedBox(width: 20),
+      const SizedBox(width: 10),
+      Visibility(
+          visible: walletUser.addr != '' && player.uuid != '',
+          child: SizedBox(
+              width: 150.0,
+              child: FloatingActionButton(
+                  backgroundColor: Colors.transparent,
+                  onPressed: () async {
+                    //GraphQL:player_matching
+                    await gameStart();
+                    countdown();
+                    // setInterval by every 2 second
+                    Timer.periodic(const Duration(seconds: 2), (timer) {
+                      getCurrentStatus(walletUser.addr).then((ret) {
+                        print(ret);
+                        if (ret.game_started == true ||
+                            ret.game_started == false) {
+                          widget.callback(
+                              'matching-success', setGameInfo(ret), null);
+                          getMariganCards(
+                                  walletUser.addr, int.parse(player.playerId))
+                              .then((data) {
+                            widget.callback(
+                                'matching-success', setGameInfo(ret), data);
+                          });
+                          timer.cancel();
+                          closeGameLoading();
+                          battleStartAnimation();
+                        } else {
+                          double num = double.parse(ret);
+                          if (num > 1685510325) {
+                            // debugPrint(
+                            //     'matching.. ${(timer.tick * 2).toString()}s');
+                          }
+                        }
+                      });
+                    });
+                  },
+                  tooltip: 'Play',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20.0),
+                    child: Image.asset(
+                      '${imagePath}button/matchingButton.png',
+                      fit: BoxFit.cover, //prefer cover over fill
+                    ),
+                  )))),
+      const SizedBox(width: 5),
       Visibility(
           visible: walletUser.addr != '',
           child: FloatingActionButton(
-            onPressed: () => signout(),
+            onPressed: signout,
             tooltip: 'Sign Out',
             child: const Icon(Icons.logout),
           )),

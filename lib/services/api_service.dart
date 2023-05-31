@@ -6,7 +6,7 @@ import 'package:CodeOfFlow/main.dart';
 import 'package:CodeOfFlow/models/ModelProvider.dart';
 
 class APIService {
-  Future<void> saveGameServerProcess(
+  Future<GameServerProcess?> saveGameServerProcess(
       String type, String message, String playerId) async {
     try {
       GameServerProcess data = GameServerProcess(
@@ -15,16 +15,18 @@ class APIService {
         playerId: playerId,
       );
       final request = ModelMutations.create(data);
-      print(request);
       final response = await Amplify.API.mutate(request: request).response;
-      print(response);
 
-      GameServerProcess? createdGameServerProcess = response.data;
-      if (createdGameServerProcess == null) {
-        return;
+      if (response.data != null) {
+        GameServerProcess? createdGameServerProcess = response.data;
+        return createdGameServerProcess;
+      } else {
+        debugPrint('saveGameServerProcess error: $response');
+        return null;
       }
     } on Exception catch (e) {
       debugPrint('saveGameServerProcess error: $e');
+      return null;
     }
   }
 
@@ -32,8 +34,8 @@ class APIService {
     try {
       final request = ModelQueries.list(GameServerProcess.classType);
       final response = await Amplify.API.query(request: request).response;
-      List<GameServerProcess?>? expenseCategories = response.data?.items;
-      return expenseCategories;
+      List<GameServerProcess?>? gameServerProcesses = response.data?.items;
+      return gameServerProcesses;
     } on Exception catch (e) {
       debugPrint('getGameServerProcesses error: $e');
     }

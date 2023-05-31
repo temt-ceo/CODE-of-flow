@@ -4,7 +4,6 @@ import 'package:CodeOfFlow/components/drag_target_widget.dart';
 import 'package:CodeOfFlow/components/on_going_game_info.dart';
 import 'package:CodeOfFlow/components/start_buttons.dart';
 import 'package:CodeOfFlow/models/on_going_info_model.dart';
-import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -20,7 +19,6 @@ class HomePageState extends State<HomePage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   GameInfo gameInfo = GameInfo('', '', '');
-  APIService apiService = APIService();
 
   void doAnimation() {
     setState(() => gameInfo = GameInfo('', '', ''));
@@ -28,10 +26,12 @@ class HomePageState extends State<HomePage> {
     Future.delayed(const Duration(milliseconds: 1500), () {
       setState(() => cardPosition = 0.0);
       setState(() => gameInfo = GameInfo('bbbbb', '', ''));
-      apiService.saveGameServerProcess('type', 'message', '1');
-      // .then((value) => print(value.toString()));
-      print('success');
     });
+  }
+
+  void setBCData(GameObject? data, List<dynamic>? mariganCards) {
+    print(data);
+    print(mariganCards);
   }
 
   @override
@@ -62,7 +62,7 @@ class HomePageState extends State<HomePage> {
                       )),
                   AnimatedContainer(
                     margin: EdgeInsetsDirectional.only(top: cardPosition),
-                    duration: const Duration(seconds: 1),
+                    duration: const Duration(milliseconds: 900),
                     curve: Curves.linear,
                     child: Row(
                       children: [
@@ -101,9 +101,14 @@ class HomePageState extends State<HomePage> {
           OnGoingGameInfo(gameInfo, 'AAAA'),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        floatingActionButton: StartButtons((status) => status == 'game-is-ready'
-            ? doAnimation()
-            : setState(() => cardPosition = 0.0)));
+        floatingActionButton: StartButtons((status, data, mariganCards) =>
+            status == 'game-is-ready'
+                ? doAnimation()
+                : (status == 'matching-success'
+                    ? setBCData(data, mariganCards)
+                    : (status == 'matching-success'
+                        ? setState(() => {})
+                        : () {}))));
   }
 
   @override

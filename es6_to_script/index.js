@@ -41,8 +41,8 @@ window.createPlayer = async (playerName) => {
 };
 
 // scripts
-window.isRegistered = async (address) => {
-  const result = await this.$fcl.query({
+window.isRegistered = async function (address) {
+  const result = await fcl.query({
     cadence: `
     import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
     pub fun main(address: Address): &CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}? {
@@ -53,9 +53,43 @@ window.isRegistered = async (address) => {
       arg(address, t.Address)
     ]
   })
-  const player_id = result.player_id;
-  return player_id;
+  return result;
 }
+window.getCurrentStatus = async function (address) {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address): AnyStruct {
+        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath).borrow()
+          ?? panic("Doesn't have capability!")
+        return cap.get_current_status()
+    }
+    `,
+    args: (arg, t) => [
+      arg(address, t.Address)
+    ]
+  });
+  console.log(result);
+  return result;
+};
+window.getMariganCards = async function (address, playerId) {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address, player_id: UInt32): [[UInt16]] {
+        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha6.Player{CodeOfFlowAlpha6.IPlayerPublic}>(CodeOfFlowAlpha6.PlayerPublicPath).borrow()
+          ?? panic("Doesn't have capability!")
+        return cap.get_marigan_cards(player_id: player_id)
+    }
+    `,
+    args: (arg, t) => [
+      arg(address, t.Address),
+      arg(playerId, t.UInt32)
+    ]
+  });
+  console.log(result);
+  return result
+};
 window.getPlayerName = function(player) {
   return player.nickname;
 };

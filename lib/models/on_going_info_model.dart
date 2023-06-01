@@ -14,6 +14,7 @@ class GameObject {
   final bool gameStarted;
   final String? lastTimeTurnend;
   final List<dynamic> enemyAttackingCards;
+  final int you;
   final int yourCp;
   final dynamic yourFieldUnit;
   final dynamic yourFieldUnitAction;
@@ -40,6 +41,7 @@ class GameObject {
       this.gameStarted,
       this.lastTimeTurnend,
       this.enemyAttackingCards,
+      this.you,
       this.yourCp,
       this.yourFieldUnit,
       this.yourFieldUnitAction,

@@ -2,10 +2,13 @@
 library index;
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:js_util';
 import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/on_going_info_model.dart';
+import 'package:CodeOfFlow/components/timerComponent.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -43,7 +46,7 @@ external String? getPlayerId(dynamic player);
 external String? getPlayerName(dynamic player);
 
 typedef void StringCallback(
-    String val, GameObject? data, List<dynamic>? mariganCards);
+    String val, GameObject? data, List<List<int>>? mariganCards);
 
 class StartButtons extends StatefulWidget {
   final StringCallback callback;
@@ -74,15 +77,12 @@ class StartButtonsState extends State<StartButtons> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool onTyping = false;
   bool onClickButton = false;
-  int _counter = 0;
   double imagePosition = 0.0;
-  late StreamController<int> _events;
   late StreamController<bool> _wait;
 
   @override
   void initState() {
     super.initState();
-    _events = StreamController<int>();
     _wait = StreamController<bool>();
   }
 
@@ -102,21 +102,15 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   void getPlayerInfo() async {
-    print(1);
-    var ret = await isRegistered(walletUser.addr);
-    print(2);
-    print(ret);
-    print(3);
-    await isRegistered(walletUser.addr).then((ret) {
-      if (ret != null) {
-        String? playerId = getPlayerId(ret);
-        String? playerName = getPlayerName(ret);
-        String? playerUUId = getPlayerUUId(ret);
-        debugPrint('PlayerId: $playerId');
-        setState(
-            () => player = PlayerResource(playerUUId!, playerId!, playerName!));
-      }
-    });
+    var ret = await promiseToFuture(isRegistered(walletUser.addr));
+    if (ret != null) {
+      String? playerId = getPlayerId(ret);
+      String? playerName = getPlayerName(ret);
+      String? playerUUId = getPlayerUUId(ret);
+      debugPrint('PlayerId: $playerId');
+      setState(
+          () => player = PlayerResource(playerUUId!, playerId!, playerName!));
+    }
   }
 
   void showGameLoading() {
@@ -142,6 +136,7 @@ class StartButtonsState extends State<StartButtons> {
 
   Future<void> gameStart() async {
     showGameLoading();
+    // Call GraphQL method.
     var ret = await apiService.saveGameServerProcess(
         'player_matching', '', player.playerId);
     closeGameLoading();
@@ -151,28 +146,15 @@ class StartButtonsState extends State<StartButtons> {
     }
   }
 
-  late Timer _timer;
-  void _startTimer() {
-    _counter = 60;
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      (_counter > 0)
-          ? _counter--
-          : () {
-              _timer.cancel();
-              closeGameLoading();
-            };
-      _events.add(_counter);
-    });
-  }
-
   void countdown() {
-    _events.add(60);
+    var timer = TimerComponent();
+    timer.countdownStart(60, null);
     showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) {
           return StreamBuilder<int>(
-              stream: _events.stream,
+              stream: timer.events.stream,
               builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
                 return Container(
                     width: 200.0,
@@ -199,7 +181,6 @@ class StartButtonsState extends State<StartButtons> {
                     )));
               });
         });
-    _startTimer();
   }
 
   void battleStartAnimation() {
@@ -256,6 +237,7 @@ class StartButtonsState extends State<StartButtons> {
       obj.game_started,
       obj.last_time_turnend,
       obj.enemy_attacking_cards,
+      int.parse(player.playerId),
       int.parse(obj.your_cp),
       obj.your_field_unit,
       obj.your_field_unit_action,
@@ -274,6 +256,17 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(obj.opponent_remain_deck),
       int.parse(obj.opponent_trigger_cards),
     );
+  }
+
+  List<List<int>> setMariganCards(arr) {
+    final List<List<int>> retArr = [];
+    for (int i = 0; i < 5; i++) {
+      retArr.add([]);
+      for (int j = 0; j < 4; j++) {
+        retArr[i].add(int.parse(arr[i][j]));
+      }
+    }
+    return retArr;
   }
 
   void signout() {
@@ -434,37 +427,32 @@ class StartButtonsState extends State<StartButtons> {
                     await gameStart();
                     countdown();
                     // setInterval by every 2 second
-                    Timer.periodic(const Duration(seconds: 2), (timer) {
-                      getCurrentStatus(walletUser.addr).then((ret) {
-                        print(ret);
-                        if (ret.game_started == true ||
-                            ret.game_started == false) {
-                          widget.callback(
-                              'matching-success', setGameInfo(ret), null);
-                          getMariganCards(
-                                  walletUser.addr, int.parse(player.playerId))
-                              .then((data) {
-                            widget.callback(
-                                'matching-success', setGameInfo(ret), data);
-                          });
-                          timer.cancel();
-                          closeGameLoading();
-                          battleStartAnimation();
-                        } else {
-                          double num = double.parse(ret);
-                          if (num > 1685510325) {
-                            // debugPrint(
-                            //     'matching.. ${(timer.tick * 2).toString()}s');
-                          }
+                    Timer.periodic(const Duration(seconds: 2), (timer) async {
+                      dynamic ret = await promiseToFuture(
+                          getCurrentStatus(walletUser.addr));
+                      if (ret.game_started == true ||
+                          ret.game_started == false) {
+                        dynamic data = await promiseToFuture(getMariganCards(
+                            walletUser.addr, int.parse(player.playerId)));
+                        widget.callback('matching-success', setGameInfo(ret),
+                            setMariganCards(data));
+                        timer.cancel();
+                        closeGameLoading();
+                        battleStartAnimation();
+                      } else {
+                        double num = double.parse(ret);
+                        if (num > 1685510325) {
+                          // debugPrint(
+                          //     'matching.. ${(timer.tick * 2).toString()}s');
                         }
-                      });
+                      }
                     });
                   },
                   tooltip: 'Play',
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.0),
                     child: Image.asset(
-                      '${imagePath}button/matchingButton.png',
+                      '${imagePath}button/playButton.png',
                       fit: BoxFit.cover, //prefer cover over fill
                     ),
                   )))),

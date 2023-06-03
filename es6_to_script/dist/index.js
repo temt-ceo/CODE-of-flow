@@ -87,6 +87,20 @@ window.getMariganCards = async function (address, playerId) {
   console.log(result);
   return result
 };
+window.getCardInfo = async function () {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    pub fun main(): {UInt16: CodeOfFlowAlpha6.CardStruct} {
+        return CodeOfFlowAlpha6.getCardInfo()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  console.log(result);
+  return result
+};
 window.getPlayerName = function(player) {
   return player.nickname;
 };
@@ -95,6 +109,9 @@ window.getPlayerId = function(player) {
 };
 window.getPlayerUUId = function(player) {
   return player.uuid;
+};
+window.jsonToString = function(obj) {
+  return JSON.stringify(obj);
 };
 
 },{"@onflow/fcl":37,"@onflow/types":41}],2:[function(require,module,exports){

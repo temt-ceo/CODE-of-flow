@@ -1,10 +1,10 @@
-class GameInfo {
-  final String cardText;
-  final String task;
-  final String description;
+// class GameInfo {
+//   final String cardText;
+//   final String task;
+//   final String description;
 
-  GameInfo(this.cardText, this.task, this.description);
-}
+//   GameInfo(this.cardText, this.task, this.description);
+// }
 
 class GameObject {
   final int turn;
@@ -59,4 +59,9 @@ class GameObject {
       this.opponentLife,
       this.opponentRemainDeck,
       this.opponentTriggerCards);
+
+  static dynamic getOtherGameInfo() {
+    return GameObject(1, true, true, '1', true, '1', [], 1, 1, 1, 1, 1, {}, 1,
+        [], 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+  }
 }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/models/on_going_info_model.dart';
 
 class OnGoingGameInfo extends StatefulWidget {
-  final GameInfo info;
+  final GameObject? info;
   final String cardText;
 
   const OnGoingGameInfo(this.info, this.cardText);
@@ -117,7 +117,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           left: 30.0,
           top: 490.0,
           width: 270.0,
-          child: Text(widget.info.cardText,
+          child: Text(widget.cardText,
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,

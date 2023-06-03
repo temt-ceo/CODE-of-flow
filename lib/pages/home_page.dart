@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/components/draggable_card_widget.dart';
 import 'package:CodeOfFlow/components/drag_target_widget.dart';
@@ -21,28 +22,61 @@ class HomePageState extends State<HomePage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   APIService apiService = APIService();
-  GameInfo gameInfo = GameInfo('', '', '');
-  late GameObject gameObject;
+  GameObject? gameObject;
   List<List<int>> mariganCardList = [];
   int mariganClickCount = 0;
   List<int> handCards = [];
   int gameProgressStatus = 0;
+  int? tappedCardId;
+  dynamic cardInfos;
 
   void doAnimation() {
-    setState(() => gameInfo = GameInfo('', '', ''));
     setState(() => cardPosition = 400.0);
     Future.delayed(const Duration(milliseconds: 1500), () {
       setState(() => cardPosition = 0.0);
-      setState(() => gameInfo = GameInfo('bbbbb', '', ''));
     });
+  }
+
+  void showGameLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Container(
+          color: Colors.transparent,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void closeGameLoading() {
+    Navigator.pop(context);
+  }
+
+  String getCardInfo(int? cardId) {
+    if (cardInfos != null) {
+      if (cardInfos[cardId.toString()] != null) {
+        return cardInfos[cardId.toString()]['skill']['description'];
+      }
+      return '';
+    } else {
+      return '';
+    }
   }
 
   void battleStart() async {
     setState(() => gameProgressStatus = 2);
     // Call GraphQL method.
     if (gameObject != null) {
+      showGameLoading();
       var ret = await apiService.saveGameServerProcess(
-          'player_matching', '', gameObject.you.toString());
+          'game_start', jsonEncode(handCards), gameObject!.you.toString());
+      closeGameLoading();
       debugPrint('transaction published');
       if (ret != null) {
         debugPrint(ret.message);
@@ -50,15 +84,41 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  var timer = TimerComponent();
+  final _timer = TimerComponent();
   void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCards) {
+    if (gameProgressStatus < 2) {
+      setState(() => gameProgressStatus = 2); // リロードなどの対応
+    }
     setState(() => gameObject = data!);
-    setState(() => mariganCardList = mariganCards!);
-    setState(() => mariganClickCount = 0);
-    setState(() => handCards = mariganCards![mariganClickCount]);
-    setState(() => gameProgressStatus = 1);
-    // Start Marigan.
-    timer.countdownStart(8, battleStart);
+
+    // マリガン時のみこちらへ
+    if (mariganCards != null) {
+      setState(() => mariganCardList = mariganCards!);
+      setState(() => mariganClickCount = 0);
+      setState(() => handCards = mariganCards![mariganClickCount]);
+      setState(() => gameProgressStatus = 1);
+      // Start Marigan.
+      _timer.countdownStart(8, battleStart);
+    }
+
+    // ハンドのブロックチェーンデータとの調整
+    List<int> _hand = [];
+    for (int i = 0; i < 7; i++) {
+      var cardId = gameObject!.yourHand[i.toString()];
+      if (cardId != null) {
+        _hand.add(int.parse(cardId));
+      }
+    }
+    setState(() => handCards = _hand);
+  }
+
+  void setCardInfo(cardInfo) {
+    setState(() => cardInfos = cardInfo);
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
@@ -95,11 +155,17 @@ class HomePageState extends State<HomePage> {
                           child: Row(
                             children: [
                               for (var cardId in handCards)
-                                DragBox(
-                                    cardId,
-                                    cardId > 16
-                                        ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-                                        : '${imagePath}unit/card_${cardId.toString()}.jpeg'),
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        tappedCardId = cardId;
+                                      });
+                                    },
+                                    child: DragBox(
+                                        cardId,
+                                        cardId > 16
+                                            ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
+                                            : '${imagePath}unit/card_${cardId.toString()}.jpeg')),
                               const SizedBox(width: 5),
                             ],
                           ),
@@ -149,14 +215,14 @@ class HomePageState extends State<HomePage> {
                     child: SizedBox(
                         width: 120.0,
                         child: StreamBuilder<int>(
-                            stream: timer.events.stream,
+                            stream: _timer.events.stream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<int> snapshot) {
                               return Center(
                                   child: Text(
-                                '00:0${snapshot.data.toString()}',
+                                '0:0${snapshot.data.toString()}',
                                 style: const TextStyle(
-                                    color: Colors.black, fontSize: 46.0),
+                                    color: Colors.white, fontSize: 46.0),
                               ));
                             })))),
             Visibility(
@@ -185,17 +251,24 @@ class HomePageState extends State<HomePage> {
                               ),
                             )))))
           ]),
-          OnGoingGameInfo(gameInfo, 'AAAA'),
+          gameObject != null
+              ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
+              : Container(),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        floatingActionButton: StartButtons((status, data, mariganCards) =>
-            status == 'game-is-ready'
+        floatingActionButton: StartButtons(
+            gameProgressStatus,
+            (status, data, mariganCards, cardInfo) => status == 'game-is-ready'
                 ? doAnimation()
                 : (status == 'matching-success'
                     ? setDataAndMarigan(data, mariganCards)
-                    : (status == 'matching-success'
-                        ? setState(() => {})
-                        : () {}))));
+                    : (status == 'started-game-info'
+                        ? setDataAndMarigan(data, null)
+                        : (status == 'other-game-info'
+                            ? setDataAndMarigan(data, null)
+                            : (status == 'card-info'
+                                ? setCardInfo(cardInfo)
+                                : ()))))));
   }
 
   @override

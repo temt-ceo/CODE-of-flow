@@ -24,6 +24,9 @@ external void subscribe(dynamic user);
 @JS('createPlayer')
 external void createPlayer(String? name);
 
+@JS('buyCyberEN')
+external void buyCyberEN();
+
 @JS('getAddr')
 external String? getAddr(dynamic user);
 
@@ -35,6 +38,9 @@ external dynamic getCurrentStatus(String? address);
 
 @JS('getMariganCards')
 external dynamic getMariganCards(String? address, int playerId);
+
+@JS('getBalance')
+external dynamic getBalance(String? address, int? playerId);
 
 @JS('getPlayerUUId')
 external String? getPlayerUUId(dynamic player);
@@ -82,10 +88,18 @@ class StartButtonsState extends State<StartButtons> {
   WalletUser walletUser = WalletUser('');
   PlayerResource player = PlayerResource('', '', '');
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  bool showBottomSheet = false;
+  bool showBottomSheet2 = false;
   bool onTyping = false;
   bool onClickButton = false;
   bool gameStarted = false;
   double imagePosition = 0.0;
+  double? balance;
+  int? cyberEnergy;
+  String yourScore = '';
+  String enemyName = '';
+  String enemyScore = '';
+
   late StreamController<bool> _wait;
 
   dynamic timerObj = null;
@@ -101,27 +115,130 @@ class StartButtonsState extends State<StartButtons> {
         widget.callback(
             'other-game-info', GameObject.getOtherGameInfo(), null, null);
       } else {
-        dynamic ret = await promiseToFuture(getCurrentStatus(walletUser.addr));
-        if (ret.toString().startsWith('1')) {
-          double num = double.parse(ret);
-          if (num > 1685510325) {
-            // debugPrint(
-            //     'matching.. ${(timer.tick * 2).toString()}s');
+        if (player.uuid == '') {
+          // Playerリソース未インポート
+          if (showBottomSheet == false) {
+            setState(() {
+              showBottomSheet = true;
+            });
+            // Playerリソースをインポート
+            showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(25.0),
+                    topRight: Radius.circular(25.0),
+                  ),
+                ),
+                backgroundColor: const Color.fromARGB(195, 54, 219, 244),
+                barrierColor: Colors.transparent,
+                builder: (context) {
+                  return SizedBox(
+                      child: Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
+                          child: Column(children: <Widget>[
+                            const Text(
+                                'プレイヤー名を入力して下さい。\n(Please input a Player Name.)',
+                                style: TextStyle(color: Color(0xFFFFFFFF))),
+                            const SizedBox(height: 5.0),
+                            SizedBox(
+                                width: 250.0,
+                                child: Focus(
+                                  child: TextField(
+                                    controller: nameController,
+                                    style: const TextStyle(
+                                        color: Color(0xFFFFFFFF)),
+                                  ),
+                                  onFocusChange: (hasFocus) {
+                                    setState(() => onTyping = hasFocus);
+                                  },
+                                )),
+                            const SizedBox(height: 60.0),
+                            Visibility(
+                              visible: onClickButton == true,
+                              child: const CircularProgressIndicator(),
+                            ),
+                            const SizedBox(height: 10.0),
+                            Visibility(
+                                visible: onTyping == false &&
+                                    nameController.text != '',
+                                child: Text(
+                                  'If you are satisfied with ${nameController.text}, please click the button below.',
+                                  style: const TextStyle(
+                                    color: Color(0xFFFFFFFF),
+                                    fontSize: 16.0,
+                                  ),
+                                )),
+                            const SizedBox(height: 20.0),
+                            Center(
+                                child: ElevatedButton(
+                              style: ButtonStyle(
+                                shape: MaterialStateProperty.all<
+                                    RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(10), //丸み具合
+                                  ),
+                                ),
+                              ),
+                              onPressed: onTyping == false &&
+                                      nameController.text != ''
+                                  ? () {
+                                      setState(() => onClickButton = true);
+                                      // showGameLoading();
+                                      createPlayer(nameController.text);
+                                      // setInterval by every 2 second
+                                      Timer.periodic(const Duration(seconds: 2),
+                                          (timer) {
+                                        getPlayerInfo();
+                                        if (player.uuid != '') {
+                                          timer.cancel();
+                                          setState(() => onClickButton = false);
+                                          // Navigator.of(context).pop();
+                                          widget.callback('game-is-ready', null,
+                                              null, null);
+                                        }
+                                      });
+                                    }
+                                  : null,
+                              child: const Text('Create a Player'),
+                            )),
+                            const SizedBox(height: 10.0),
+                          ])));
+                });
           }
-        } else if (ret.game_started == true || ret.game_started == false) {
-          if (ret.game_started == false && gameStarted == false) {
-            dynamic data = await promiseToFuture(
-                getMariganCards(walletUser.addr, int.parse(player.playerId)));
-            widget.callback('matching-success', setGameInfo(ret),
-                setMariganCards(data), null);
-            closeGameLoading();
-            battleStartAnimation();
-          } else if (ret.game_started == true) {
-            widget.callback('started-game-info', setGameInfo(ret), null, null);
+        } else {
+          // ゲーム状況(Current Status)取得
+          dynamic ret =
+              await promiseToFuture(getCurrentStatus(walletUser.addr));
+          if (ret == null) {
+            widget.callback(
+                'other-game-info', GameObject.getOtherGameInfo(), null, null);
+          } else if (ret.toString().startsWith('1')) {
+            double num = double.parse(ret);
+            if (num > 1685510325) {
+              // debugPrint(
+              //     'matching.. ${(timer.tick * 2).toString()}s');
+            }
+          } else if (ret.game_started == true || ret.game_started == false) {
+            if (ret.game_started == false && gameStarted == false) {
+              dynamic data = await promiseToFuture(
+                  getMariganCards(walletUser.addr, int.parse(player.playerId)));
+              widget.callback('matching-success', setGameInfo(ret),
+                  setMariganCards(data), null);
+              closeGameLoading();
+              battleStartAnimation();
+            } else if (ret.game_started == true) {
+              widget.callback(
+                  'started-game-info', setGameInfo(ret), null, null);
+            }
+            setState(() {
+              gameStarted = ret.game_started;
+            });
           }
-          setState(() {
-            gameStarted = ret.game_started;
-          });
+          // 残高を取得
+          getBalances();
         }
       }
     });
@@ -136,7 +253,31 @@ class StartButtonsState extends State<StartButtons> {
     var objStr = jsonToString(cardInfo);
     var objJs = jsonDecode(objStr);
     widget.callback('card-info', null, null, objJs);
-    print(99);
+  }
+
+  void getBalances() async {
+    if (walletUser.addr != '') {
+      // 保有$Flow残高取得
+      dynamic ret = await promiseToFuture(getBalance(walletUser.addr,
+          player.playerId == '' ? null : int.parse(player.playerId)));
+      var objStr = jsonToString(ret);
+      var objJs = jsonDecode(objStr);
+      var yourInfo = objJs[0];
+      setState(() {
+        balance = double.parse(yourInfo['balance']);
+      });
+      setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
+      int win = 0;
+      for (int i = 0; i < yourInfo['score'].length; i++) {
+        if (int.parse(yourInfo['score'][i]) == 1) {
+          win++;
+        }
+      }
+      setState(
+          () => yourScore = '${yourInfo['score'].length} games ${win} win');
+
+      print(objJs);
+    }
   }
 
   @override
@@ -171,6 +312,8 @@ class StartButtonsState extends State<StartButtons> {
       debugPrint('PlayerId: $playerId');
       setState(
           () => player = PlayerResource(playerUUId!, playerId!, playerName!));
+    } else {
+      print('Not Imporing.');
     }
   }
 
@@ -289,6 +432,78 @@ class StartButtonsState extends State<StartButtons> {
     });
   }
 
+  // EN購入
+  void buyCyberEnergy() {
+    if (showBottomSheet2 == false) {
+      setState(() {
+        showBottomSheet2 = true;
+      });
+      // EN購入
+      showModalBottomSheet(
+          context: context,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10.0),
+              topRight: Radius.circular(10.0),
+            ),
+          ),
+          backgroundColor: Color.fromARGB(205, 248, 129, 2),
+          barrierColor: Colors.transparent,
+          builder: (context) {
+            return SizedBox(
+                child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
+                    child: Column(children: <Widget>[
+                      const Text('EN is insufficient.\n(ENが不足しています)',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Color(0xFFFFFFFF), fontSize: 20.0)),
+                      const SizedBox(height: 35.0),
+                      Center(
+                          child: ElevatedButton(
+                        style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10), //丸み具合
+                            ),
+                          ),
+                        ),
+                        onPressed: () {
+                          // showGameLoading();
+                          buyCyberEN();
+                          // setInterval by every 2 second
+                          // Timer.periodic(const Duration(seconds: 2), (timer) {
+                          //   if (balance! > 0.0 || timer.tick > 5) {
+                          //     timer.cancel();
+                          //     Navigator.of(context).pop();
+                          //   }
+                          // });
+                        },
+                        child: const Text('Insert 1FLOW coin.'),
+                      )),
+                      const SizedBox(height: 10.0),
+                      Text(
+                          'You currently have ${balance.toString()} FLOW coins.\n By pressing the button, you are asked to pay 1 coin.',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
+                      const SizedBox(height: 8.0),
+                      const Text(
+                          'Press "Approve" button, then 100 EN will be added.\n But when you won this arcade game, you will get 0.5 FLOW in that time!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
+                      const SizedBox(height: 4.0),
+                      const Text('So you can increase your FLOW coins!!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
+                    ])));
+          });
+    }
+  }
+
   GameObject setGameInfo(obj) {
     var objStr = jsonToString(obj);
     var objJs = jsonDecode(objStr);
@@ -336,179 +551,120 @@ class StartButtonsState extends State<StartButtons> {
     unauthenticate();
     setState(() => walletUser = WalletUser(''));
     setState(() => player = PlayerResource('', '', ''));
+    setState(() => showBottomSheet = false);
   }
 
   @override
   Widget build(BuildContext context) {
     subscribe(allowInterop(setupWallet));
-    return Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-      Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            walletUser.addr == ''
-                ? 'connect to wallet→'
-                : (player.nickname == ''
-                    ? walletUser.addr
-                    : 'Player: ${player.nickname}'),
-            style: const TextStyle(color: Colors.white, fontSize: 26.0),
-          ),
-        ],
-      ),
+    return Stack(children: <Widget>[
       Visibility(
-          visible: walletUser.addr == '', child: const SizedBox(width: 20)),
+          visible: balance != null,
+          child: Positioned(
+              left: 75,
+              top: 0,
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    SizedBox(
+                        width: 220.0,
+                        child: Text(
+                          'Balance：${balance.toString()}',
+                          style: const TextStyle(
+                              color: Colors.lightGreen, fontSize: 26.0),
+                        )),
+                    Container(
+                        width: 22.0,
+                        height: 22.0,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                              image:
+                                  AssetImage('${imagePath}button/flowLogo.png'),
+                              fit: BoxFit.contain),
+                        )),
+                  ]))),
       Visibility(
-          visible: walletUser.addr == '',
-          child: const FloatingActionButton(
-            onPressed: authenticate,
-            tooltip: 'Authenticate',
-            child: Icon(Icons.key_outlined),
-          )),
-      Visibility(
-          visible: walletUser.addr != '' && player.uuid == '',
-          child: const SizedBox(width: 20)),
-      Visibility(
-          visible: walletUser.addr != '' && player.uuid == '',
-          child: FloatingActionButton(
-            onPressed: () {
-              showModalBottomSheet(
-                  context: context,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(25.0),
-                      topRight: Radius.circular(25.0),
-                    ),
+          visible: cyberEnergy != null,
+          child: Positioned(
+            left: 75,
+            top: 32,
+            child: SizedBox(
+                width: 300.0,
+                child: Row(children: <Widget>[
+                  const Text(
+                    'EN:  ',
+                    style: TextStyle(
+                        color: Color.fromARGB(255, 32, 243, 102),
+                        fontSize: 16.0),
                   ),
-                  backgroundColor: const Color.fromARGB(195, 54, 219, 244),
-                  barrierColor: Colors.transparent,
-                  builder: (context) {
-                    return SizedBox(
-                        child: Padding(
-                            padding:
-                                const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
-                            child: Column(children: <Widget>[
-                              const Text(
-                                  'プレイヤー名を入力して下さい。\n(Please input a Player Name.)',
-                                  style: TextStyle(color: Color(0xFFFFFFFF))),
-                              const SizedBox(height: 5.0),
-                              SizedBox(
-                                  width: 250.0,
-                                  child: Focus(
-                                    child: TextField(
-                                      controller: nameController,
-                                      style: const TextStyle(
-                                          color: Color(0xFFFFFFFF)),
-                                    ),
-                                    onFocusChange: (hasFocus) {
-                                      setState(() => onTyping = hasFocus);
-                                    },
-                                  )),
-                              const SizedBox(height: 60.0),
-                              Visibility(
-                                visible: onClickButton == true,
-                                child: const CircularProgressIndicator(),
-                              ),
-                              const SizedBox(height: 10.0),
-                              Visibility(
-                                  visible: onTyping == false &&
-                                      nameController.text != '',
-                                  child: Text(
-                                    '${nameController.text}でよろしければ以下のボタンを押して下さい。',
-                                    style: const TextStyle(
-                                      color: Color(0xFFFFFFFF),
-                                      fontSize: 16.0,
-                                    ),
-                                  )),
-                              const SizedBox(height: 20.0),
-                              Center(
-                                  child: ElevatedButton(
-                                style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(10), //丸み具合
-                                    ),
-                                  ),
-                                ),
-                                onPressed: onTyping == false &&
-                                        nameController.text != ''
-                                    ? () {
-                                        setState(() => onClickButton = true);
-                                        createPlayer(nameController.text);
-                                        // setInterval by every 2 second
-                                        Timer.periodic(
-                                            const Duration(seconds: 2),
-                                            (timer) {
-                                          getPlayerInfo();
-                                          if (player.uuid != '') {
-                                            timer.cancel();
-                                            setState(
-                                                () => onClickButton = false);
-                                            Navigator.of(context).pop();
-                                            widget.callback('game-is-ready',
-                                                null, null, null);
-                                          }
-                                        });
-                                      }
-                                    : null,
-                                child: const Text('Create a Player'),
-                              )),
-                              const SizedBox(height: 10.0),
-                              Center(
-                                  child: ElevatedButton(
-                                style: ButtonStyle(
-                                  shape: MaterialStateProperty.all<
-                                      RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(10), //丸み具合
-                                    ),
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text('Cancel'),
-                              )),
-                            ])));
-                  });
-            },
-            tooltip: 'Create Player',
-            child: const Icon(Icons.add),
+                  Text(
+                    '${cyberEnergy.toString()} / 200',
+                    style: const TextStyle(
+                        color: Color.fromARGB(255, 32, 243, 102),
+                        fontSize: 18.0),
+                  ),
+                  const SizedBox(width: 20.0),
+                  Text(
+                    yourScore,
+                    style: const TextStyle(
+                        color: Color.fromARGB(255, 247, 245, 245),
+                        fontSize: 18.0),
+                  ),
+                ])),
           )),
-      const SizedBox(width: 10),
-      Visibility(
-          visible: walletUser.addr != '' && player.uuid != '',
-          child: SizedBox(
-              width: 150.0,
-              child: FloatingActionButton(
-                  backgroundColor: Colors.transparent,
-                  onPressed: () async {
-                    gameStarted == true
-                        ? ()
-                        : () async {
-                            //GraphQL:player_matching
-                            await gameStart();
-                            countdown();
-                          };
-                  },
-                  tooltip: 'Play',
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(20.0),
-                    child: Image.asset(
-                      '${imagePath}button/playButton.png',
-                      fit: BoxFit.cover,
-                    ),
-                  )))),
-      const SizedBox(width: 5),
-      Visibility(
-          visible: walletUser.addr != '',
-          child: FloatingActionButton(
-            onPressed: signout,
-            tooltip: 'Sign Out',
-            child: const Icon(Icons.logout),
-          )),
+      Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+        Text(
+          walletUser.addr == ''
+              ? 'connect to wallet→'
+              : (player.uuid == ''
+                  ? 'Address: ${walletUser.addr} '
+                  : 'Player: ${player.nickname} '),
+          style: const TextStyle(color: Colors.white, fontSize: 26.0),
+        ),
+        Visibility(
+            visible: walletUser.addr == '', child: const SizedBox(width: 20)),
+        Visibility(
+            visible: walletUser.addr == '',
+            child: const FloatingActionButton(
+              onPressed: authenticate,
+              tooltip: 'Authenticate',
+              child: Icon(Icons.key_outlined),
+            )),
+        Visibility(
+            visible: walletUser.addr != '' && player.uuid != '',
+            child: SizedBox(
+                width: 150.0,
+                child: FloatingActionButton(
+                    backgroundColor: Colors.transparent,
+                    onPressed: () async {
+                      if (gameStarted == true || cyberEnergy == null) {
+                      } else {
+                        if (cyberEnergy! < 30) {
+                          buyCyberEnergy();
+                        } else {
+                          //GraphQL:player_matching
+                          await gameStart();
+                          countdown();
+                        }
+                      }
+                    },
+                    tooltip: 'Play',
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Image.asset(
+                        '${imagePath}button/playButton.png',
+                        fit: BoxFit.cover,
+                      ),
+                    )))),
+        const SizedBox(width: 5),
+        Visibility(
+            visible: walletUser.addr != '',
+            child: FloatingActionButton(
+              onPressed: signout,
+              tooltip: 'Sign Out',
+              child: const Icon(Icons.logout),
+            )),
+      ])
     ]);
   }
 }

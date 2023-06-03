@@ -61,7 +61,7 @@ class GameObject {
       this.opponentTriggerCards);
 
   static dynamic getOtherGameInfo() {
-    return GameObject(1, true, true, '1', true, '1', [], 1, 1, 1, 1, 1, {}, 1,
-        [], 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    return GameObject(1, true, true, '1', true, '1', [], 1, 1, 1, 1, 1, {1: 16},
+        1, [], 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
   }
 }

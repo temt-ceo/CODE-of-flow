@@ -6,11 +6,11 @@ const { SHA3 } = require("sha3");
 
 const FlowTransactions = {
   matchingStart: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.matching_start(player_id: player_id)
       }
@@ -20,11 +20,11 @@ const FlowTransactions = {
     }
   `,
   gameStart: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32, drawed_cards: [UInt16]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.game_start(player_id: player_id, drawed_cards: drawed_cards)
       }
@@ -34,11 +34,11 @@ const FlowTransactions = {
     }
   `,
   putCardOnField: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32, unit_card: {UInt8: UInt16}, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.put_card_on_the_field(player_id: player_id, unit_card: unit_card, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_positions: used_intercept_positions)
       }
@@ -48,11 +48,11 @@ const FlowTransactions = {
     }
   `,
   turnChange: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32, attacking_cards: [UInt8], enemy_skill_target: {UInt8: UInt8}, trigger_cards: {UInt8: UInt16}, used_intercept_position: {UInt8: [UInt8]}) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.turn_change(player_id: player_id, attacking_cards: attacking_cards, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_position: used_intercept_position)
       }
@@ -62,11 +62,11 @@ const FlowTransactions = {
     }
   `,
   startYourTurn: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32, blocked_unit: {UInt8: UInt8}, used_intercept_position: {UInt8: UInt8}) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.start_your_turn_and_draw_two_cards(player_id: player_id, blocked_unit: blocked_unit, used_intercept_position: used_intercept_position)
       }
@@ -76,11 +76,11 @@ const FlowTransactions = {
     }
   `,
   surrendar: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.surrendar(player_id: player_id)
       }
@@ -90,11 +90,11 @@ const FlowTransactions = {
     }
   `,
   claimWin: `
-    import CodeOfFlowAlpha6 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha9 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt32) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha6.Admin>(from: CodeOfFlowAlpha6.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha9.Admin>(from: CodeOfFlowAlpha9.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.claimWin(player_id: player_id)
       }
@@ -135,7 +135,7 @@ exports.handler = async function (event) {
     const PRIVATE_KEY = JSON.parse(response.SecretString)?.SmartContractPK;
     const ADDRESS = "0x9e447fb949c3f1b6";
     const KEY_ID = 0;
-    const CONTRACT_NAME = "CodeOfFlowAlpha6";
+    const CONTRACT_NAME = "CodeOfFlowAlpha9";
 
     const sign = (message) => {
       const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY, "hex"))

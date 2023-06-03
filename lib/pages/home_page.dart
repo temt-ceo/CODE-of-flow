@@ -197,7 +197,7 @@ class HomePageState extends State<HomePage> {
                     children: <Widget>[
                       Padding(
                         padding:
-                            const EdgeInsets.fromLTRB(30.0, 130.0, 30.0, 10.0),
+                            const EdgeInsets.fromLTRB(30.0, 165.0, 30.0, 0.0),
                         child: DragTargetWidget(
                             'trigger', '${imagePath}trigger/trigger.png'),
                       ),

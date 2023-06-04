@@ -6,9 +6,9 @@ typedef void StringCallback(int? data);
 
 class DragBox extends StatefulWidget {
   final int cardId;
-  final StringCallback cpUseCallback;
+  final StringCallback putCardCallback;
 
-  const DragBox(this.cardId, this.cpUseCallback);
+  const DragBox(this.cardId, this.putCardCallback);
 
   @override
   DragBoxState createState() => DragBoxState();
@@ -51,7 +51,7 @@ class DragBoxState extends State<DragBox> {
         setState(() {
           isDroped = true;
         });
-        widget.cpUseCallback(widget.cardId);
+        widget.putCardCallback(widget.cardId);
       },
       onDraggableCanceled: (velocity, offset) {
         setState(() {

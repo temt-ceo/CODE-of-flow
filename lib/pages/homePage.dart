@@ -6,6 +6,7 @@ import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
 import 'package:CodeOfFlow/components/startButtons.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
+import 'package:CodeOfFlow/models/putCardModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
@@ -73,11 +74,40 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  void cpUsed(cardId) {
+  void putCard(cardId) async {
     setState(() {
       gameObject!.yourCp =
           gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
     });
+    var fieldPosition = 0;
+    var objStr = jsonToString(gameObject!.yourFieldUnit);
+    var objJs = jsonDecode(objStr);
+
+    for (int i = 1; i <= 5; i++) {
+      if (objJs[i.toString()] == null) {
+        fieldPosition = i;
+        print('フィールド$iにカードを置きました!');
+        break;
+      }
+    }
+    Map<int, int> fieldUnit = {};
+    fieldUnit[fieldPosition] = cardId;
+    int enemySkillTarget = 0;
+    Map<int, int> yourTriggerCards = {1: 0, 2: 0, 3: 0, 4: 0};
+    List<int> usedInterceptCard = [];
+    // showGameLoading();
+    // Call GraphQL method.
+    var message = PutCardModel(
+        fieldUnit, enemySkillTarget, yourTriggerCards, usedInterceptCard);
+    print(666);
+    print(PutCardModel.convertToJson(message));
+    // var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+    //     jsonEncode(message), gameObject!.you.toString());
+    // closeGameLoading();
+    // debugPrint('transaction published');
+    // if (ret != null) {
+    //   debugPrint(ret.message);
+    // }
   }
 
   void battleStart() async {
@@ -179,7 +209,7 @@ class HomePageState extends State<HomePage> {
                                         tappedCardId = cardId;
                                       });
                                     },
-                                    child: DragBox(cardId, cpUsed)),
+                                    child: DragBox(cardId, putCard)),
                               const SizedBox(width: 5),
                             ],
                           ),
@@ -190,13 +220,13 @@ class HomePageState extends State<HomePage> {
                           curve: Curves.linear,
                           child: Row(
                             children: [
-                              DragBox(16, cpUsed),
-                              DragBox(17, cpUsed),
-                              DragBox(18, cpUsed),
-                              DragBox(19, cpUsed),
-                              DragBox(1, cpUsed),
-                              DragBox(2, cpUsed),
-                              DragBox(3, cpUsed),
+                              DragBox(16, putCard),
+                              DragBox(17, putCard),
+                              DragBox(18, putCard),
+                              DragBox(19, putCard),
+                              DragBox(1, putCard),
+                              DragBox(2, putCard),
+                              DragBox(3, putCard),
                               const SizedBox(width: 5),
                             ],
                           ),

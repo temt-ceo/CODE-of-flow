@@ -5,7 +5,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'amplifyconfiguration.dart';
 import 'package:CodeOfFlow/models/ModelProvider.dart';
-import 'package:CodeOfFlow/pages/home_page.dart';
+import 'package:CodeOfFlow/pages/homePage.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 

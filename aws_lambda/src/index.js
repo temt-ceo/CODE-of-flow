@@ -195,7 +195,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[player_matching] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -212,7 +212,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[game_start] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -232,7 +232,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[put_card_on_the_field] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -252,7 +252,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[turn_change] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -270,7 +270,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[start_your_turn] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -286,7 +286,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[surrendar] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
@@ -302,7 +302,7 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[claim_win] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })

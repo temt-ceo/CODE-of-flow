@@ -42,6 +42,7 @@ dependencies:
   amplify_authenticator: ^1.1.0
   amplify_api: ^1.1.0
   # amplify_datastore: ^1.1.0-supports-only-mobile
+  percent_indicator: ^4.0.1
 
 dev_dependencies:
   flutter_test:

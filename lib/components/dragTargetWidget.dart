@@ -2,21 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_bloc.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
 import 'package:CodeOfFlow/components/droppedCardWidget.dart';
+import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 
-const env_flavor = String.fromEnvironment('flavor');
+const envFlavor = String.fromEnvironment('flavor');
 
 class DragTargetWidget extends StatefulWidget {
   final String label;
   final String imageUrl;
+  final GameObject? info;
+  final dynamic cardInfos;
 
-  const DragTargetWidget(this.label, this.imageUrl);
+  const DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos);
 
   @override
   DragTargetState createState() => DragTargetState();
 }
 
 class DragTargetState extends State<DragTargetWidget> {
-  String imagePath = env_flavor == 'prod' ? 'assets/image/' : 'image/';
+  String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   List<Widget> dropedList = [
     const Positioned(
         left: 225.0,
@@ -30,7 +33,11 @@ class DragTargetState extends State<DragTargetWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<String>(onAccept: (String imageUrl) {
+    return DragTarget<String>(onAccept: (String cardIdStr) {
+      var cardId = int.parse(cardIdStr);
+      var imageUrl = cardId > 16
+          ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
+          : '${imagePath}unit/card_${cardId.toString()}.jpeg';
       dropedList.add(DroppedCardWidget(
         widget.label == 'unit'
             ? 135.0 * (dropedList.length - 1) + 20
@@ -39,8 +46,25 @@ class DragTargetState extends State<DragTargetWidget> {
         widget.label,
       ));
       _dropBloc.counterEventSink.add(DropLeaveEvent());
-    }, onWillAccept: (String? imageUrl) {
-      if (widget.label == 'unit' && imageUrl!.startsWith('${imagePath}unit')) {
+    }, onWillAccept: (String? cardIdStr) {
+      var cardId = int.parse(cardIdStr!);
+      var imageUrl = cardId > 16
+          ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
+          : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+
+      if (widget.label == 'unit' && imageUrl.startsWith('${imagePath}unit')) {
+        if (widget.info != null) {
+          // カード情報がない。
+          if (widget.cardInfos == null || widget.cardInfos[cardIdStr] == null) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
+          }
+          var cardData = widget.cardInfos[cardIdStr];
+          if (int.parse(cardData['cost']) > widget.info!.yourCp) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
+          }
+        }
         _dropBloc.counterEventSink.add(DropAllowedEvent());
         return true;
       } else if (widget.label == 'trigger' &&

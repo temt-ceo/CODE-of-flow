@@ -15,7 +15,7 @@ class GameObject {
   final String? lastTimeTurnend;
   final List<dynamic> enemyAttackingCards;
   final int you;
-  final int yourCp;
+  int yourCp;
   final dynamic yourFieldUnit;
   final dynamic yourFieldUnitAction;
   final dynamic yourFieldUnitBpAmountOfChange;

@@ -38,7 +38,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ))),
       for (var i = 0; i < widget.info!.opponentLife; i++)
         Positioned(
-          left: 120.0 + i * 26,
+          left: 150.0 + i * 26,
           top: 68.0,
           child: Container(
             width: 25.0,
@@ -59,7 +59,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 70.0,
+          left: 80.0,
           top: 100.0,
           child: Text(
               'CP ${widget.info != null ? (widget.info!.opponentCp < 10 ? '0${widget.info!.opponentCp}' : widget.info!.opponentCp) : '--'}',
@@ -70,7 +70,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ))),
       for (var i = 0; i < widget.info!.opponentCp; i++)
         Positioned(
-          left: 140.0 + i * 20,
+          left: 152.0 + i * 20,
           top: 105.0,
           child: Container(
             width: 20.0,
@@ -91,7 +91,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 70.0,
+          left: 80.0,
           top: 130.0,
           child: Text(
               'Dead - / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
@@ -164,7 +164,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         ),
       const Positioned(
           left: 20.0,
-          top: 175.0,
+          top: 205.0,
           child: Text('Your Life:',
               style: TextStyle(
                 color: Colors.white,
@@ -173,8 +173,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ))),
       for (var i = 0; i < widget.info!.yourLife; i++)
         Positioned(
-          left: 120.0 + i * 26,
-          top: 178.0,
+          left: 150.0 + i * 26,
+          top: 208.0,
           child: Container(
             width: 25.0,
             height: 25.0,
@@ -194,8 +194,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 70.0,
-          top: 210.0,
+          left: 80.0,
+          top: 240.0,
           child: Text(
               'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
               style: const TextStyle(
@@ -205,8 +205,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ))),
       for (var i = 0; i < widget.info!.yourCp; i++)
         Positioned(
-          left: 140.0 + i * 20,
-          top: 215.0,
+          left: 152.0 + i * 20,
+          top: 245.0,
           child: Container(
             width: 20.0,
             height: 20.0,
@@ -265,6 +265,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               radius: 45.0,
               lineWidth: 10.0,
               percent: 0.5,
+              backgroundWidth: 0.0,
               center: const Column(children: <Widget>[
                 SizedBox(height: 30.0),
                 Text("50%",
@@ -288,6 +289,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               radius: 60.0,
               lineWidth: 10.0,
               percent: 0.5,
+              backgroundWidth: 0.0,
               center: Column(children: <Widget>[
                 const SizedBox(height: 10.0),
                 const Text("50%",

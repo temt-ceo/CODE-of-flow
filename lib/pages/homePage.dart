@@ -73,6 +73,13 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void cpUsed(cardId) {
+    setState(() {
+      gameObject!.yourCp =
+          gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
+    });
+  }
+
   void battleStart() async {
     gameProgressStatus = 2;
     // Call GraphQL method.
@@ -93,7 +100,14 @@ class HomePageState extends State<HomePage> {
     if (gameProgressStatus < 2) {
       setState(() => gameProgressStatus = 2); // リロードなどの対応
     }
-    setState(() => gameObject = data!);
+    if (data != null) {
+      if (gameObject != null) {
+        if (data.yourCp > gameObject!.yourCp) {
+          data.yourCp = gameObject!.yourCp;
+        }
+      }
+      setState(() => gameObject = data);
+    }
 
     // マリガン時のみこちらへ
     if (mariganCards != null) {
@@ -165,11 +179,7 @@ class HomePageState extends State<HomePage> {
                                         tappedCardId = cardId;
                                       });
                                     },
-                                    child: DragBox(
-                                        cardId,
-                                        cardId > 16
-                                            ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-                                            : '${imagePath}unit/card_${cardId.toString()}.jpeg')),
+                                    child: DragBox(cardId, cpUsed)),
                               const SizedBox(width: 5),
                             ],
                           ),
@@ -180,13 +190,13 @@ class HomePageState extends State<HomePage> {
                           curve: Curves.linear,
                           child: Row(
                             children: [
-                              DragBox(16, '${imagePath}unit/card_16.jpeg'),
-                              DragBox(17, '${imagePath}trigger/card_17.jpeg'),
-                              DragBox(18, '${imagePath}trigger/card_18.jpeg'),
-                              DragBox(19, '${imagePath}trigger/card_19.jpeg'),
-                              DragBox(1, '${imagePath}unit/card_1.jpeg'),
-                              DragBox(2, '${imagePath}unit/card_2.jpeg'),
-                              DragBox(3, '${imagePath}unit/card_3.jpeg'),
+                              DragBox(16, cpUsed),
+                              DragBox(17, cpUsed),
+                              DragBox(18, cpUsed),
+                              DragBox(19, cpUsed),
+                              DragBox(1, cpUsed),
+                              DragBox(2, cpUsed),
+                              DragBox(3, cpUsed),
                               const SizedBox(width: 5),
                             ],
                           ),
@@ -203,12 +213,15 @@ class HomePageState extends State<HomePage> {
                         padding:
                             const EdgeInsets.fromLTRB(150.0, 200.0, 30.0, 0.0),
                         child: DragTargetWidget(
-                            'trigger', '${imagePath}trigger/trigger.png'),
+                            'trigger',
+                            '${imagePath}trigger/trigger.png',
+                            gameObject,
+                            cardInfos),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(30.0),
-                        child: DragTargetWidget(
-                            'unit', '${imagePath}unit/bg-2.jpg'),
+                        child: DragTargetWidget('unit',
+                            '${imagePath}unit/bg-2.jpg', gameObject, cardInfos),
                       ),
                     ])),
             Visibility(
@@ -260,19 +273,26 @@ class HomePageState extends State<HomePage> {
               : Container(),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        floatingActionButton: StartButtons(
-            gameProgressStatus,
-            (status, data, mariganCards, cardInfo) => status == 'game-is-ready'
-                ? doAnimation()
-                : (status == 'matching-success'
-                    ? setDataAndMarigan(data, mariganCards)
-                    : (status == 'started-game-info'
-                        ? setDataAndMarigan(data, null)
-                        : (status == 'other-game-info'
-                            ? setDataAndMarigan(data, null)
-                            : (status == 'card-info'
-                                ? setCardInfo(cardInfo)
-                                : ()))))));
+        floatingActionButton: StartButtons(gameProgressStatus,
+            (status, data, mariganCards, cardInfo) {
+          switch (status) {
+            case 'game-is-ready':
+              doAnimation();
+              break;
+            case 'matching-success':
+              setDataAndMarigan(data, mariganCards);
+              break;
+            case 'started-game-info':
+              setDataAndMarigan(data, null);
+              break;
+            case 'other-game-info':
+              setDataAndMarigan(data, null);
+              break;
+            case 'card-info':
+              setCardInfo(cardInfo);
+              break;
+          }
+        }));
   }
 
   @override

@@ -41,4 +41,45 @@ class APIService {
     }
     return null;
   }
+
+  Future<void> subscribeBCGGameServerProcess() async {
+    // const graphQLDocument = r'''
+    //     subscription onCreateCommentByPostId($id: ID!) {
+    //       onCommentByPostId(postCommentsId: $id) {
+    //         content
+    //         id
+    //         postCommentsId
+    //       }
+    //     }
+    //   ''';
+    const graphQLDocument = r'''
+      subscription OnCreateBCGGameServerProcess(
+        $filter: ModelSubscriptionBCGGameServerProcessFilterInput
+      ) {
+        onCreateBCGGameServerProcess(filter: $filter) {
+          id
+          type
+          message
+          playerId
+          createdAt
+          updatedAt
+        }
+      }
+      ''';
+    final Stream<GraphQLResponse<String>> operation = Amplify.API.subscribe(
+      GraphQLRequest<String>(
+        document: graphQLDocument,
+        // variables: <String, String>{'id': postId},
+      ),
+      onEstablished: () => print('Subscription established'),
+    );
+
+    try {
+      await for (var event in operation) {
+        print('Subscription event data received: ${event.data}');
+      }
+    } on Exception catch (e) {
+      print('Error in subscription stream: $e');
+    }
+  }
 }

@@ -4,6 +4,7 @@ library index;
 import 'dart:async';
 import 'dart:convert';
 import 'dart:js_util';
+import 'dart:html' as html;
 import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
@@ -644,7 +645,9 @@ class StartButtonsState extends State<StartButtons> {
               child: Icon(Icons.key_outlined),
             )),
         Visibility(
-            visible: walletUser.addr != '' && player.uuid != '',
+            visible: walletUser.addr != '' &&
+                player.uuid != '' &&
+                gameStarted == false,
             child: SizedBox(
                 width: 150.0,
                 child: FloatingActionButton(
@@ -669,6 +672,21 @@ class StartButtonsState extends State<StartButtons> {
                         fit: BoxFit.cover,
                       ),
                     )))),
+        Visibility(
+            visible: walletUser.addr != '',
+            child: FloatingActionButton(
+                backgroundColor: Colors.transparent,
+                onPressed: () {
+                  html.window.location.href = 'deck_edit';
+                },
+                tooltip: 'Play',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(40.0),
+                  child: Image.asset(
+                    '${imagePath}button/editDeck.png',
+                    fit: BoxFit.cover,
+                  ),
+                ))),
         const SizedBox(width: 5),
         Visibility(
             visible: walletUser.addr != '',

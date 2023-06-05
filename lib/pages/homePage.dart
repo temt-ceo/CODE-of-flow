@@ -6,7 +6,7 @@ import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
 import 'package:CodeOfFlow/components/startButtons.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
-import 'package:CodeOfFlow/models/putCardModel.dart';
+import 'package:CodeOfFlow/models/put_card_model.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
@@ -75,39 +75,55 @@ class HomePageState extends State<HomePage> {
   }
 
   void putCard(cardId) async {
+    // Unit case
+    if (cardId > 16) {
+      return;
+    }
+
     setState(() {
       gameObject!.yourCp =
           gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
     });
-    var fieldPosition = 0;
     var objStr = jsonToString(gameObject!.yourFieldUnit);
     var objJs = jsonDecode(objStr);
 
+    List<int?> unitPositions = [null, null, null, null, null];
     for (int i = 1; i <= 5; i++) {
       if (objJs[i.toString()] == null) {
-        fieldPosition = i;
+        unitPositions[i - 1] = cardId;
         print('フィールド$iにカードを置きました!');
         break;
+      } else {
+        unitPositions[i - 1] = objJs[i.toString()];
       }
     }
-    Map<int, int> fieldUnit = {};
-    fieldUnit[fieldPosition] = cardId;
+
+    var objStr2 = jsonToString(gameObject!.yourTriggerCards);
+    var objJs2 = jsonDecode(objStr2);
+    List<int?> triggerPositions = [null, null, null, null];
+    for (int i = 1; i <= 4; i++) {
+      if (objJs2[i.toString()] != null) {
+        triggerPositions[i - 1] = objJs2[i.toString()];
+      }
+    }
+
+    FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
+        unitPositions[2], unitPositions[3], unitPositions[4]);
     int enemySkillTarget = 0;
-    Map<int, int> yourTriggerCards = {1: 0, 2: 0, 3: 0, 4: 0};
+    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
+        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
     List<int> usedInterceptCard = [];
-    // showGameLoading();
+    showGameLoading();
     // Call GraphQL method.
     var message = PutCardModel(
-        fieldUnit, enemySkillTarget, yourTriggerCards, usedInterceptCard);
-    print(666);
-    print(PutCardModel.convertToJson(message));
-    // var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
-    //     jsonEncode(message), gameObject!.you.toString());
-    // closeGameLoading();
-    // debugPrint('transaction published');
-    // if (ret != null) {
-    //   debugPrint(ret.message);
-    // }
+        fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
+    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+        jsonEncode(message), gameObject!.you.toString());
+    closeGameLoading();
+    debugPrint('transaction published');
+    if (ret != null) {
+      debugPrint(ret.message);
+    }
   }
 
   void battleStart() async {
@@ -167,6 +183,11 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    listenBCGGameServerProcess();
+  }
+
+  void listenBCGGameServerProcess() async {
+    await apiService.subscribeBCGGameServerProcess();
   }
 
   @override
@@ -220,13 +241,34 @@ class HomePageState extends State<HomePage> {
                           curve: Curves.linear,
                           child: Row(
                             children: [
-                              DragBox(16, putCard),
-                              DragBox(17, putCard),
-                              DragBox(18, putCard),
-                              DragBox(19, putCard),
-                              DragBox(1, putCard),
-                              DragBox(2, putCard),
-                              DragBox(3, putCard),
+                              GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      tappedCardId = 16;
+                                    });
+                                  },
+                                  child: DragBox(16, putCard)),
+                              GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      tappedCardId = 17;
+                                    });
+                                  },
+                                  child: DragBox(17, putCard)),
+                              GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      tappedCardId = 1;
+                                    });
+                                  },
+                                  child: DragBox(1, putCard)),
+                              GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      tappedCardId = 3;
+                                    });
+                                  },
+                                  child: DragBox(3, putCard)),
                               const SizedBox(width: 5),
                             ],
                           ),

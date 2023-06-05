@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
+import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -16,7 +18,32 @@ class OnGoingGameInfo extends StatefulWidget {
 
 class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
-  // Offset position = const Offset(0.0, 0.0);
+  APIService apiService = APIService();
+  BuildContext? loadingContext;
+
+  void showGameLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (buildContext) {
+        loadingContext = buildContext;
+        return Container(
+          color: Colors.transparent,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void closeGameLoading() {
+    if (loadingContext != null) {
+      Navigator.pop(loadingContext!);
+    }
+  }
 
   @override
   void initState() {
@@ -303,16 +330,15 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
                         onPressed: () async {
-                          // if (gameStarted == true || cyberEnergy == null) {
-                          // } else {
-                          //   if (cyberEnergy! < 30) {
-                          //     buyCyberEnergy();
-                          //   } else {
-                          //     //GraphQL:player_matching
-                          //     await gameStart();
-                          //     countdown();
-                          //   }
-                          // }
+                          showGameLoading();
+                          var ret = await apiService.saveGameServerProcess(
+                              'turn_change', '', widget.info!.you.toString());
+                          closeGameLoading();
+                          debugPrint('transaction published');
+                          debugPrint(ret.toString());
+                          if (ret != null) {
+                            debugPrint(ret.message);
+                          }
                         },
                         tooltip: 'Play',
                         child: Image.asset(

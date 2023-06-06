@@ -31,6 +31,8 @@ class DeckEditPageState extends State<DeckEditPage> {
   int? tappedCardId;
   dynamic cardInfos;
   BuildContext? loadingContext;
+  int? removedCardId;
+  int? removedPosition;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -63,67 +65,19 @@ class DeckEditPageState extends State<DeckEditPage> {
     }
   }
 
-  String getCardInfo(int? cardId) {
-    if (cardInfos != null) {
-      if (cardInfos[cardId.toString()] != null) {
-        return cardInfos[cardId.toString()]['skill']['description'];
-      }
-      return '';
-    } else {
-      return '';
+  void putCard(cardId) async {}
+  void tapCard(message, cardId, index) {
+    if (message == 'tapped') {
+      setState(() {
+        tappedCardId = cardId;
+        removedPosition = null;
+      });
+    } else if (message == 'remove') {
+      setState(() {
+        removedCardId = cardId;
+        removedPosition = index;
+      });
     }
-  }
-
-  void putCard(cardId) async {
-    // // Unit case
-    // if (cardId > 16) {
-    //   return;
-    // }
-
-    // setState(() {
-    //   gameObject!.yourCp =
-    //       gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
-    // });
-    // var objStr = jsonToString(gameObject!.yourFieldUnit);
-    // var objJs = jsonDecode(objStr);
-
-    // List<int?> unitPositions = [null, null, null, null, null];
-    // for (int i = 1; i <= 5; i++) {
-    //   if (objJs[i.toString()] == null) {
-    //     unitPositions[i - 1] = cardId;
-    //     print('フィールド$iにカードを置きました!');
-    //     break;
-    //   } else {
-    //     unitPositions[i - 1] = objJs[i.toString()];
-    //   }
-    // }
-
-    // var objStr2 = jsonToString(gameObject!.yourTriggerCards);
-    // var objJs2 = jsonDecode(objStr2);
-    // List<int?> triggerPositions = [null, null, null, null];
-    // for (int i = 1; i <= 4; i++) {
-    //   if (objJs2[i.toString()] != null) {
-    //     triggerPositions[i - 1] = objJs2[i.toString()];
-    //   }
-    // }
-
-    // FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
-    //     unitPositions[2], unitPositions[3], unitPositions[4]);
-    // int enemySkillTarget = 0;
-    // TriggerCards triggerCards = TriggerCards(triggerPositions[0],
-    //     triggerPositions[1], triggerPositions[2], triggerPositions[3]);
-    // List<int> usedInterceptCard = [];
-    // showGameLoading();
-    // // Call GraphQL method.
-    // var message = PutCardModel(
-    //     fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
-    // var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
-    //     jsonEncode(message), gameObject!.you.toString());
-    // closeGameLoading();
-    // debugPrint('transaction published');
-    // if (ret != null) {
-    //   debugPrint(ret.message);
-    // }
   }
 
   void battleStart() async {
@@ -176,10 +130,6 @@ class DeckEditPageState extends State<DeckEditPage> {
     setState(() => handCards = _hand);
   }
 
-  void setCardInfo(cardInfo) {
-    setState(() => cardInfos = cardInfo);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -188,6 +138,21 @@ class DeckEditPageState extends State<DeckEditPage> {
 
   void listenBCGGameServerProcess() async {
     await apiService.subscribeBCGGameServerProcess();
+  }
+
+  String getCardInfo(int? cardId) {
+    if (cardInfos != null) {
+      if (cardInfos[cardId.toString()] != null) {
+        return cardInfos[cardId.toString()]['skill']['description'];
+      }
+      return '';
+    } else {
+      return '';
+    }
+  }
+
+  void setCardInfo(cardInfo) {
+    setState(() => cardInfos = cardInfo);
   }
 
   @override
@@ -223,15 +188,20 @@ class DeckEditPageState extends State<DeckEditPage> {
                           padding: const EdgeInsets.all(5),
                           child: Row(
                             children: [
-                              for (int cardId = 1; cardId <= 16; cardId++)
-                                GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        tappedCardId = cardId;
-                                      });
-                                    },
-                                    child:
-                                        DragBoxForDeckEditor(cardId, putCard)),
+                              for (int cardId = 1; cardId <= 26; cardId++)
+                                cardInfos == null || cardId == 12
+                                    ? Container()
+                                    : GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            tappedCardId = cardId;
+                                          });
+                                        },
+                                        child: DragBoxForDeckEditor(
+                                            cardId,
+                                            putCard,
+                                            cardInfos[cardId.toString()],
+                                            removedCardId)),
                             ],
                           ))),
                 ])),
@@ -245,14 +215,18 @@ class DeckEditPageState extends State<DeckEditPage> {
                       Padding(
                         padding:
                             const EdgeInsets.fromLTRB(0.0, 20.0, 30.0, 0.0),
-                        child: DragTargetWidget('deck',
-                            '${imagePath}unit/bg-2.jpg', gameObject, cardInfos),
+                        child: DragTargetWidget(
+                          'deck',
+                          '${imagePath}unit/bg-2.jpg',
+                          gameObject,
+                          cardInfos,
+                          tapCard,
+                          removedPosition,
+                        ),
                       ),
                     ])),
           ]),
-          gameObject != null
-              ? DeckCardInfo(gameObject, getCardInfo(tappedCardId))
-              : Container(),
+          DeckCardInfo(gameObject, getCardInfo(tappedCardId)),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         floatingActionButton: DeckButtons(gameProgressStatus,

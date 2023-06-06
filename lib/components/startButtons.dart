@@ -220,6 +220,8 @@ class StartButtonsState extends State<StartButtons> {
           // ゲーム状況(Current Status)取得
           dynamic ret =
               await promiseToFuture(getCurrentStatus(walletUser.addr));
+          var objStr = jsonToString(ret);
+          var objJs = jsonDecode(objStr);
           if (ret == null) {
             widget.callback(
                 'other-game-info', GameObject.getOtherGameInfo(), null, null);
@@ -229,20 +231,22 @@ class StartButtonsState extends State<StartButtons> {
               // debugPrint(
               //     'matching.. ${(timer.tick * 2).toString()}s');
             }
-          } else if (ret.game_started == true || ret.game_started == false) {
-            if (ret.game_started == false && gameStarted == false) {
+          } else if (objJs['game_started'] == true ||
+              objJs['game_started'] == false) {
+            if (objJs['game_started'] == false && gameStarted == false) {
               dynamic data = await promiseToFuture(
                   getMariganCards(walletUser.addr, int.parse(player.playerId)));
-              widget.callback('matching-success', setGameInfo(ret),
+              widget.callback('matching-success', setGameInfo(objJs),
                   setMariganCards(data), null);
               if (dcontext1 != null) {
                 Navigator.pop(dcontext1!);
               }
               battleStartAnimation();
-            } else if (ret.game_started == true) {
+            } else if (objJs['game_started'] == true) {
               widget.callback(
-                  'started-game-info', setGameInfo(ret), null, null);
+                  'started-game-info', setGameInfo(objJs), null, null);
             }
+            print('Set gameStarted = true.');
             gameStarted = true;
           }
           // 残高を取得
@@ -518,35 +522,34 @@ class StartButtonsState extends State<StartButtons> {
     }
   }
 
-  GameObject setGameInfo(obj) {
-    var objStr = jsonToString(obj);
-    var objJs = jsonDecode(objStr);
+  GameObject setGameInfo(objJs) {
+    print('setGameInfo');
     return GameObject(
-      int.parse(obj.turn),
-      obj.is_first,
-      obj.is_first_turn,
-      obj.matched_time,
-      obj.game_started,
-      obj.last_time_turnend,
-      obj.enemy_attacking_cards,
+      int.parse(objJs['turn']),
+      objJs['is_first'],
+      objJs['is_first_turn'],
+      objJs['matched_time'],
+      objJs['game_started'],
+      objJs['last_time_turnend'],
+      objJs['enemy_attacking_cards'],
       int.parse(player.playerId),
-      int.parse(obj.your_cp),
-      obj.your_field_unit,
-      obj.your_field_unit_action,
-      obj.your_field_unit_bp_amount_of_change,
+      int.parse(objJs['your_cp']),
+      objJs['your_field_unit'],
+      objJs['your_field_unit_action'],
+      objJs['your_field_unit_bp_amount_of_change'],
       objJs['your_hand'],
-      int.parse(obj.your_life),
-      obj.your_remain_deck,
-      obj.your_trigger_cards,
-      int.parse(obj.opponent),
-      int.parse(obj.opponent_cp),
-      obj.opponent_field_unit,
-      obj.opponent_field_unit_action,
-      obj.opponent_field_unit_bp_amount_of_change,
-      int.parse(obj.opponent_hand),
-      int.parse(obj.opponent_life),
-      int.parse(obj.opponent_remain_deck),
-      int.parse(obj.opponent_trigger_cards),
+      int.parse(objJs['your_life']),
+      objJs['your_remain_deck'],
+      objJs['your_trigger_cards'],
+      int.parse(objJs['opponent']),
+      int.parse(objJs['opponent_cp']),
+      objJs['opponent_field_unit'],
+      objJs['opponent_field_unit_action'],
+      objJs['opponent_field_unit_bp_amount_of_change'],
+      int.parse(objJs['opponent_hand']),
+      int.parse(objJs['opponent_life']),
+      int.parse(objJs['opponent_remain_deck']),
+      int.parse(objJs['opponent_trigger_cards']),
     );
   }
 

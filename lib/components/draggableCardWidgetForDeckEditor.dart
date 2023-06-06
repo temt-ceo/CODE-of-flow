@@ -7,8 +7,11 @@ typedef void StringCallback(int? data);
 class DragBoxForDeckEditor extends StatefulWidget {
   final int cardId;
   final StringCallback putCardCallback;
+  final dynamic cardInfo;
+  int? pushBackedCardId;
 
-  const DragBoxForDeckEditor(this.cardId, this.putCardCallback);
+  DragBoxForDeckEditor(
+      this.cardId, this.putCardCallback, this.cardInfo, this.pushBackedCardId);
 
   @override
   DragBoxForDeckEditorState createState() => DragBoxForDeckEditorState();
@@ -21,65 +24,126 @@ class DragBoxForDeckEditorState extends State<DragBoxForDeckEditor> {
 
   @override
   Widget build(BuildContext context) {
+    // デッキから返却されたカードを+1
+    if (widget.pushBackedCardId != null &&
+        widget.pushBackedCardId == widget.cardId &&
+        maxCount < 3) {
+      setState(() => maxCount = maxCount + 1);
+      setState(() => widget.pushBackedCardId = null);
+    }
     var imageUrl = widget.cardId > 16
         ? '${imagePath}trigger/card_${widget.cardId.toString()}.jpeg'
         : '${imagePath}unit/card_${widget.cardId.toString()}.jpeg';
     return Draggable(
-      // delay: const Duration(milliseconds: 100),
-      maxSimultaneousDrags: 1,
-      data: widget.cardId.toString(),
-      childWhenDragging: Container(
-        width: 115,
-      ),
-      feedback: Container(
-        margin: const EdgeInsets.only(left: 15.0),
-        width: 100.0,
-        height: 150.0,
-        decoration: BoxDecoration(
-          image:
-              DecorationImage(image: AssetImage(imageUrl), fit: BoxFit.contain),
+        // delay: const Duration(milliseconds: 100),
+        maxSimultaneousDrags: 1,
+        data: widget.cardId.toString(),
+        childWhenDragging: Container(
+          width: 115,
         ),
-        child: Center(
-          child: Text(widget.cardId.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                decoration: TextDecoration.none,
-                fontSize: 18.0,
-              )),
-        ),
-      ),
-      onDragCompleted: () {
-        setState(() {
-          maxCount = maxCount - 1;
-          isDroped = true;
-        });
-        widget.putCardCallback(widget.cardId);
-      },
-      onDraggableCanceled: (velocity, offset) {
-        setState(() {
-          isDroped = false;
-        });
-      },
-      child: isDroped && maxCount == 0
-          ? Container()
-          : Padding(
-              padding: const EdgeInsets.only(left: 15.0),
-              child: Container(
-                width: 100.0,
-                height: 150.0,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage(imageUrl), fit: BoxFit.contain),
-                ),
-                child: Center(
-                    child: Text(widget.cardId.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                          fontSize: 20.0,
-                        ))),
-              ),
+        feedback: Container(
+            margin: const EdgeInsets.only(left: 15.0),
+            width: 100.0,
+            height: 150.0,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(imageUrl), fit: BoxFit.contain),
             ),
-    );
+            child: Stack(children: <Widget>[
+              Positioned(
+                  left: 0.0,
+                  top: 0.0,
+                  child: SizedBox(
+                      width: 20.0,
+                      height: 26.0,
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(2.0),
+                          child: Container(
+                              alignment: Alignment.topCenter,
+                              color: widget.cardInfo?['type'] == '0'
+                                  ? Colors.red
+                                  : (widget.cardInfo?['type'] == '1'
+                                      ? const Color.fromARGB(255, 170, 153, 1)
+                                      : Colors.grey),
+                              child: Text(
+                                  widget.cardInfo == null
+                                      ? ''
+                                      : widget.cardInfo?['cost'],
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    decoration: TextDecoration.none,
+                                    fontSize: 20.0,
+                                  )))))),
+            ])),
+        onDragCompleted: () {
+          setState(() {
+            maxCount = maxCount - 1;
+            isDroped = true;
+          });
+          widget.putCardCallback(widget.cardId);
+        },
+        onDraggableCanceled: (velocity, offset) {
+          setState(() {
+            isDroped = false;
+          });
+        },
+        child: isDroped && maxCount == 0
+            ? Container()
+            : Padding(
+                padding: const EdgeInsets.only(left: 15.0),
+                child: Container(
+                  width: 100.0,
+                  height: 150.0,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage(imageUrl), fit: BoxFit.contain),
+                  ),
+                  child: Stack(children: <Widget>[
+                    Positioned(
+                        left: 0.0,
+                        top: 0.0,
+                        child: SizedBox(
+                            width: 20.0,
+                            height: 26.0,
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(2.0),
+                                child: Container(
+                                    alignment: Alignment.topCenter,
+                                    color: widget.cardInfo?['type'] == '0'
+                                        ? Colors.red
+                                        : (widget.cardInfo?['type'] == '1'
+                                            ? const Color.fromARGB(
+                                                255, 170, 153, 1)
+                                            : Colors.grey),
+                                    child: Text(
+                                        widget.cardInfo == null
+                                            ? ''
+                                            : widget.cardInfo?['cost'],
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          decoration: TextDecoration.none,
+                                          fontSize: 20.0,
+                                        )))))),
+                    Positioned(
+                        right: 0.0,
+                        bottom: 0.0,
+                        child: SizedBox(
+                            width: 26.0,
+                            height: 26.0,
+                            child: ClipRRect(
+                                borderRadius: BorderRadius.circular(2.0),
+                                child: Container(
+                                    alignment: Alignment.bottomRight,
+                                    color: Colors.white,
+                                    child: Text('x${maxCount.toString()}',
+                                        style: const TextStyle(
+                                          color:
+                                              Color.fromARGB(255, 52, 51, 51),
+                                          decoration: TextDecoration.none,
+                                          fontSize: 20.0,
+                                        )))))),
+                  ]),
+                ),
+              ));
   }
 }

@@ -66,11 +66,11 @@ class APIService {
         }
       }
       ''';
-    final Stream<GraphQLResponse<String>> operation = Amplify.API.subscribe(
-      GraphQLRequest<String>(
-        document: graphQLDocument,
-        // variables: <String, String>{'id': postId},
-      ),
+    final subscriptionRequest =
+        ModelSubscriptions.onCreate(GameServerProcess.classType);
+    final Stream<GraphQLResponse<GameServerProcess>> operation =
+        Amplify.API.subscribe(
+      subscriptionRequest,
       onEstablished: () => print('Subscription established'),
     );
 

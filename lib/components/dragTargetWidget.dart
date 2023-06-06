@@ -2,19 +2,23 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_bloc.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
-import 'package:CodeOfFlow/components/startButtons.dart';
+import 'package:CodeOfFlow/components/deckButtons.dart';
 import 'package:CodeOfFlow/components/droppedCardWidget.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
+typedef void StringCallback(String val, int cardId, int? position);
 
 class DragTargetWidget extends StatefulWidget {
   final String label;
   final String imageUrl;
   final GameObject? info;
   final dynamic cardInfos;
+  final StringCallback tapCardCallback;
+  int? actedCardPosition;
 
-  const DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos);
+  DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos,
+      this.tapCardCallback, this.actedCardPosition);
 
   @override
   DragTargetState createState() => DragTargetState();
@@ -24,11 +28,13 @@ class DragTargetState extends State<DragTargetWidget> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   List<Widget> dropedList = [];
   List<Widget> dropedListEnemy = [];
+  List<Widget> dropedListSecond = [];
   final DropAllowBloc _dropBloc = DropAllowBloc();
 
   @override
   Widget build(BuildContext context) {
-    print(widget.info);
+    // print(
+    //     '除去orアタック(remove or attack card position): ${widget.actedCardPosition}');
     if (widget.info != null && widget.label == 'unit') {
       var objStr = jsonToString(widget.info!.yourFieldUnit);
       var objJs = jsonDecode(objStr);
@@ -43,8 +49,10 @@ class DragTargetState extends State<DragTargetWidget> {
                   : 108.0 * dropedList.length + 20,
               imageUrl,
               widget.label,
-              cardIdStr,
-              false));
+              widget.cardInfos[cardIdStr],
+              false,
+              widget.tapCardCallback,
+              dropedList.length));
         }
       }
       var objStr2 = jsonToString(widget.info!.opponentFieldUnit);
@@ -60,8 +68,10 @@ class DragTargetState extends State<DragTargetWidget> {
                   : 108.0 * dropedListEnemy.length + 20,
               imageUrl,
               widget.label,
-              cardIdStr,
-              true));
+              widget.cardInfos[cardIdStr],
+              true,
+              widget.tapCardCallback,
+              dropedList.length));
         }
       }
     }
@@ -79,9 +89,19 @@ class DragTargetState extends State<DragTargetWidget> {
                   : 108.0 * dropedList.length + 20,
               imageUrl,
               widget.label,
-              cardIdStr,
-              false));
+              widget.cardInfos[cardIdStr],
+              false,
+              widget.tapCardCallback,
+              dropedList.length));
         }
+      }
+    }
+
+    if (widget.label == 'deck') {
+      // Remove a deck card.
+      if (widget.actedCardPosition != null) {
+        dropedList.removeAt(widget.actedCardPosition!);
+        setState(() => widget.actedCardPosition = null);
       }
     }
 
@@ -90,16 +110,29 @@ class DragTargetState extends State<DragTargetWidget> {
       var imageUrl = cardId > 16
           ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
           : '${imagePath}unit/card_${cardId.toString()}.jpeg';
-      dropedList.add(DroppedCardWidget(
-          widget.label == 'deck'
-              ? 90.0 * dropedList.length - 1 + 10
-              : (widget.label == 'unit'
-                  ? 135.0 * dropedList.length - 1 + 20
-                  : 108.0 * dropedList.length - 1 + 20),
-          imageUrl,
-          widget.label,
-          cardIdStr,
-          false));
+      if (widget.label == 'deck' && dropedList.length >= 15) {
+        dropedListSecond.add(DroppedCardWidget(
+            90.0 * dropedListSecond.length - 1 + 10,
+            imageUrl,
+            widget.label,
+            widget.cardInfos[cardIdStr],
+            true,
+            widget.tapCardCallback,
+            dropedList.length + dropedListSecond.length));
+      } else {
+        dropedList.add(DroppedCardWidget(
+            widget.label == 'deck'
+                ? 90.0 * dropedList.length - 1 + 10
+                : (widget.label == 'unit'
+                    ? 135.0 * dropedList.length - 1 + 20
+                    : 108.0 * dropedList.length - 1 + 20),
+            imageUrl,
+            widget.label,
+            widget.cardInfos[cardIdStr],
+            false,
+            widget.tapCardCallback,
+            dropedList.length));
+      }
       _dropBloc.counterEventSink.add(DropLeaveEvent());
     }, onWillAccept: (String? cardIdStr) {
       if (widget.label == 'deck') {
@@ -175,9 +208,14 @@ class DragTargetState extends State<DragTargetWidget> {
                       Stack(children: dropedListEnemy),
                       Stack(children: dropedList),
                     ])
-                  : Stack(
-                      children: dropedList,
-                    ),
+                  : (widget.label == 'deck'
+                      ? Stack(children: <Widget>[
+                          Stack(children: dropedList),
+                          Stack(children: dropedListSecond),
+                        ])
+                      : Stack(
+                          children: dropedList,
+                        )),
             );
           });
     });

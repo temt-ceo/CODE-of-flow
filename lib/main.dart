@@ -39,9 +39,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
-    print(11111);
 
-    print(Uri.base);
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(

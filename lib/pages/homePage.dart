@@ -31,6 +31,7 @@ class HomePageState extends State<HomePage> {
   int? tappedCardId;
   dynamic cardInfos;
   BuildContext? loadingContext;
+  int? actedCardPosition;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -74,6 +75,18 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void tapCard(message, cardId, index) {
+    if (message == 'tapped') {
+      setState(() {
+        tappedCardId = cardId;
+      });
+    } else if (message == 'attack') {
+      setState(() {
+        actedCardPosition = index;
+      });
+    }
+  }
+
   void putCard(cardId) async {
     // Unit case
     if (cardId > 16) {
@@ -97,7 +110,6 @@ class HomePageState extends State<HomePage> {
         unitPositions[i - 1] = objJs[i.toString()];
       }
     }
-
     var objStr2 = jsonToString(gameObject!.yourTriggerCards);
     var objJs2 = jsonDecode(objStr2);
     List<int?> triggerPositions = [null, null, null, null];
@@ -288,12 +300,19 @@ class HomePageState extends State<HomePage> {
                             'trigger',
                             '${imagePath}trigger/trigger.png',
                             gameObject,
-                            cardInfos),
+                            cardInfos,
+                            tapCard,
+                            actedCardPosition),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(30.0),
-                        child: DragTargetWidget('unit',
-                            '${imagePath}unit/bg-2.jpg', gameObject, cardInfos),
+                        child: DragTargetWidget(
+                            'unit',
+                            '${imagePath}unit/bg-2.jpg',
+                            gameObject,
+                            cardInfos,
+                            tapCard,
+                            actedCardPosition),
                       ),
                     ])),
             Visibility(
@@ -358,7 +377,7 @@ class HomePageState extends State<HomePage> {
               setDataAndMarigan(data, null);
               break;
             case 'other-game-info':
-              setDataAndMarigan(data, null);
+              // setDataAndMarigan(data, null);
               break;
             case 'card-info':
               setCardInfo(cardInfo);

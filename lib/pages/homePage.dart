@@ -1,19 +1,24 @@
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
 import 'package:CodeOfFlow/components/startButtons.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
+import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
-import 'package:CodeOfFlow/models/put_card_model.dart';
+import 'package:CodeOfFlow/models/putCardModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
+typedef void StringCallback(Locale val);
 
 class HomePage extends StatefulWidget {
-  HomePage({super.key, required this.title});
   final String title;
+  final StringCallback localeCallback;
+  HomePage({super.key, required this.title, required this.localeCallback});
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -32,6 +37,7 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
+  bool activeLocale = ui.window.locale.toString() == 'ja' ? false : true;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -67,7 +73,8 @@ class HomePageState extends State<HomePage> {
   String getCardInfo(int? cardId) {
     if (cardInfos != null) {
       if (cardInfos[cardId.toString()] != null) {
-        return cardInfos[cardId.toString()]['skill']['description'];
+        String ret = L10n.of(context)!.cardDescription;
+        return ret.split('|')[cardId! - 1];
       }
       return '';
     } else {
@@ -202,6 +209,14 @@ class HomePageState extends State<HomePage> {
     await apiService.subscribeBCGGameServerProcess();
   }
 
+  void _changeSwitch(bool changed) {
+    setState(() {
+      activeLocale = changed;
+    });
+    Locale _locale = changed == true ? Locale('en') : Locale('ja');
+    widget.localeCallback(_locale);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,6 +225,28 @@ class HomePageState extends State<HomePage> {
           backgroundColor: Colors.transparent,
           title: Text(widget.title,
               style: const TextStyle(color: Color(0xFFFFFFFF))),
+          flexibleSpace: Stack(children: <Widget>[
+            Positioned(
+                top: 4.0,
+                right: 300.0,
+                child: Switch(
+                  value: activeLocale,
+                  activeColor: Colors.black,
+                  activeTrackColor: Colors.blueGrey,
+                  inactiveThumbColor: Colors.black,
+                  inactiveTrackColor: Colors.blueGrey,
+                  onChanged: _changeSwitch,
+                )),
+            Positioned(
+              right: 270.0,
+              top: 10.0,
+              child: Text(activeLocale == true ? 'EN' : 'JP',
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 20.0,
+                  )),
+            )
+          ]),
         ),
         body: Stack(children: <Widget>[
           Stack(fit: StackFit.expand, children: <Widget>[
@@ -242,7 +279,8 @@ class HomePageState extends State<HomePage> {
                                         tappedCardId = cardId;
                                       });
                                     },
-                                    child: DragBox(cardId, putCard)),
+                                    child: DragBox(cardId, putCard,
+                                        cardInfos[cardId.toString()])),
                               const SizedBox(width: 5),
                             ],
                           ),
@@ -259,35 +297,55 @@ class HomePageState extends State<HomePage> {
                                       tappedCardId = 16;
                                     });
                                   },
-                                  child: DragBox(16, putCard)),
+                                  child: DragBox(
+                                      16,
+                                      putCard,
+                                      cardInfos != null
+                                          ? cardInfos['16']
+                                          : null)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       tappedCardId = 17;
                                     });
                                   },
-                                  child: DragBox(17, putCard)),
+                                  child: DragBox(
+                                      17,
+                                      putCard,
+                                      cardInfos != null
+                                          ? cardInfos['17']
+                                          : null)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       tappedCardId = 1;
                                     });
                                   },
-                                  child: DragBox(1, putCard)),
+                                  child: DragBox(
+                                      1,
+                                      putCard,
+                                      cardInfos != null
+                                          ? cardInfos['1']
+                                          : null)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
                                       tappedCardId = 3;
                                     });
                                   },
-                                  child: DragBox(3, putCard)),
+                                  child: DragBox(
+                                      3,
+                                      putCard,
+                                      cardInfos != null
+                                          ? cardInfos['3']
+                                          : null)),
                               const SizedBox(width: 5),
                             ],
                           ),
                         ),
                 ])),
             Positioned(
-                left: 10.0,
+                left: 30.0,
                 top: 30.0,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
@@ -305,7 +363,8 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(30.0),
+                        padding:
+                            const EdgeInsets.fromLTRB(30.0, 20.0, 130.0, 85.0),
                         child: DragTargetWidget(
                             'unit',
                             '${imagePath}unit/bg-2.jpg',
@@ -361,7 +420,7 @@ class HomePageState extends State<HomePage> {
           ]),
           gameObject != null
               ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
-              : Container(),
+              : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         floatingActionButton: StartButtons(gameProgressStatus,

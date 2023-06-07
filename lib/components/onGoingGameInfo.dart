@@ -48,11 +48,29 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   @override
   void initState() {
     super.initState();
-    // position = widget.initPos;
   }
 
   @override
   Widget build(BuildContext context) {
+    DateTime lastTurnEndTime;
+    double percentIndicatorValue = 100;
+
+    if (widget.info!.lastTimeTurnend != null) {
+      lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
+          double.parse(widget.info!.lastTimeTurnend!).toInt() * 1000);
+      final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 60));
+      final now = DateTime.now();
+
+      if (turnEndTime.difference(now).inSeconds < 0) {
+        setState(() {
+          percentIndicatorValue = 0.0;
+        });
+      } else {
+        setState(() {
+          percentIndicatorValue = turnEndTime.difference(now).inSeconds / 60;
+        });
+      }
+    }
     return Stack(children: <Widget>[
       const Positioned(
           left: 20.0,
@@ -262,7 +280,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 decoration: TextDecoration.none,
                 fontSize: 22.0,
               ))),
-      Positioned(
+      const Positioned(
           left: 1320.0,
           top: 500.0,
           child: Text('Dead -',
@@ -291,12 +309,12 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             child: CircularPercentIndicator(
               radius: 45.0,
               lineWidth: 10.0,
-              percent: 0.5,
+              percent: percentIndicatorValue,
               backgroundWidth: 0.0,
-              center: const Column(children: <Widget>[
-                SizedBox(height: 30.0),
-                Text("50%",
-                    style: TextStyle(
+              center: Column(children: <Widget>[
+                const SizedBox(height: 30.0),
+                Text('${percentIndicatorValue.toString()} s',
+                    style: const TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: 22.0,
@@ -315,12 +333,12 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             child: CircularPercentIndicator(
               radius: 60.0,
               lineWidth: 10.0,
-              percent: 0.5,
+              percent: percentIndicatorValue,
               backgroundWidth: 0.0,
               center: Column(children: <Widget>[
                 const SizedBox(height: 10.0),
-                const Text("50%",
-                    style: TextStyle(
+                Text('${percentIndicatorValue.toString()} s',
+                    style: const TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: 22.0,

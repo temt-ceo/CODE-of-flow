@@ -1,4 +1,6 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 // import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
@@ -32,8 +34,19 @@ Future<void> _configureAmplify() async {
   }
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
+  @override
+  State<App> createState() => AppState();
+}
+
+class AppState extends State<App> {
+  Locale _locale = ui.window.locale;
+  void setLocale(Locale value) {
+    setState(() {
+      _locale = value;
+    });
+  }
 
   // This widget is the root of your application.
   @override
@@ -41,11 +54,14 @@ class App extends StatelessWidget {
     String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
 
     return MaterialApp(
-      title: 'Flutter Demo',
+      locale: _locale,
+      title: 'Code Of Flow',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurpleAccent),
         useMaterial3: true,
       ),
+      supportedLocales: L10n.supportedLocales,
+      localizationsDelegates: L10n.localizationsDelegates,
       routes: {
         '/': (context) => Container(
               decoration: BoxDecoration(
@@ -53,7 +69,8 @@ class App extends StatelessWidget {
                       image: AssetImage('${imagePath}unit/bg-2.jpg'),
                       fit: BoxFit.cover)),
               child: HomePage(
-                  title: '\\ Welcome to the Virtual Arcade! / | CODE-Of-Flow'),
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale),
             ),
         '/deck_edit': (context) => Container(
               decoration: BoxDecoration(
@@ -61,7 +78,8 @@ class App extends StatelessWidget {
                       image: AssetImage('${imagePath}unit/bg-2.jpg'),
                       fit: BoxFit.cover)),
               child: DeckEditPage(
-                  title: '\\ Welcome to the Virtual Arcade! / | CODE-Of-Flow'),
+                  title: L10n.of(context)!.deckEditPageTitle,
+                  localeCallback: setLocale),
             ),
       },
     );

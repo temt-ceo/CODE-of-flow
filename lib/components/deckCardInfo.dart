@@ -9,8 +9,9 @@ const envFlavor = String.fromEnvironment('flavor');
 class DeckCardInfo extends StatefulWidget {
   final GameObject? info;
   final String cardText;
+  final String label;
 
-  const DeckCardInfo(this.info, this.cardText);
+  const DeckCardInfo(this.info, this.cardText, this.label);
 
   @override
   DeckCardInfoState createState() => DeckCardInfoState();
@@ -56,7 +57,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
     return Stack(children: <Widget>[
       Positioned(
           left: 30.0,
-          top: 490.0,
+          top: widget.label == 'home' ? 485.0 : 450.0,
           width: 270.0,
           child: Text(widget.cardText,
               style: const TextStyle(

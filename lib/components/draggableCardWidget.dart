@@ -7,8 +7,9 @@ typedef void StringCallback(int? data);
 class DragBox extends StatefulWidget {
   final int cardId;
   final StringCallback putCardCallback;
+  final dynamic cardInfo;
 
-  const DragBox(this.cardId, this.putCardCallback);
+  const DragBox(this.cardId, this.putCardCallback, this.cardInfo);
 
   @override
   DragBoxState createState() => DragBoxState();
@@ -69,13 +70,55 @@ class DragBoxState extends State<DragBox> {
                   image: DecorationImage(
                       image: AssetImage(imageUrl), fit: BoxFit.contain),
                 ),
-                child: Center(
-                    child: Text(widget.cardId.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                          fontSize: 20.0,
-                        ))),
+                child: Stack(children: <Widget>[
+                  Positioned(
+                      left: 0.0,
+                      top: 0.0,
+                      child: SizedBox(
+                          width: 20.0,
+                          height: 26.0,
+                          child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2.0),
+                              child: Container(
+                                  alignment: Alignment.topCenter,
+                                  color: widget.cardInfo?['type'] == '0'
+                                      ? Colors.red
+                                      : (widget.cardInfo?['type'] == '1'
+                                          ? const Color.fromARGB(
+                                              255, 170, 153, 1)
+                                          : Colors.grey),
+                                  child: Text(
+                                      widget.cardInfo == null
+                                          ? ''
+                                          : widget.cardInfo?['cost'],
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        decoration: TextDecoration.none,
+                                        fontSize: 20.0,
+                                      )))))),
+                  widget.cardInfo?['bp'] == '0'
+                      ? Container()
+                      : Positioned(
+                          right: 0.0,
+                          bottom: 0.0,
+                          child: SizedBox(
+                              width: 60.0,
+                              height: 19.0,
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(2.0),
+                                  child: Container(
+                                      alignment: Alignment.centerRight,
+                                      color: Color.fromARGB(255, 52, 51, 51),
+                                      child: Text(
+                                          widget.cardInfo == null
+                                              ? ''
+                                              : widget.cardInfo?['bp'],
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            decoration: TextDecoration.none,
+                                            fontSize: 16.0,
+                                          )))))),
+                ]),
               ),
             ),
     );

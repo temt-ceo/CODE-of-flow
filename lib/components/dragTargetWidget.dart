@@ -52,7 +52,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
-              dropedList.length));
+              dropedList.length,
+              false));
         }
       }
       var objStr2 = jsonToString(widget.info!.opponentFieldUnit);
@@ -71,7 +72,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               true,
               widget.tapCardCallback,
-              dropedList.length));
+              dropedList.length,
+              false));
         }
       }
     }
@@ -92,7 +94,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
-              dropedList.length));
+              dropedList.length,
+              false));
         }
       }
     }
@@ -118,7 +121,8 @@ class DragTargetState extends State<DragTargetWidget> {
             widget.cardInfos[cardIdStr],
             true,
             widget.tapCardCallback,
-            dropedList.length + dropedListSecond.length));
+            dropedList.length + dropedListSecond.length,
+            false));
       } else {
         dropedList.add(DroppedCardWidget(
             widget.label == 'deck'
@@ -131,15 +135,25 @@ class DragTargetState extends State<DragTargetWidget> {
             widget.cardInfos[cardIdStr],
             false,
             widget.tapCardCallback,
-            dropedList.length));
+            dropedList.length,
+            widget.label == 'unit' && widget.info != null
+                ? (widget.info!.isFirst == widget.info!.isFirstTurn
+                    ? true
+                    : false)
+                : false));
       }
       _dropBloc.counterEventSink.add(DropLeaveEvent());
     }, onWillAccept: (String? cardIdStr) {
       if (widget.label == 'deck') {
+        if (dropedListSecond.length >= 15) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
         _dropBloc.counterEventSink.add(DropAllowedEvent());
         return true;
       } else {
-        if (widget.info!.isFirst != widget.info!.isFirstTurn) {
+        if (widget.info != null &&
+            widget.info!.isFirst != widget.info!.isFirstTurn) {
           _dropBloc.counterEventSink.add(DropDeniedEvent());
           return false;
         }
@@ -162,6 +176,10 @@ class DragTargetState extends State<DragTargetWidget> {
               return false;
             }
           }
+          if (dropedList.length >= 5) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
+          }
           _dropBloc.counterEventSink.add(DropAllowedEvent());
           return true;
         } else if (widget.label == 'trigger' &&
@@ -169,6 +187,10 @@ class DragTargetState extends State<DragTargetWidget> {
           _dropBloc.counterEventSink.add(DropAllowedEvent());
           return true;
         } else {
+          if (dropedList.length >= 4) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
+          }
           _dropBloc.counterEventSink.add(DropDeniedEvent());
           return false;
         }

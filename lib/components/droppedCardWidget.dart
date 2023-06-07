@@ -12,9 +12,10 @@ class DroppedCardWidget extends StatefulWidget {
   final bool isSecondRow;
   final StringCallback tapCardCallback;
   final int index;
+  final bool canAttack;
 
   const DroppedCardWidget(this.left, this.imageUrl, this.label, this.cardInfo,
-      this.isSecondRow, this.tapCardCallback, this.index);
+      this.isSecondRow, this.tapCardCallback, this.index, this.canAttack);
 
   @override
   DroppedCardState createState() => DroppedCardState();
@@ -101,31 +102,74 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                                   fontSize: 16.0,
                                                 )))))),
                       ]))
-                  : Image.asset(
-                      widget.imageUrl,
+                  : Container(
                       width: widget.label == 'unit' ? 110 : 88,
-                    )),
+                      height: widget.label == 'unit' ? 155 : 125,
+                      child: widget.label == 'unit'
+                          ? Stack(children: <Widget>[
+                              Container(
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        alignment: Alignment.topLeft,
+                                        image: AssetImage(widget.imageUrl),
+                                        fit: BoxFit.cover)),
+                              )
+                            ])
+                          : Center(
+                              child: Padding(
+                              padding: const EdgeInsets.only(bottom: 19.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        alignment: FractionalOffset.topCenter,
+                                        image: AssetImage(widget.imageUrl),
+                                        fit: BoxFit.fitWidth)),
+                              ),
+                            )))),
           isTapped
-              ? Positioned(
-                  left: 16.0,
-                  top: 30.0,
-                  child: FloatingActionButton(
-                      backgroundColor: Colors.transparent,
-                      onPressed: () {
-                        widget.tapCardCallback(
-                            'remove',
-                            int.parse(widget.cardInfo['card_id']),
-                            widget.index);
-                      },
-                      tooltip: 'Remove',
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(40.0),
-                        child: Image.asset(
-                          '${imagePath}button/remove.png',
-                          fit: BoxFit.cover,
-                        ),
-                      )),
-                )
+              ? (widget.label == 'deck'
+                  ? Positioned(
+                      left: 16.0,
+                      top: 30.0,
+                      child: FloatingActionButton(
+                          backgroundColor: Colors.transparent,
+                          onPressed: () {
+                            widget.tapCardCallback(
+                                'remove',
+                                int.parse(widget.cardInfo['card_id']),
+                                widget.index);
+                          },
+                          tooltip: 'Remove',
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(40.0),
+                            child: Image.asset(
+                              '${imagePath}button/remove.png',
+                              fit: BoxFit.cover,
+                            ),
+                          )),
+                    )
+                  : widget.label == 'unit' && widget.canAttack
+                      ? Positioned(
+                          left: 28.0,
+                          top: 50.0,
+                          child: FloatingActionButton(
+                              backgroundColor: Colors.transparent,
+                              onPressed: () {
+                                widget.tapCardCallback(
+                                    'attack',
+                                    int.parse(widget.cardInfo['card_id']),
+                                    widget.index);
+                              },
+                              tooltip: 'Attack',
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(40.0),
+                                child: Image.asset(
+                                  '${imagePath}button/attack.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              )),
+                        )
+                      : Container())
               : Container(),
         ]));
   }

@@ -1,19 +1,23 @@
 import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:CodeOfFlow/components/draggableCardWidgetForDeckEditor.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/components/deckButtons.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
-import 'package:CodeOfFlow/models/put_card_model.dart';
+import 'package:CodeOfFlow/models/putCardModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
+typedef void StringCallback(Locale val);
 
 class DeckEditPage extends StatefulWidget {
-  DeckEditPage({super.key, required this.title});
   final String title;
+  final StringCallback localeCallback;
+  DeckEditPage({super.key, required this.title, required this.localeCallback});
 
   @override
   State<DeckEditPage> createState() => DeckEditPageState();
@@ -33,6 +37,7 @@ class DeckEditPageState extends State<DeckEditPage> {
   BuildContext? loadingContext;
   int? removedCardId;
   int? removedPosition;
+  bool activeLocale = ui.window.locale.toString() == 'ja' ? false : true;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -143,7 +148,8 @@ class DeckEditPageState extends State<DeckEditPage> {
   String getCardInfo(int? cardId) {
     if (cardInfos != null) {
       if (cardInfos[cardId.toString()] != null) {
-        return cardInfos[cardId.toString()]['skill']['description'];
+        String ret = L10n.of(context)!.cardDescription;
+        return ret.split('|')[cardId! - 1];
       }
       return '';
     } else {
@@ -155,14 +161,48 @@ class DeckEditPageState extends State<DeckEditPage> {
     setState(() => cardInfos = cardInfo);
   }
 
+  void _changeSwitch(bool changed) {
+    setState(() {
+      activeLocale = changed;
+    });
+    Locale _locale = changed == true ? Locale('en') : Locale('ja');
+    widget.localeCallback(_locale);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.reply, color: Colors.white),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           backgroundColor: Colors.transparent,
           title: Text(widget.title,
               style: const TextStyle(color: Color(0xFFFFFFFF))),
+          flexibleSpace: Stack(children: <Widget>[
+            Positioned(
+                top: 1.0,
+                right: 82.0,
+                child: Switch(
+                  value: activeLocale,
+                  activeColor: Colors.black,
+                  activeTrackColor: Colors.blueGrey,
+                  inactiveThumbColor: Colors.black,
+                  inactiveTrackColor: Colors.blueGrey,
+                  onChanged: _changeSwitch,
+                )),
+            Positioned(
+              right: 52.0,
+              top: 7.0,
+              child: Text(activeLocale == true ? 'EN' : 'JP',
+                  style: const TextStyle(
+                    color: Color(0xFFFFFFFF),
+                    fontSize: 20.0,
+                  )),
+            )
+          ]),
         ),
         body: Stack(children: <Widget>[
           Stack(fit: StackFit.expand, children: <Widget>[
@@ -207,7 +247,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                 ])),
             Positioned(
                 left: 10.0,
-                top: 30.0,
+                top: 20.0,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -226,7 +266,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                       ),
                     ])),
           ]),
-          DeckCardInfo(gameObject, getCardInfo(tappedCardId)),
+          DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'deckEditor'),
         ]),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         floatingActionButton: DeckButtons(gameProgressStatus,

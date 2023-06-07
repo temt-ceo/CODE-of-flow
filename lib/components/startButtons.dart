@@ -7,6 +7,7 @@ import 'dart:js_util';
 import 'dart:html' as html;
 import 'package:js/js.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
@@ -203,7 +204,7 @@ class StartButtonsState extends State<StartButtons> {
                                         if (player.uuid != '') {
                                           timer.cancel();
                                           setState(() => onClickButton = false);
-                                          // Navigator.of(context).pop();
+                                          Navigator.of(context).pop();
                                           widget.callback('game-is-ready', null,
                                               null, null);
                                         }
@@ -584,9 +585,9 @@ class StartButtonsState extends State<StartButtons> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     SizedBox(
-                        width: 220.0,
+                        width: 213.0,
                         child: Text(
-                          'Balance：${balance.toString()}',
+                          '${L10n.of(context)!.balance} ${balance.toString()}',
                           style: const TextStyle(
                               color: Colors.lightGreen, fontSize: 26.0),
                         )),
@@ -629,76 +630,94 @@ class StartButtonsState extends State<StartButtons> {
                   ),
                 ])),
           )),
-      Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-        Text(
-          walletUser.addr == ''
-              ? 'connect to wallet→'
-              : (player.uuid == ''
-                  ? 'Address: ${walletUser.addr} '
-                  : 'Player: ${player.nickname} '),
-          style: const TextStyle(color: Colors.white, fontSize: 26.0),
-        ),
-        Visibility(
-            visible: walletUser.addr == '', child: const SizedBox(width: 20)),
-        Visibility(
-            visible: walletUser.addr == '',
-            child: const FloatingActionButton(
-              onPressed: authenticate,
-              tooltip: 'Authenticate',
-              child: Icon(Icons.key_outlined),
-            )),
-        Visibility(
-            visible: walletUser.addr != '' &&
-                player.uuid != '' &&
-                gameStarted == false,
-            child: SizedBox(
-                width: 150.0,
+      Padding(
+          padding: const EdgeInsets.only(top: 15.0),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+            Text(
+              walletUser.addr == ''
+                  ? 'connect to wallet→'
+                  : (player.uuid == ''
+                      ? 'Address: ${walletUser.addr} '
+                      : 'Player: ${player.nickname} '),
+              style: const TextStyle(color: Colors.white, fontSize: 26.0),
+            ),
+            Visibility(
+                visible: walletUser.addr == '',
+                child: const SizedBox(width: 10)),
+            Visibility(
+                visible: walletUser.addr == '',
+                child: const SizedBox(
+                    width: 50.0,
+                    height: 50.0,
+                    child: FloatingActionButton(
+                      onPressed: authenticate,
+                      tooltip: 'Authenticate',
+                      child: Icon(Icons.key_outlined),
+                    ))),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
+                child: SizedBox(
+                    width: 130.0,
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        onPressed: () async {
+                          if (gameStarted == true || cyberEnergy == null) {
+                          } else {
+                            if (cyberEnergy! < 30) {
+                              buyCyberEnergy();
+                            } else {
+                              //GraphQL:player_matching
+                              await gameStart();
+                              countdown();
+                            }
+                          }
+                        },
+                        tooltip: 'Play',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Image.asset(
+                            '${imagePath}button/playButton.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )))),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
+                child: const SizedBox(width: 8)),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
                 child: FloatingActionButton(
                     backgroundColor: Colors.transparent,
-                    onPressed: () async {
-                      if (gameStarted == true || cyberEnergy == null) {
-                      } else {
-                        if (cyberEnergy! < 30) {
-                          buyCyberEnergy();
-                        } else {
-                          //GraphQL:player_matching
-                          await gameStart();
-                          countdown();
-                        }
-                      }
+                    onPressed: () {
+                      html.window.location.href = 'deck_edit';
                     },
                     tooltip: 'Play',
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(40.0),
                       child: Image.asset(
-                        '${imagePath}button/playButton.png',
+                        '${imagePath}button/editDeck.png',
                         fit: BoxFit.cover,
                       ),
-                    )))),
-        Visibility(
-            visible: walletUser.addr != '',
-            child: FloatingActionButton(
-                backgroundColor: Colors.transparent,
-                onPressed: () {
-                  html.window.location.href = 'deck_edit';
-                },
-                tooltip: 'Play',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(40.0),
-                  child: Image.asset(
-                    '${imagePath}button/editDeck.png',
-                    fit: BoxFit.cover,
-                  ),
-                ))),
-        const SizedBox(width: 5),
-        Visibility(
-            visible: walletUser.addr != '',
-            child: FloatingActionButton(
-              onPressed: signout,
-              tooltip: 'Sign Out',
-              child: const Icon(Icons.logout),
-            )),
-      ])
+                    ))),
+            const SizedBox(width: 5),
+            Visibility(
+                visible: walletUser.addr != '',
+                child: SizedBox(
+                    width: 40.0,
+                    height: 40.0,
+                    child: FloatingActionButton(
+                      onPressed: signout,
+                      tooltip: 'Sign Out',
+                      child: const Icon(Icons.logout),
+                    ))),
+            const SizedBox(width: 50),
+          ]))
     ]);
   }
 }

@@ -428,70 +428,61 @@ class DeckButtonsState extends State<DeckButtons> {
                   ),
                 ])),
           )),
-      Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-        Visibility(
-            visible: walletUser.addr == '', child: const SizedBox(width: 20)),
-        Visibility(
-            visible: walletUser.addr == '',
-            child: const FloatingActionButton(
-              onPressed: authenticate,
-              tooltip: 'Authenticate',
-              child: Icon(Icons.key_outlined),
-            )),
-        SizedBox(
-            width: 65.0,
-            child: Visibility(
+      Padding(
+          padding: const EdgeInsets.only(top: 15.0),
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
+            Visibility(
+                visible: walletUser.addr == '',
+                child: const SizedBox(width: 20)),
+            Visibility(
+                visible: walletUser.addr == '',
+                child: const FloatingActionButton(
+                  onPressed: authenticate,
+                  tooltip: 'Authenticate',
+                  child: Icon(Icons.key_outlined),
+                )),
+            SizedBox(
+                width: 65.0,
+                child: Visibility(
+                    visible: walletUser.addr != '',
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        onPressed: () async {
+                          if (gameStarted == true || cyberEnergy == null) {
+                          } else {
+                            if (cyberEnergy! < 30) {
+                              buyCyberEnergy();
+                            } else {
+                              //GraphQL:player_matching
+                              await gameStart();
+                              countdown();
+                            }
+                          }
+                        },
+                        tooltip: 'SAVE',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Image.asset(
+                            '${imagePath}button/save.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )))),
+            Visibility(
                 visible: walletUser.addr != '',
                 child: FloatingActionButton(
                     backgroundColor: Colors.transparent,
-                    onPressed: () async {
-                      if (gameStarted == true || cyberEnergy == null) {
-                      } else {
-                        if (cyberEnergy! < 30) {
-                          buyCyberEnergy();
-                        } else {
-                          //GraphQL:player_matching
-                          await gameStart();
-                          countdown();
-                        }
-                      }
-                    },
-                    tooltip: 'SAVE',
+                    onPressed: () {},
+                    tooltip: 'Reset',
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(40.0),
                       child: Image.asset(
-                        '${imagePath}button/save.png',
+                        '${imagePath}button/reset.png',
                         fit: BoxFit.cover,
                       ),
-                    )))),
-        Visibility(
-            visible: walletUser.addr != '',
-            child: FloatingActionButton(
-                backgroundColor: Colors.transparent,
-                onPressed: () {},
-                tooltip: 'Reset',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(40.0),
-                  child: Image.asset(
-                    '${imagePath}button/reset.png',
-                    fit: BoxFit.cover,
-                  ),
-                ))),
-        const SizedBox(width: 5),
-        SizedBox(
-            width: 35.0,
-            height: 35.0,
-            child: Visibility(
-                visible: walletUser.addr != '',
-                child: FloatingActionButton(
-                  onPressed: () {
-                    html.window.location.href = '';
-                  },
-                  tooltip: 'Back',
-                  child: const Icon(Icons.reply),
-                ))),
-        const SizedBox(width: 25),
-      ])
+                    ))),
+            const SizedBox(width: 25),
+          ]))
     ]);
   }
 }

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
 // import 'package:amplify_auth_cognito/amplify_auth_cognito.dart';
 // import 'package:amplify_authenticator/amplify_authenticator.dart';
@@ -57,7 +58,10 @@ class AppState extends State<App> {
       locale: _locale,
       title: 'Code Of Flow',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurpleAccent),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
+        textTheme: GoogleFonts.robotoTextTheme(),
+        scaffoldBackgroundColor: Colors.blue,
+        iconTheme: IconThemeData(size: 15.0),
         useMaterial3: true,
       ),
       supportedLocales: L10n.supportedLocales,

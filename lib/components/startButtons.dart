@@ -5,12 +5,18 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_util';
 import 'dart:html' as html;
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
+import 'package:CodeOfFlow/components/expandableFAB.dart';
+import 'package:CodeOfFlow/components/fabActionButton.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -65,8 +71,9 @@ typedef void StringCallback(String val, GameObject? data,
 class StartButtons extends StatefulWidget {
   int gameProgressStatus;
   final StringCallback callback;
+  final bool isEnglish;
 
-  StartButtons(this.gameProgressStatus, this.callback);
+  StartButtons(this.gameProgressStatus, this.callback, this.isEnglish);
 
   @override
   StartButtonsState createState() => StartButtonsState();
@@ -104,6 +111,39 @@ class StartButtonsState extends State<StartButtons> {
   BuildContext? dcontext1;
   BuildContext? dcontext2;
   BuildContext? loadingContext;
+  BuildContext? loadingContext2;
+  BuildContext? loadingContext3;
+  bool showCarousel = false;
+  bool showCarousel2 = false;
+  int activeIndex = 0;
+  final cController = CarouselController();
+  final cardImages = [
+    'unit/card_1.jpeg',
+    'unit/card_2.jpeg',
+    'unit/card_3.jpeg',
+    'unit/card_4.jpeg',
+    'unit/card_5.jpeg',
+    'unit/card_6.jpeg',
+    'unit/card_7.jpeg',
+    'unit/card_8.jpeg',
+    'unit/card_9.jpeg',
+    'unit/card_10.jpeg',
+    'unit/card_11.jpeg',
+    'unit/card_13.jpeg',
+    'unit/card_14.jpeg',
+    'unit/card_15.jpeg',
+    'unit/card_16.jpeg',
+    'trigger/card_17.jpeg',
+    'trigger/card_18.jpeg',
+    'trigger/card_19.jpeg',
+    'trigger/card_20.jpeg',
+    'trigger/card_21.jpeg',
+    'trigger/card_22.jpeg',
+    'trigger/card_23.jpeg',
+    'trigger/card_24.jpeg',
+    'trigger/card_25.jpeg',
+    'trigger/card_26.jpeg',
+  ];
 
   late StreamController<bool> _wait;
 
@@ -113,7 +153,7 @@ class StartButtonsState extends State<StartButtons> {
     super.initState();
     _wait = StreamController<bool>();
     // setInterval by every 2 second
-    Timer.periodic(const Duration(seconds: 2), (timer) async {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
       timerObj = timer;
       if (walletUser.addr == '') {
         print('Not Login.');
@@ -137,7 +177,8 @@ class StartButtonsState extends State<StartButtons> {
                 ),
                 backgroundColor: const Color.fromARGB(195, 54, 219, 244),
                 barrierColor: Colors.transparent,
-                builder: (context) {
+                builder: (buildContext) {
+                  loadingContext2 = buildContext;
                   return SizedBox(
                       child: Padding(
                           padding:
@@ -195,7 +236,9 @@ class StartButtonsState extends State<StartButtons> {
                                       createPlayer(nameController.text);
                                       Future.delayed(
                                           const Duration(seconds: 4000), () {
-                                        Navigator.of(context).pop();
+                                        if (loadingContext2 != null) {
+                                          Navigator.pop(loadingContext2!);
+                                        }
                                       });
                                       // setInterval by every 2 second
                                       Timer.periodic(const Duration(seconds: 2),
@@ -204,7 +247,6 @@ class StartButtonsState extends State<StartButtons> {
                                         if (player.uuid != '') {
                                           timer.cancel();
                                           setState(() => onClickButton = false);
-                                          Navigator.of(context).pop();
                                           widget.callback('game-is-ready', null,
                                               null, null);
                                         }
@@ -262,10 +304,12 @@ class StartButtonsState extends State<StartButtons> {
 
   void getCardInfos() async {
     // カード情報取得
-    dynamic cardInfo = await promiseToFuture(getCardInfo());
-    var objStr = jsonToString(cardInfo);
-    var objJs = jsonDecode(objStr);
-    widget.callback('card-info', null, null, objJs);
+    try {
+      dynamic cardInfo = await promiseToFuture(getCardInfo());
+      var objStr = jsonToString(cardInfo);
+      var objJs = jsonDecode(objStr);
+      widget.callback('card-info', null, null, objJs);
+    } catch (e) {}
   }
 
   void getBalances() async {
@@ -472,7 +516,8 @@ class StartButtonsState extends State<StartButtons> {
           ),
           backgroundColor: Color.fromARGB(205, 248, 129, 2),
           barrierColor: Colors.transparent,
-          builder: (context) {
+          builder: (buildContext) {
+            loadingContext3 = buildContext;
             return SizedBox(
                 child: Padding(
                     padding: const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
@@ -496,7 +541,9 @@ class StartButtonsState extends State<StartButtons> {
                           // showGameLoading();
                           buyCyberEN();
                           Future.delayed(const Duration(seconds: 3000), () {
-                            Navigator.of(context).pop();
+                            if (loadingContext3 != null) {
+                              Navigator.pop(loadingContext3!);
+                            }
                           });
                         },
                         child: const Text('Insert 1FLOW coin.'),
@@ -577,15 +624,15 @@ class StartButtonsState extends State<StartButtons> {
     subscribe(allowInterop(setupWallet));
     return Stack(children: <Widget>[
       Visibility(
-          visible: balance != null,
+          visible: balance != null && walletUser.addr != '',
           child: Positioned(
               left: 75,
-              top: 0,
+              top: 30,
               child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     SizedBox(
-                        width: 213.0,
+                        width: widget.isEnglish ? 213.0 : 172.0,
                         child: Text(
                           '${L10n.of(context)!.balance} ${balance.toString()}',
                           style: const TextStyle(
@@ -605,7 +652,7 @@ class StartButtonsState extends State<StartButtons> {
           visible: cyberEnergy != null,
           child: Positioned(
             left: 75,
-            top: 32,
+            top: 62,
             child: SizedBox(
                 width: 300.0,
                 child: Row(children: <Widget>[
@@ -631,7 +678,7 @@ class StartButtonsState extends State<StartButtons> {
                 ])),
           )),
       Padding(
-          padding: const EdgeInsets.only(top: 15.0),
+          padding: const EdgeInsets.only(top: 55.0),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Text(
@@ -716,8 +763,214 @@ class StartButtonsState extends State<StartButtons> {
                       tooltip: 'Sign Out',
                       child: const Icon(Icons.logout),
                     ))),
-            const SizedBox(width: 50),
+            const SizedBox(width: 70),
+          ])),
+      Visibility(
+          visible: walletUser.addr == '',
+          child: Stack(children: <Widget>[
+            Positioned(
+                left: 40,
+                top: 80,
+                child: CircularPercentIndicator(
+                  radius: 45.0,
+                  lineWidth: 10.0,
+                  percent: 0.0,
+                  backgroundWidth: 0.0,
+                  center: Column(children: <Widget>[
+                    const SizedBox(height: 30.0),
+                    Text('${0.0.toString()}%',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          decoration: TextDecoration.none,
+                          fontSize: 22.0,
+                        )),
+                  ]),
+                  progressColor: Color.fromARGB(255, 6, 178, 246),
+                )),
+            Positioned(
+                left: 50,
+                top: 270,
+                child: ExpandableFAB(distance: 120, children: [
+                  FABActionButton(
+                    icon: Icon(Icons.create, color: Colors.white),
+                    onPressed: () {
+                      print('person');
+                    },
+                  ),
+                  FABActionButton(
+                    icon: Icon(Icons.settings, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel2 = true;
+                      });
+                    },
+                  ),
+                  FABActionButton(
+                    icon: Icon(Icons.add, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel = true;
+                      });
+                      ;
+                    },
+                  ),
+                ])),
+            Positioned(
+              left: 168,
+              top: 198,
+              child: ExpandableFAB(
+                distance: 120,
+                children: [
+                  FABActionButton(
+                    icon: Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      print('person');
+                    },
+                  ),
+                  FABActionButton(
+                    icon: Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      print('settings');
+                    },
+                  ),
+                  FABActionButton(
+                    icon: Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      print('persaddon');
+                    },
+                  ),
+                ],
+              ),
+            ),
+            Positioned(
+                left: 240,
+                top: 80,
+                child: ExpandableFAB(distance: 120, children: [
+                  FABActionButton(
+                    icon: const Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) => const AlertDialog(
+                              title: Text('My Title'),
+                              content: Text('jdlskfldsjaldjksdfdslfksa')));
+                    },
+                  ),
+                  FABActionButton(
+                    icon: const Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      print('settings');
+                    },
+                  ),
+                  FABActionButton(
+                    icon: const Icon(Icons.person, color: Colors.white),
+                    onPressed: () {
+                      showToast('EN is successfull charged.');
+                    },
+                  ),
+                ])),
+          ])),
+      Visibility(
+          visible: walletUser.addr == '' && showCarousel == true,
+          child: Stack(children: <Widget>[
+            CarouselSlider.builder(
+              options: CarouselOptions(
+                  height: 700,
+                  // aspectRatio: 9 / 9,
+                  viewportFraction: 0.75, // 1.0:1つが全体に出る
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  enlargeCenterPage: true,
+                  scrollDirection: Axis.vertical),
+              itemCount: cardImages.length,
+              itemBuilder: (context, index, realIndex) {
+                final cardImage = imagePath + cardImages[index];
+                return buildCarouselImage(cardImage, index);
+              },
+            ),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showCarousel = false;
+                });
+              },
+              child: Text('Close'),
+            ),
+          ])),
+      Visibility(
+          visible: walletUser.addr == '' && showCarousel2 == true,
+          child: Column(children: <Widget>[
+            CarouselSlider.builder(
+              carouselController: cController,
+              options: CarouselOptions(
+                  height: 300,
+                  // aspectRatio: 9 / 9,
+                  viewportFraction: 0.4, // 1.0:1つが全体に出る
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  enlargeCenterPage: true,
+                  scrollDirection: Axis.horizontal,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      activeIndex = index;
+                    });
+                  }),
+              itemCount: cardImages.length,
+              itemBuilder: (context, index, realIndex) {
+                final cardImage = imagePath + cardImages[index];
+                return buildCarouselImage2(cardImage, index);
+              },
+            ),
+            const SizedBox(height: 32.0),
+            buildIndicator(),
+            ElevatedButton(
+              onPressed: () => cController.animateToPage(2),
+              child: Text('jump->'),
+            ),
           ]))
     ]);
+  }
+
+  Widget buildCarouselImage(String cardImage, int index) => Container(
+        width: MediaQuery.of(context).size.width,
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        color: Colors.grey,
+        child: Row(children: <Widget>[
+          Image.asset(
+            cardImage,
+            fit: BoxFit.cover,
+          ),
+          Text('text $index', style: TextStyle(fontSize: 16.0)),
+        ]),
+      );
+
+  Widget buildCarouselImage2(String cardImage, int index) => Container(
+        width: MediaQuery.of(context).size.width,
+        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
+        color: Colors.grey,
+        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
+      );
+
+  Widget buildIndicator() => AnimatedSmoothIndicator(
+        activeIndex: activeIndex,
+        count: cardImages.length,
+        onDotClicked: (index) {
+          cController.animateToPage(index);
+        },
+        effect: const JumpingDotEffect(
+          verticalOffset: 5.0,
+          activeDotColor: Colors.orange,
+          // dotColor: Colors.black12,
+        ),
+      );
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 }

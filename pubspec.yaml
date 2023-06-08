@@ -29,6 +29,10 @@ dependencies:
   # amplify_datastore: ^1.1.0-supports-only-mobile
   percent_indicator: ^4.0.1
   intl: ^0.18.0
+  google_fonts: ^4.0.0
+  carousel_slider: ^4.2.1
+  fluttertoast: ^8.2.2
+  smooth_page_indicator: ^1.1.0
 
 dev_dependencies:
   flutter_test:

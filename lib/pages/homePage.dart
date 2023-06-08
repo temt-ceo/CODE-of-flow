@@ -422,27 +422,29 @@ class HomePageState extends State<HomePage> {
               ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
               : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
         ]),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        floatingActionButton: StartButtons(gameProgressStatus,
-            (status, data, mariganCards, cardInfo) {
-          switch (status) {
-            case 'game-is-ready':
-              doAnimation();
-              break;
-            case 'matching-success':
-              setDataAndMarigan(data, mariganCards);
-              break;
-            case 'started-game-info':
-              setDataAndMarigan(data, null);
-              break;
-            case 'other-game-info':
-              // setDataAndMarigan(data, null);
-              break;
-            case 'card-info':
-              setCardInfo(cardInfo);
-              break;
-          }
-        }));
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        floatingActionButton: SizedBox(
+            height: 1000,
+            child: StartButtons(gameProgressStatus,
+                (status, data, mariganCards, cardInfo) {
+              switch (status) {
+                case 'game-is-ready':
+                  doAnimation();
+                  break;
+                case 'matching-success':
+                  setDataAndMarigan(data, mariganCards);
+                  break;
+                case 'started-game-info':
+                  setDataAndMarigan(data, null);
+                  break;
+                case 'other-game-info':
+                  // setDataAndMarigan(data, null);
+                  break;
+                case 'card-info':
+                  setCardInfo(cardInfo);
+                  break;
+              }
+            }, activeLocale)));
   }
 
   @override

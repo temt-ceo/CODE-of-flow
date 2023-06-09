@@ -8,6 +8,7 @@ import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 typedef void StringCallback(String val, int cardId, int? position);
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class DragTargetWidget extends StatefulWidget {
   final String label;
@@ -16,9 +17,10 @@ class DragTargetWidget extends StatefulWidget {
   final dynamic cardInfos;
   final StringCallback tapCardCallback;
   int? actedCardPosition;
+  final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos,
-      this.tapCardCallback, this.actedCardPosition);
+      this.tapCardCallback, this.actedCardPosition, this.r);
 
   @override
   DragTargetState createState() => DragTargetState();
@@ -44,16 +46,15 @@ class DragTargetState extends State<DragTargetWidget> {
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
           dropedList.add(DroppedCardWidget(
-              widget.label == 'unit'
-                  ? 135.0 * dropedList.length + 20
-                  : 108.0 * dropedList.length + 20,
+              widget.r(135.0 * dropedList.length + 20), // TODO 690 / 700
               imageUrl,
               widget.label,
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
               dropedList.length,
-              false));
+              false,
+              widget.r));
         }
       }
       var objStr2 = jsonToString(widget.info!.opponentFieldUnit);
@@ -64,16 +65,15 @@ class DragTargetState extends State<DragTargetWidget> {
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
           dropedListEnemy.add(DroppedCardWidget(
-              widget.label == 'unit'
-                  ? 135.0 * dropedListEnemy.length + 20
-                  : 108.0 * dropedListEnemy.length + 20,
+              widget.r(135.0 * dropedListEnemy.length + 20), // TODO 690 / 700
               imageUrl,
               widget.label,
               widget.cardInfos[cardIdStr],
               true,
               widget.tapCardCallback,
               dropedList.length,
-              false));
+              false,
+              widget.r));
         }
       }
     }
@@ -86,16 +86,15 @@ class DragTargetState extends State<DragTargetWidget> {
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
           dropedList.add(DroppedCardWidget(
-              widget.label == 'unit'
-                  ? 135.0 * dropedList.length + 20
-                  : 108.0 * dropedList.length + 20,
+              widget.r(108.0 * dropedList.length + 20), // TODO 380 / 440
               imageUrl,
               widget.label,
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
               dropedList.length,
-              false));
+              false,
+              widget.r));
         }
       }
     }
@@ -115,21 +114,23 @@ class DragTargetState extends State<DragTargetWidget> {
           : '${imagePath}unit/card_${cardId.toString()}.jpeg';
       if (widget.label == 'deck' && dropedList.length >= 15) {
         dropedListSecond.add(DroppedCardWidget(
-            90.0 * dropedListSecond.length - 1 + 10,
+            widget.r(90.0 * dropedListSecond.length - 1 + 10),
             imageUrl,
             widget.label,
             widget.cardInfos[cardIdStr],
             true,
             widget.tapCardCallback,
             dropedList.length + dropedListSecond.length,
-            false));
+            false,
+            widget.r));
       } else {
         dropedList.add(DroppedCardWidget(
             widget.label == 'deck'
-                ? 90.0 * dropedList.length - 1 + 10
+                ? widget.r(86.0 * dropedList.length - 1 + 10)
                 : (widget.label == 'unit'
-                    ? 135.0 * dropedList.length - 1 + 20
-                    : 108.0 * dropedList.length - 1 + 20),
+                    ? widget.r(132.0 * dropedList.length - 1 + 20)
+                    : widget.r(
+                        93.0 * dropedList.length - 1 + 17)), // TODO 380 / 440
             imageUrl,
             widget.label,
             widget.cardInfos[cardIdStr],
@@ -140,7 +141,8 @@ class DragTargetState extends State<DragTargetWidget> {
                 ? (widget.info!.isFirst == widget.info!.isFirstTurn
                     ? true
                     : false)
-                : false));
+                : false,
+            widget.r));
       }
       _dropBloc.counterEventSink.add(DropLeaveEvent());
     }, onWillAccept: (String? cardIdStr) {
@@ -208,11 +210,15 @@ class DragTargetState extends State<DragTargetWidget> {
           builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
             return Container(
               width: widget.label == 'deck'
-                  ? 1380.0
-                  : (widget.label == 'unit' ? 700.0 : 440.0),
+                  ? widget.r(1320.0)
+                  : (widget.label == 'unit'
+                      ? widget.r(690.0)
+                      : widget.r(380.0)),
               height: widget.label == 'deck'
-                  ? 350.0
-                  : (widget.label == 'unit' ? 400.0 : 132.0),
+                  ? widget.r(350.0)
+                  : (widget.label == 'unit'
+                      ? widget.r(380.0)
+                      : widget.r(112.0)),
               decoration: BoxDecoration(
                 image: DecorationImage(
                     image: AssetImage(widget.imageUrl), fit: BoxFit.cover),
@@ -221,7 +227,8 @@ class DragTargetState extends State<DragTargetWidget> {
                     color: Color(snapshot.data ?? 0xFFFFFFFF),
                     spreadRadius: 5,
                     blurRadius: 7,
-                    offset: const Offset(2, 5), // changes position of shadow
+                    offset: Offset(
+                        widget.r(2), widget.r(5)), // changes position of shadow
                   ),
                 ],
               ),

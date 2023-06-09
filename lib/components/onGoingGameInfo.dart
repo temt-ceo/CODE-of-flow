@@ -71,6 +71,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         });
       }
     }
+
     return Stack(children: <Widget>[
       const Positioned(
           left: 20.0,

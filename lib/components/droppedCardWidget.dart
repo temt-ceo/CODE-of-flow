@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 const envFlavor = String.fromEnvironment('flavor');
 
 typedef void StringCallback(String val, int cardId, int? position);
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class DroppedCardWidget extends StatefulWidget {
   final double left;
@@ -13,9 +14,18 @@ class DroppedCardWidget extends StatefulWidget {
   final StringCallback tapCardCallback;
   final int index;
   final bool canAttack;
+  final ResponsiveSizeChangeFunction r;
 
-  const DroppedCardWidget(this.left, this.imageUrl, this.label, this.cardInfo,
-      this.isSecondRow, this.tapCardCallback, this.index, this.canAttack);
+  const DroppedCardWidget(
+      this.left,
+      this.imageUrl,
+      this.label,
+      this.cardInfo,
+      this.isSecondRow,
+      this.tapCardCallback,
+      this.index,
+      this.canAttack,
+      this.r);
 
   @override
   DroppedCardState createState() => DroppedCardState();
@@ -30,8 +40,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
     return Positioned(
         left: widget.left,
         bottom: widget.label == 'deck'
-            ? (widget.isSecondRow ? 40.0 : 220.0)
-            : (widget.isSecondRow ? 240.0 : 5.0),
+            ? (widget.isSecondRow ? widget.r(40.0) : widget.r(220.0))
+            : (widget.isSecondRow ? widget.r(240.0) : widget.r(5.0)),
         child: Stack(children: [
           GestureDetector(
               onTap: () {
@@ -43,8 +53,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
               },
               child: widget.label == 'deck'
                   ? Container(
-                      width: 85.0,
-                      height: 120.0,
+                      width: widget.r(81.0),
+                      height: widget.r(115.0),
                       decoration: BoxDecoration(
                         image: DecorationImage(
                             image: AssetImage(widget.imageUrl),
@@ -55,10 +65,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             left: 0.0,
                             top: 0.0,
                             child: SizedBox(
-                                width: 20.0,
-                                height: 26.0,
+                                width: widget.r(20.0),
+                                height: widget.r(26.0),
                                 child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(2.0),
+                                    borderRadius:
+                                        BorderRadius.circular(widget.r(2.0)),
                                     child: Container(
                                         alignment: Alignment.topCenter,
                                         color: widget.cardInfo?['type'] == '0'
@@ -71,10 +82,10 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                             widget.cardInfo == null
                                                 ? ''
                                                 : widget.cardInfo?['cost'],
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               color: Colors.white,
                                               decoration: TextDecoration.none,
-                                              fontSize: 20.0,
+                                              fontSize: widget.r(20.0),
                                             )))))),
                         widget.cardInfo?['bp'] == '0'
                             ? Container()
@@ -82,15 +93,15 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                 right: 0.0,
                                 bottom: 0.0,
                                 child: SizedBox(
-                                    width: 60.0,
-                                    height: 19.0,
+                                    width: widget.r(60.0),
+                                    height: widget.r(19.0),
                                     child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(2.0),
+                                        borderRadius: BorderRadius.circular(
+                                            widget.r(2.0)),
                                         child: Container(
                                             alignment: Alignment.centerRight,
-                                            color:
-                                                Color.fromARGB(255, 52, 51, 51),
+                                            color: const Color.fromARGB(
+                                                255, 52, 51, 51),
                                             child: Text(
                                                 widget.cardInfo == null
                                                     ? ''
@@ -103,8 +114,12 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                                 )))))),
                       ]))
                   : Container(
-                      width: widget.label == 'unit' ? 110 : 88,
-                      height: widget.label == 'unit' ? 155 : 125,
+                      width: widget.label == 'unit'
+                          ? widget.r(105)
+                          : widget.r(76), // TODO 380 / 440
+                      height: widget.label == 'unit'
+                          ? widget.r(150)
+                          : widget.r(108), // TODO 380 / 440
                       child: widget.label == 'unit'
                           ? Stack(children: <Widget>[
                               Container(
@@ -117,7 +132,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             ])
                           : Center(
                               child: Padding(
-                              padding: const EdgeInsets.only(bottom: 19.0),
+                              padding: EdgeInsets.only(bottom: widget.r(19.0)),
                               child: Container(
                                 decoration: BoxDecoration(
                                     image: DecorationImage(
@@ -129,8 +144,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
           isTapped
               ? (widget.label == 'deck'
                   ? Positioned(
-                      left: 16.0,
-                      top: 30.0,
+                      left: widget.r(16.0),
+                      top: widget.r(30.0),
                       child: FloatingActionButton(
                           backgroundColor: Colors.transparent,
                           onPressed: () {
@@ -150,8 +165,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
                     )
                   : widget.label == 'unit' && widget.canAttack
                       ? Positioned(
-                          left: 28.0,
-                          top: 50.0,
+                          left: widget.r(28.0),
+                          top: widget.r(50.0),
                           child: FloatingActionButton(
                               backgroundColor: Colors.transparent,
                               onPressed: () {
@@ -162,7 +177,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
                               },
                               tooltip: 'Attack',
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(40.0),
+                                borderRadius:
+                                    BorderRadius.circular(widget.r(40.0)),
                                 child: Image.asset(
                                   '${imagePath}button/attack.png',
                                   fit: BoxFit.cover,

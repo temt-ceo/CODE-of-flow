@@ -3,13 +3,15 @@ import 'package:flutter/material.dart';
 const envFlavor = String.fromEnvironment('flavor');
 
 typedef void StringCallback(int? data);
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class DragBox extends StatefulWidget {
   final int cardId;
   final StringCallback putCardCallback;
   final dynamic cardInfo;
+  final ResponsiveSizeChangeFunction r;
 
-  const DragBox(this.cardId, this.putCardCallback, this.cardInfo);
+  const DragBox(this.cardId, this.putCardCallback, this.cardInfo, this.r);
 
   @override
   DragBoxState createState() => DragBoxState();
@@ -62,10 +64,10 @@ class DragBoxState extends State<DragBox> {
       child: isDroped
           ? Container()
           : Padding(
-              padding: const EdgeInsets.only(left: 15.0),
+              padding: EdgeInsets.only(left: widget.r(15.0)),
               child: Container(
-                width: 100.0,
-                height: 150.0,
+                width: widget.r(100.0),
+                height: widget.r(150.0),
                 decoration: BoxDecoration(
                   image: DecorationImage(
                       image: AssetImage(imageUrl), fit: BoxFit.contain),
@@ -75,10 +77,11 @@ class DragBoxState extends State<DragBox> {
                       left: 0.0,
                       top: 0.0,
                       child: SizedBox(
-                          width: 20.0,
-                          height: 26.0,
+                          width: widget.r(20.0),
+                          height: widget.r(26.0),
                           child: ClipRRect(
-                              borderRadius: BorderRadius.circular(2.0),
+                              borderRadius:
+                                  BorderRadius.circular(widget.r(2.0)),
                               child: Container(
                                   alignment: Alignment.topCenter,
                                   color: widget.cardInfo?['type'] == '0'
@@ -91,10 +94,10 @@ class DragBoxState extends State<DragBox> {
                                       widget.cardInfo == null
                                           ? ''
                                           : widget.cardInfo?['cost'],
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: Colors.white,
                                         decoration: TextDecoration.none,
-                                        fontSize: 20.0,
+                                        fontSize: widget.r(20.0),
                                       )))))),
                   widget.cardInfo?['bp'] == '0'
                       ? Container()
@@ -102,21 +105,23 @@ class DragBoxState extends State<DragBox> {
                           right: 0.0,
                           bottom: 0.0,
                           child: SizedBox(
-                              width: 60.0,
-                              height: 19.0,
+                              width: widget.r(60.0),
+                              height: widget.r(19.0),
                               child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(2.0),
+                                  borderRadius:
+                                      BorderRadius.circular(widget.r(2.0)),
                                   child: Container(
                                       alignment: Alignment.centerRight,
-                                      color: Color.fromARGB(255, 52, 51, 51),
+                                      color:
+                                          const Color.fromARGB(255, 52, 51, 51),
                                       child: Text(
                                           widget.cardInfo == null
                                               ? ''
                                               : widget.cardInfo?['bp'],
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
                                             decoration: TextDecoration.none,
-                                            fontSize: 16.0,
+                                            fontSize: widget.r(16.0),
                                           )))))),
                 ]),
               ),

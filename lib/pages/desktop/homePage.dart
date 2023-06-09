@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
@@ -11,14 +10,13 @@ import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/putCardModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
+import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
-typedef void StringCallback(Locale val);
 
 class HomePage extends StatefulWidget {
-  final String title;
-  final StringCallback localeCallback;
-  HomePage({super.key, required this.title, required this.localeCallback});
+  final bool enLocale;
+  const HomePage({super.key, required this.enLocale});
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -37,7 +35,6 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
-  bool activeLocale = ui.window.locale.toString() == 'ja' ? false : true;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -99,11 +96,12 @@ class HomePageState extends State<HomePage> {
     if (cardId > 16) {
       return;
     }
-
-    setState(() {
-      gameObject!.yourCp =
-          gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
-    });
+    if (mounted) {
+      setState(() {
+        gameObject!.yourCp = gameObject!.yourCp -
+            int.parse(cardInfos[cardId.toString()]['cost']);
+      });
+    }
     var objStr = jsonToString(gameObject!.yourFieldUnit);
     var objJs = jsonDecode(objStr);
 
@@ -209,56 +207,26 @@ class HomePageState extends State<HomePage> {
     await apiService.subscribeBCGGameServerProcess();
   }
 
-  void _changeSwitch(bool changed) {
-    setState(() {
-      activeLocale = changed;
-    });
-    Locale _locale = changed == true ? Locale('en') : Locale('ja');
-    widget.localeCallback(_locale);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
+    return LayoutBuilder(builder: (layoutContext, constraints) {
+      final wRes = constraints.maxWidth / desktopWidth;
+      double r(double val) {
+        return val * wRes;
+      }
+
+      return Scaffold(
           backgroundColor: Colors.transparent,
-          title: Text(widget.title,
-              style: const TextStyle(color: Color(0xFFFFFFFF))),
-          flexibleSpace: Stack(children: <Widget>[
+          body: Stack(fit: StackFit.expand, children: <Widget>[
             Positioned(
-                top: 4.0,
-                right: 300.0,
-                child: Switch(
-                  value: activeLocale,
-                  activeColor: Colors.black,
-                  activeTrackColor: Colors.blueGrey,
-                  inactiveThumbColor: Colors.black,
-                  inactiveTrackColor: Colors.blueGrey,
-                  onChanged: _changeSwitch,
-                )),
-            Positioned(
-              right: 270.0,
-              top: 10.0,
-              child: Text(activeLocale == true ? 'EN' : 'JP',
-                  style: const TextStyle(
-                    color: Color(0xFFFFFFFF),
-                    fontSize: 20.0,
-                  )),
-            )
-          ]),
-        ),
-        body: Stack(children: <Widget>[
-          Stack(fit: StackFit.expand, children: <Widget>[
-            Positioned(
-                left: 10.0,
-                top: 480.0,
+                left: r(10.0),
+                top: r(445.0),
                 child: Row(children: <Widget>[
                   Padding(
-                      padding: const EdgeInsets.only(left: 15.0),
+                      padding: EdgeInsets.only(left: r(15.0), top: r(10.0)),
                       child: Container(
-                        width: 280.0,
-                        height: 160.0,
+                        width: r(280.0),
+                        height: r(160.0),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('${imagePath}unit/bg-2.jpg'),
@@ -280,8 +248,8 @@ class HomePageState extends State<HomePage> {
                                       });
                                     },
                                     child: DragBox(cardId, putCard,
-                                        cardInfos[cardId.toString()])),
-                              const SizedBox(width: 5),
+                                        cardInfos[cardId.toString()], r)),
+                              SizedBox(width: r(5)),
                             ],
                           ),
                         )
@@ -302,7 +270,8 @@ class HomePageState extends State<HomePage> {
                                       putCard,
                                       cardInfos != null
                                           ? cardInfos['16']
-                                          : null)),
+                                          : null,
+                                      r)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -314,7 +283,8 @@ class HomePageState extends State<HomePage> {
                                       putCard,
                                       cardInfos != null
                                           ? cardInfos['17']
-                                          : null)),
+                                          : null,
+                                      r)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -324,9 +294,8 @@ class HomePageState extends State<HomePage> {
                                   child: DragBox(
                                       1,
                                       putCard,
-                                      cardInfos != null
-                                          ? cardInfos['1']
-                                          : null)),
+                                      cardInfos != null ? cardInfos['1'] : null,
+                                      r)),
                               GestureDetector(
                                   onTap: () {
                                     setState(() {
@@ -336,51 +305,52 @@ class HomePageState extends State<HomePage> {
                                   child: DragBox(
                                       3,
                                       putCard,
-                                      cardInfos != null
-                                          ? cardInfos['3']
-                                          : null)),
-                              const SizedBox(width: 5),
+                                      cardInfos != null ? cardInfos['3'] : null,
+                                      r)),
+                              SizedBox(width: r(5)),
                             ],
                           ),
                         ),
                 ])),
             Positioned(
-                left: 30.0,
-                top: 30.0,
+                left: r(30.0),
+                top: r(30.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(150.0, 200.0, 30.0, 0.0),
+                        padding: EdgeInsets.fromLTRB(
+                            r(150.0), r(200.0), r(30.0), r(5.0)),
                         child: DragTargetWidget(
                             'trigger',
                             '${imagePath}trigger/trigger.png',
                             gameObject,
                             cardInfos,
                             tapCard,
-                            actedCardPosition),
+                            actedCardPosition,
+                            r),
                       ),
                       Padding(
-                        padding:
-                            const EdgeInsets.fromLTRB(30.0, 20.0, 130.0, 85.0),
+                        padding: EdgeInsets.fromLTRB(
+                            r(30.0), r(20.0), r(130.0), r(85.0)),
                         child: DragTargetWidget(
                             'unit',
                             '${imagePath}unit/bg-2.jpg',
                             gameObject,
                             cardInfos,
                             tapCard,
-                            actedCardPosition),
+                            actedCardPosition,
+                            r),
                       ),
                     ])),
             Visibility(
                 visible: gameProgressStatus == 1,
                 child: Positioned(
-                    left: 320,
-                    top: 420,
+                    left: r(320),
+                    top: r(420),
                     child: SizedBox(
-                        width: 120.0,
+                        width: r(120.0),
                         child: StreamBuilder<int>(
                             stream: _timer.events.stream,
                             builder: (BuildContext context,
@@ -388,15 +358,15 @@ class HomePageState extends State<HomePage> {
                               return Center(
                                   child: Text(
                                 '0:0${snapshot.data.toString()}',
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 46.0),
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(46.0)),
                               ));
                             })))),
             Visibility(
                 visible: mariganClickCount < 5 && gameProgressStatus == 1,
                 child: Positioned(
-                    left: 500,
-                    top: 420,
+                    left: r(500),
+                    top: r(420),
                     child: SizedBox(
                         width: 120.0,
                         child: FloatingActionButton(
@@ -416,35 +386,35 @@ class HomePageState extends State<HomePage> {
                                 '${imagePath}button/redo.png',
                                 fit: BoxFit.cover, //prefer cover over fill
                               ),
-                            )))))
+                            ))))),
+            gameObject != null
+                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
+                : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
           ]),
-          gameObject != null
-              ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
-              : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
-        ]),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
-        floatingActionButton: SizedBox(
-            height: 1000,
-            child: StartButtons(gameProgressStatus,
-                (status, data, mariganCards, cardInfo) {
-              switch (status) {
-                case 'game-is-ready':
-                  doAnimation();
-                  break;
-                case 'matching-success':
-                  setDataAndMarigan(data, mariganCards);
-                  break;
-                case 'started-game-info':
-                  setDataAndMarigan(data, null);
-                  break;
-                case 'other-game-info':
-                  // setDataAndMarigan(data, null);
-                  break;
-                case 'card-info':
-                  setCardInfo(cardInfo);
-                  break;
-              }
-            }, activeLocale)));
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          floatingActionButton: SizedBox(
+              height: r(1000),
+              child: StartButtons(gameProgressStatus,
+                  (status, data, mariganCards, cardInfo) {
+                switch (status) {
+                  case 'game-is-ready':
+                    doAnimation();
+                    break;
+                  case 'matching-success':
+                    setDataAndMarigan(data, mariganCards);
+                    break;
+                  case 'started-game-info':
+                    setDataAndMarigan(data, null);
+                    break;
+                  case 'other-game-info':
+                    // setDataAndMarigan(data, null);
+                    break;
+                  case 'card-info':
+                    setCardInfo(cardInfo);
+                    break;
+                }
+              }, widget.enLocale)));
+    });
   }
 
   @override

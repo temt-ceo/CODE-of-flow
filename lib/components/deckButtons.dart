@@ -384,6 +384,7 @@ class DeckButtonsState extends State<DeckButtons> {
   @override
   Widget build(BuildContext context) {
     subscribe(allowInterop(setupWallet));
+
     return Stack(children: <Widget>[
       const Positioned(
           left: 75,
@@ -429,7 +430,7 @@ class DeckButtonsState extends State<DeckButtons> {
                 ])),
           )),
       Padding(
-          padding: const EdgeInsets.only(top: 15.0),
+          padding: const EdgeInsets.only(top: .0),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Visibility(

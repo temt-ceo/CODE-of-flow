@@ -95,7 +95,7 @@ class StartButtonsState extends State<StartButtons> {
   final nameController = TextEditingController();
   APIService apiService = APIService();
   WalletUser walletUser = WalletUser('');
-  PlayerResource player = PlayerResource('', '', '');
+  PlayerResource player = PlayerResource('-', '', '');
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool showBottomSheet = false;
   bool showBottomSheet2 = false;
@@ -117,33 +117,7 @@ class StartButtonsState extends State<StartButtons> {
   bool showCarousel2 = false;
   int activeIndex = 0;
   final cController = CarouselController();
-  final cardImages = [
-    'unit/card_1.jpeg',
-    'unit/card_2.jpeg',
-    'unit/card_3.jpeg',
-    'unit/card_4.jpeg',
-    'unit/card_5.jpeg',
-    'unit/card_6.jpeg',
-    'unit/card_7.jpeg',
-    'unit/card_8.jpeg',
-    'unit/card_9.jpeg',
-    'unit/card_10.jpeg',
-    'unit/card_11.jpeg',
-    'unit/card_13.jpeg',
-    'unit/card_14.jpeg',
-    'unit/card_15.jpeg',
-    'unit/card_16.jpeg',
-    'trigger/card_17.jpeg',
-    'trigger/card_18.jpeg',
-    'trigger/card_19.jpeg',
-    'trigger/card_20.jpeg',
-    'trigger/card_21.jpeg',
-    'trigger/card_22.jpeg',
-    'trigger/card_23.jpeg',
-    'trigger/card_24.jpeg',
-    'trigger/card_25.jpeg',
-    'trigger/card_26.jpeg',
-  ];
+  dynamic cardList;
 
   late StreamController<bool> _wait;
 
@@ -162,7 +136,7 @@ class StartButtonsState extends State<StartButtons> {
       } else {
         if (player.uuid == '') {
           // Playerリソース未インポート
-          if (showBottomSheet == false) {
+          if (showBottomSheet == false && mounted) {
             setState(() {
               showBottomSheet = true;
             });
@@ -308,6 +282,9 @@ class StartButtonsState extends State<StartButtons> {
       dynamic cardInfo = await promiseToFuture(getCardInfo());
       var objStr = jsonToString(cardInfo);
       var objJs = jsonDecode(objStr);
+      setState(() {
+        cardList = objJs;
+      });
       widget.callback('card-info', null, null, objJs);
     } catch (e) {}
   }
@@ -320,20 +297,20 @@ class StartButtonsState extends State<StartButtons> {
       var objStr = jsonToString(ret);
       var objJs = jsonDecode(objStr);
       var yourInfo = objJs[0];
-      setState(() {
-        balance = double.parse(yourInfo['balance']);
-      });
-      setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
-      int win = 0;
-      for (int i = 0; i < yourInfo['score'].length; i++) {
-        if (int.parse(yourInfo['score'][i]) == 1) {
-          win++;
+      if (mounted) {
+        setState(() {
+          balance = double.parse(yourInfo['balance']);
+        });
+        setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
+        int win = 0;
+        for (int i = 0; i < yourInfo['score'].length; i++) {
+          if (int.parse(yourInfo['score'][i]) == 1) {
+            win++;
+          }
         }
+        setState(
+            () => yourScore = '${yourInfo['score'].length} games ${win} win');
       }
-      setState(
-          () => yourScore = '${yourInfo['score'].length} games ${win} win');
-
-      print(objJs);
     }
   }
 
@@ -622,12 +599,13 @@ class StartButtonsState extends State<StartButtons> {
   @override
   Widget build(BuildContext context) {
     subscribe(allowInterop(setupWallet));
+
     return Stack(children: <Widget>[
       Visibility(
           visible: balance != null && walletUser.addr != '',
           child: Positioned(
               left: 75,
-              top: 30,
+              top: 0,
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
@@ -649,10 +627,10 @@ class StartButtonsState extends State<StartButtons> {
                         )),
                   ]))),
       Visibility(
-          visible: cyberEnergy != null,
+          visible: cyberEnergy != null && walletUser.addr != '',
           child: Positioned(
             left: 75,
-            top: 62,
+            top: 32,
             child: SizedBox(
                 width: 300.0,
                 child: Row(children: <Widget>[
@@ -678,7 +656,7 @@ class StartButtonsState extends State<StartButtons> {
                 ])),
           )),
       Padding(
-          padding: const EdgeInsets.only(top: 55.0),
+          padding: const EdgeInsets.only(top: 5.0),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Text(
@@ -770,7 +748,7 @@ class StartButtonsState extends State<StartButtons> {
           child: Stack(children: <Widget>[
             Positioned(
                 left: 40,
-                top: 80,
+                top: 30,
                 child: CircularPercentIndicator(
                   radius: 45.0,
                   lineWidth: 10.0,
@@ -789,12 +767,12 @@ class StartButtonsState extends State<StartButtons> {
                 )),
             Positioned(
                 left: 50,
-                top: 270,
+                top: 220,
                 child: ExpandableFAB(distance: 120, children: [
                   FABActionButton(
                     icon: Icon(Icons.create, color: Colors.white),
                     onPressed: () {
-                      print('person');
+                      showToast('EN is successfull charged.');
                     },
                   ),
                   FABActionButton(
@@ -817,26 +795,38 @@ class StartButtonsState extends State<StartButtons> {
                 ])),
             Positioned(
               left: 168,
-              top: 198,
+              top: 148,
               child: ExpandableFAB(
                 distance: 120,
                 children: [
                   FABActionButton(
-                    icon: Icon(Icons.person, color: Colors.white),
+                    icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      print('person');
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              title: Text(L10n.of(context)!.tutorial1),
+                              content: Text(L10n.of(context)!.tutorial2)));
                     },
                   ),
                   FABActionButton(
-                    icon: Icon(Icons.person, color: Colors.white),
+                    icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      print('settings');
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              title: Text(L10n.of(context)!.tutorial3),
+                              content: Text(L10n.of(context)!.tutorial4)));
                     },
                   ),
                   FABActionButton(
-                    icon: Icon(Icons.person, color: Colors.white),
+                    icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      print('persaddon');
+                      showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                              title: Text(L10n.of(context)!.tutorial5),
+                              content: Text(L10n.of(context)!.tutorial6)));
                     },
                   ),
                 ],
@@ -844,7 +834,7 @@ class StartButtonsState extends State<StartButtons> {
             ),
             Positioned(
                 left: 240,
-                top: 80,
+                top: 30,
                 child: ExpandableFAB(distance: 120, children: [
                   FABActionButton(
                     icon: const Icon(Icons.person, color: Colors.white),
@@ -859,13 +849,21 @@ class StartButtonsState extends State<StartButtons> {
                   FABActionButton(
                     icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      print('settings');
+                      showDialog(
+                          context: context,
+                          builder: (context) => const AlertDialog(
+                              title: Text('My Title'),
+                              content: Text('jdlskfldsjaldjksdfdslfksa')));
                     },
                   ),
                   FABActionButton(
                     icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
-                      showToast('EN is successfull charged.');
+                      showDialog(
+                          context: context,
+                          builder: (context) => const AlertDialog(
+                              title: Text('My Title'),
+                              content: Text('jdlskfldsjaldjksdfdslfksa')));
                     },
                   ),
                 ])),
@@ -876,26 +874,33 @@ class StartButtonsState extends State<StartButtons> {
             CarouselSlider.builder(
               options: CarouselOptions(
                   height: 700,
-                  // aspectRatio: 9 / 9,
+                  aspectRatio: 14 / 9,
                   viewportFraction: 0.75, // 1.0:1つが全体に出る
                   initialPage: 0,
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.vertical),
-              itemCount: cardImages.length,
+              itemCount: 25,
               itemBuilder: (context, index, realIndex) {
-                final cardImage = imagePath + cardImages[index];
-                return buildCarouselImage(cardImage, index);
+                dynamic card = cardList != null
+                    ? cardList[index >= 11
+                        ? (index + 2).toString()
+                        : (index + 1).toString()]
+                    : null;
+                return buildCarouselImage(index, card);
               },
             ),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showCarousel = false;
-                });
-              },
-              child: Text('Close'),
-            ),
+            Positioned(
+                top: 15.0,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      showCarousel = false;
+                    });
+                  },
+                  child: const Text('Close',
+                      style: TextStyle(color: Colors.black, fontSize: 28.0)),
+                )),
           ])),
       Visibility(
           visible: walletUser.addr == '' && showCarousel2 == true,
@@ -915,10 +920,9 @@ class StartButtonsState extends State<StartButtons> {
                       activeIndex = index;
                     });
                   }),
-              itemCount: cardImages.length,
+              itemCount: 4,
               itemBuilder: (context, index, realIndex) {
-                final cardImage = imagePath + cardImages[index];
-                return buildCarouselImage2(cardImage, index);
+                return buildCarouselImage2(index);
               },
             ),
             const SizedBox(height: 32.0),
@@ -931,20 +935,66 @@ class StartButtonsState extends State<StartButtons> {
     ]);
   }
 
-  Widget buildCarouselImage(String cardImage, int index) => Container(
-        width: MediaQuery.of(context).size.width,
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        color: Colors.grey,
+  Widget buildCarouselImage(int index, dynamic card) => Padding(
+        padding: const EdgeInsets.only(left: 80.0),
         child: Row(children: <Widget>[
-          Image.asset(
-            cardImage,
-            fit: BoxFit.cover,
-          ),
-          Text('text $index', style: TextStyle(fontSize: 16.0)),
+          card == null
+              ? Container()
+              : Image.asset(
+                  '$imagePath${card['category'] == '0' ? 'unit' : 'trigger'}/card_${card['card_id']}.jpeg',
+                  fit: BoxFit.cover,
+                ),
+          Container(
+              color: card == null ? Colors.grey : Colors.white,
+              child: card == null
+                  ? Container()
+                  : Table(
+                      border: TableBorder.all(),
+                      defaultVerticalAlignment: TableCellVerticalAlignment.top,
+                      defaultColumnWidth: IntrinsicColumnWidth(),
+                      children: [
+                          buildTableRow(['Name', card['name']], false),
+                          buildTableRow([
+                            'Card Type',
+                            card['category'] == '0'
+                                ? 'Unit'
+                                : (card['category'] == '1'
+                                    ? 'Trigger'
+                                    : 'Intercept')
+                          ], false),
+                          buildTableRow([
+                            'BP(Power)',
+                            card['bp'] == '0' ? '-' : card['bp']
+                          ], false),
+                          buildTableRow(['CP(Cost)', card['cost']], false),
+                          buildTableRow([
+                            'Attribute',
+                            card['type'] == '0'
+                                ? 'Red'
+                                : (card['type'] == '1' ? 'Yellow' : '-')
+                          ], false),
+                          buildTableRow([
+                            'Ability',
+                            L10n.of(context)!.cardDescription.split('|')[index]
+                          ], true),
+                        ]))
         ]),
       );
-
-  Widget buildCarouselImage2(String cardImage, int index) => Container(
+  TableRow buildTableRow(List<String> cells, bool high) => TableRow(
+          children: cells.map((cell) {
+        return TableCell(
+            child: high && cell != 'Ability'
+                ? Center(
+                    child: SizedBox(
+                        height: 165.0,
+                        width: 750.0,
+                        child:
+                            Text(cell, style: const TextStyle(fontSize: 28.0))))
+                : Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(cell, style: const TextStyle(fontSize: 28.0))));
+      }).toList());
+  Widget buildCarouselImage2(int index) => Container(
         width: MediaQuery.of(context).size.width,
         // margin: const EdgeInsets.symmetric(horizontal: 1.0),
         color: Colors.grey,
@@ -953,7 +1003,7 @@ class StartButtonsState extends State<StartButtons> {
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
-        count: cardImages.length,
+        count: 4,
         onDotClicked: (index) {
           cController.animateToPage(index);
         },

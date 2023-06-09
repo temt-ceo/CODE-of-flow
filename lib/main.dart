@@ -9,8 +9,9 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'amplifyconfiguration.dart';
 import 'package:CodeOfFlow/models/ModelProvider.dart';
-import 'package:CodeOfFlow/pages/homePage.dart';
-import 'package:CodeOfFlow/pages/deckEditPage.dart';
+import 'package:CodeOfFlow/responsive/mobile_body.dart';
+import 'package:CodeOfFlow/responsive/desktop_body.dart';
+import 'package:CodeOfFlow/responsive/responsive_layout.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -60,7 +61,7 @@ class AppState extends State<App> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         textTheme: GoogleFonts.robotoTextTheme(),
-        scaffoldBackgroundColor: Colors.blue,
+        scaffoldBackgroundColor: Colors.transparent,
         iconTheme: IconThemeData(size: 15.0),
         useMaterial3: true,
       ),
@@ -68,23 +69,35 @@ class AppState extends State<App> {
       localizationsDelegates: L10n.localizationsDelegates,
       routes: {
         '/': (context) => Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('${imagePath}unit/bg-2.jpg'),
-                      fit: BoxFit.cover)),
-              child: HomePage(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('${imagePath}unit/bg-2.jpg'),
+                    fit: BoxFit.cover)),
+            child: ResponsiveLayout(
+              desktopBody: DesktopBody(
                   title: L10n.of(context)!.homePageTitle,
-                  localeCallback: setLocale),
-            ),
+                  localeCallback: setLocale,
+                  route: 'Home'),
+              mobileBody: MobileBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'Home'),
+            )),
         '/deck_edit': (context) => Container(
-              decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage('${imagePath}unit/bg-2.jpg'),
-                      fit: BoxFit.cover)),
-              child: DeckEditPage(
-                  title: L10n.of(context)!.deckEditPageTitle,
-                  localeCallback: setLocale),
-            ),
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('${imagePath}unit/bg-2.jpg'),
+                    fit: BoxFit.cover)),
+            child: ResponsiveLayout(
+              desktopBody: DesktopBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'DeckEditor'),
+              mobileBody: MobileBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'DeckEditor'),
+            )),
       },
     );
     // );

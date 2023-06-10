@@ -24,5 +24,7 @@
   "tutorial17": "",
   "tutorial18": "",
   "tutorial19": "",
-  "tutorial20": ""
+  "tutorial20": "",
+  "inputPlayerName": " プレイヤー名を入力して下さい。",
+  "nameConfirmText": " {name}でよろしければ, 以下のボタンを押して下さい。"
 }

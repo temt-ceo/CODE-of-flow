@@ -24,5 +24,7 @@
   "tutorial17": "",
   "tutorial18": "",
   "tutorial19": "",
-  "tutorial20": ""
+  "tutorial20": "",
+  "inputPlayerName": "Please input a Player Name.",
+  "nameConfirmText": "If you are satisfied with {name}, please click the button below."
 }

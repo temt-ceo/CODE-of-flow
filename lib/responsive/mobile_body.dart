@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:ui' as ui;
+
 import 'package:CodeOfFlow/pages/mobile/homePage.dart';
 import 'package:CodeOfFlow/pages/mobile/deckEditPage.dart';
+import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 typedef void StringCallback(Locale val);
 
@@ -33,6 +35,11 @@ class MobileBodyState extends State<MobileBody> {
       widget.localeCallback(_locale);
     }
 
+    final wRes = MediaQuery.of(context).size.width / desktopWidth;
+    double r(double val) {
+      return val * wRes;
+    }
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: widget.route == 'Home'
@@ -42,8 +49,8 @@ class MobileBodyState extends State<MobileBody> {
                   style: const TextStyle(color: Colors.white)),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: 4.0,
-                    right: 300.0,
+                    top: r(4.0),
+                    right: r(300.0),
                     child: Switch(
                       value: activeLocale,
                       activeColor: Colors.black,
@@ -53,12 +60,12 @@ class MobileBodyState extends State<MobileBody> {
                       onChanged: changeSwitch,
                     )),
                 Positioned(
-                  right: 270.0,
-                  top: 10.0,
+                  right: r(270.0),
+                  top: r(10.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
-                      style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
-                        fontSize: 20.0,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: r(20.0),
                       )),
                 )
               ]),
@@ -73,8 +80,8 @@ class MobileBodyState extends State<MobileBody> {
                   style: const TextStyle(color: Colors.white)),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: 4.0,
-                    right: 300.0,
+                    top: r(4.0),
+                    right: r(300.0),
                     child: Switch(
                       value: activeLocale,
                       activeColor: Colors.black,
@@ -84,12 +91,12 @@ class MobileBodyState extends State<MobileBody> {
                       onChanged: changeSwitch,
                     )),
                 Positioned(
-                  right: 270.0,
-                  top: 10.0,
+                  right: r(270.0),
+                  top: r(10.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
-                      style: const TextStyle(
-                        color: Color(0xFFFFFFFF),
-                        fontSize: 20.0,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: r(20.0),
                       )),
                 )
               ]),

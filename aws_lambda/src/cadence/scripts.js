@@ -1,42 +1,42 @@
 export default {
     isRegistered: `
-    import CodeOfFlowAlpha10 from 0xCOF
-    pub fun main(address: Address): &CodeOfFlowAlpha10.Player{CodeOfFlowAlpha10.IPlayerPublic}? {
-        return getAccount(address).getCapability<&CodeOfFlowAlpha10.Player{CodeOfFlowAlpha10.IPlayerPublic}>(CodeOfFlowAlpha10.PlayerPublicPath).borrow()
+    import CodeOfFlowAlpha12 from 0xCOF
+    pub fun main(address: Address): &CodeOfFlowAlpha12.Player{CodeOfFlowAlpha12.IPlayerPublic}? {
+        return getAccount(address).getCapability<&CodeOfFlowAlpha12.Player{CodeOfFlowAlpha12.IPlayerPublic}>(CodeOfFlowAlpha12.PlayerPublicPath).borrow()
     }
     `,
     getCurrentStatus: `
-    import CodeOfFlowAlpha10 from 0xCOF
+    import CodeOfFlowAlpha12 from 0xCOF
     pub fun main(address: Address): AnyStruct {
-        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha10.Player{CodeOfFlowAlpha10.IPlayerPublic}>(CodeOfFlowAlpha10.PlayerPublicPath).borrow()
+        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha12.Player{CodeOfFlowAlpha12.IPlayerPublic}>(CodeOfFlowAlpha12.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_current_status()
     }
     `,
     getMariganCards: `
-    import CodeOfFlowAlpha10 from 0xCOF
+    import CodeOfFlowAlpha12 from 0xCOF
     pub fun main(address: Address): [[UInt16]] {
-        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha10.Player{CodeOfFlowAlpha10.IPlayerPublic}>(CodeOfFlowAlpha10.PlayerPublicPath).borrow()
+        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha12.Player{CodeOfFlowAlpha12.IPlayerPublic}>(CodeOfFlowAlpha12.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_marigan_cards()
     }
     `,
     getCardInfo: `
-    import CodeOfFlowAlpha10 from 0xCOF
-    pub fun main(): {UInt16: CodeOfFlowAlpha10.CardStruct} {
-        return CodeOfFlowAlpha10.getCardInfo()
+    import CodeOfFlowAlpha12 from 0xCOF
+    pub fun main(): {UInt16: CodeOfFlowAlpha12.CardStruct} {
+        return CodeOfFlowAlpha12.getCardInfo()
     }
     `,
     getMatchingLimits: `
-    import CodeOfFlowAlpha10 from 0xCOF
+    import CodeOfFlowAlpha12 from 0xCOF
     pub fun main(): [UFix64] {
-        return CodeOfFlowAlpha10.getMatchingLimits()
+        return CodeOfFlowAlpha12.getMatchingLimits()
     }
     `,
     getPlayersScore: `
-    import CodeOfFlowAlpha10 from 0xCOF
+    import CodeOfFlowAlpha12 from 0xCOF
     pub fun main(address: Address): AnyStruct {
-        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha10.Player{CodeOfFlowAlpha10.IPlayerPublic}>(CodeOfFlowAlpha10.PlayerPublicPath).borrow()
+        let cap = getAccount(address).getCapability<&CodeOfFlowAlpha12.Player{CodeOfFlowAlpha12.IPlayerPublic}>(CodeOfFlowAlpha12.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_players_score()
     }

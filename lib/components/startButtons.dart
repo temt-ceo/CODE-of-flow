@@ -160,22 +160,26 @@ class StartButtonsState extends State<StartButtons> {
                           padding:
                               const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
                           child: Column(children: <Widget>[
-                            const Text(
-                                'プレイヤー名を入力して下さい。\n(Please input a Player Name.)',
-                                style: TextStyle(color: Color(0xFFFFFFFF))),
+                            Text(L10n.of(context)!.inputPlayerName,
+                                style: const TextStyle(
+                                    fontSize: 20.0, color: Color(0xFFFFFFFF))),
                             const SizedBox(height: 5.0),
                             SizedBox(
-                                width: 250.0,
-                                child: Focus(
-                                  child: TextField(
-                                    controller: nameController,
-                                    style: const TextStyle(
-                                        color: Color(0xFFFFFFFF)),
-                                  ),
-                                  onFocusChange: (hasFocus) {
-                                    setState(() => onTyping = hasFocus);
-                                  },
-                                )),
+                              width: 250.0,
+                              // child: Focus(
+                              child: TextField(
+                                controller: nameController,
+                                onChanged: (text) {
+                                  setState(() => onTyping = text.isNotEmpty);
+                                },
+                                style:
+                                    const TextStyle(color: Color(0xFFFFFFFF)),
+                              ),
+                              //   onFocusChange: (hasFocus) {
+                              //     setState(() => onTyping = hasFocus);
+                              //   },
+                              // )
+                            ),
                             const SizedBox(height: 60.0),
                             Visibility(
                               visible: onClickButton == true,
@@ -183,10 +187,10 @@ class StartButtonsState extends State<StartButtons> {
                             ),
                             const SizedBox(height: 10.0),
                             Visibility(
-                                visible: onTyping == false &&
-                                    nameController.text != '',
+                                visible: onTyping,
                                 child: Text(
-                                  'If you are satisfied with ${nameController.text}, please click the button below.',
+                                  L10n.of(context)!
+                                      .nameConfirmText(nameController.text),
                                   style: const TextStyle(
                                     color: Color(0xFFFFFFFF),
                                     fontSize: 16.0,
@@ -204,8 +208,7 @@ class StartButtonsState extends State<StartButtons> {
                                   ),
                                 ),
                               ),
-                              onPressed: onTyping == false &&
-                                      nameController.text != ''
+                              onPressed: onTyping
                                   ? () {
                                       setState(() => onClickButton = true);
                                       // showGameLoading();
@@ -233,7 +236,10 @@ class StartButtonsState extends State<StartButtons> {
                                       });
                                     }
                                   : null,
-                              child: const Text('Create a Player'),
+                              child: const Text('Create a Player',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                  )),
                             )),
                             const SizedBox(height: 10.0),
                           ])));

@@ -363,7 +363,7 @@ exports.handler = async function (event) {
   } catch (error) {
     return {
       id: new Date().getTime(),
-      type: input.type || "",
+      type: "E:" + input.type,
       message: error.toString(),
       playerId: player_id,
       createdAt: new Date(),

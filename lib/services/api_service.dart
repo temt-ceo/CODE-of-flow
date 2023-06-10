@@ -42,7 +42,7 @@ class APIService {
     return null;
   }
 
-  Future<void> subscribeBCGGameServerProcess() async {
+  Future<GameServerProcess?> subscribeBCGGameServerProcess() async {
     // const graphQLDocument = r'''
     //     subscription onCreateCommentByPostId($id: ID!) {
     //       onCommentByPostId(postCommentsId: $id) {
@@ -76,10 +76,13 @@ class APIService {
 
     try {
       await for (var event in operation) {
-        print('Subscription event data received: ${event.data}');
+        print('*** Subscription event data received: ${event.data}');
+        return event.data;
       }
+      // return ret;
     } on Exception catch (e) {
       print('Error in subscription stream: $e');
+      return null;
     }
   }
 }

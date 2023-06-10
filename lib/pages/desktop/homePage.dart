@@ -1,6 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
@@ -9,6 +13,7 @@ import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/putCardModel.dart';
+import 'package:CodeOfFlow/models/GameServerProcess.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
@@ -35,6 +40,7 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
+  String playerId = '';
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -204,7 +210,38 @@ class HomePageState extends State<HomePage> {
   }
 
   void listenBCGGameServerProcess() async {
-    await apiService.subscribeBCGGameServerProcess();
+    GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
+    print(6665555);
+    print(ret);
+    if (ret != null) {
+      print(ret.message);
+      if (playerId == ret.playerId) {
+        if (ret.type == 'player_matching') {
+          try {
+            String transactionId = ret.message.split('TransactionId:')[1];
+            displayMessage(ret.type,
+                "${ret.message.split(':')[1]} : ${ret.message.split(':')[2]}");
+            await Clipboard.setData(ClipboardData(text: transactionId));
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        }
+      } else {
+        if (ret.type == 'player_matching') {
+          showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
+        }
+      }
+    }
+  }
+
+  void displayMessage(type, transactionId) {
+    if (type == 'player_matching') {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+              // title: const Text('You entered in Alcana.'),
+              content: Text('$transactionId (Saved on clipboard.)')));
+    }
   }
 
   @override
@@ -395,7 +432,12 @@ class HomePageState extends State<HomePage> {
           floatingActionButton: SizedBox(
               height: r(1000),
               child: StartButtons(gameProgressStatus,
-                  (status, data, mariganCards, cardInfo) {
+                  (status, _playerId, data, mariganCards, cardInfo) {
+                if (playerId != _playerId) {
+                  setState(() {
+                    playerId = _playerId;
+                  });
+                }
                 switch (status) {
                   case 'game-is-ready':
                     doAnimation();
@@ -420,5 +462,17 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.black,
+        textColor: Colors.blue,
+        fontSize: 22.0,
+        webPosition: 'left');
   }
 }

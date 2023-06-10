@@ -5,18 +5,20 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_util';
 import 'dart:html' as html;
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:js/js.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:js/js.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/percent_indicator.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/components/expandableFAB.dart';
 import 'package:CodeOfFlow/components/fabActionButton.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -65,7 +67,7 @@ external dynamic getCardInfo();
 @JS('jsonToString')
 external String jsonToString(dynamic obj);
 
-typedef void StringCallback(String val, GameObject? data,
+typedef void StringCallback(String val, String playerId, GameObject? data,
     List<List<int>>? mariganCards, dynamic cardInfo);
 
 class StartButtons extends StatefulWidget {
@@ -95,7 +97,7 @@ class StartButtonsState extends State<StartButtons> {
   final nameController = TextEditingController();
   APIService apiService = APIService();
   WalletUser walletUser = WalletUser('');
-  PlayerResource player = PlayerResource('-', '', '');
+  PlayerResource player = PlayerResource('', '', '');
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool showBottomSheet = false;
   bool showBottomSheet2 = false;
@@ -131,10 +133,10 @@ class StartButtonsState extends State<StartButtons> {
       timerObj = timer;
       if (walletUser.addr == '') {
         print('Not Login.');
-        widget.callback(
-            'other-game-info', GameObject.getOtherGameInfo(), null, null);
+        widget.callback('other-game-info', player.playerId,
+            GameObject.getOtherGameInfo(), null, null);
       } else {
-        if (player.uuid == '') {
+        if (player.playerId == '') {
           // Playerリソース未インポート
           if (showBottomSheet == false && mounted) {
             setState(() {
@@ -221,8 +223,12 @@ class StartButtonsState extends State<StartButtons> {
                                         if (player.uuid != '') {
                                           timer.cancel();
                                           setState(() => onClickButton = false);
-                                          widget.callback('game-is-ready', null,
-                                              null, null);
+                                          widget.callback(
+                                              'game-is-ready',
+                                              player.playerId,
+                                              null,
+                                              null,
+                                              null);
                                         }
                                       });
                                     }
@@ -234,14 +240,23 @@ class StartButtonsState extends State<StartButtons> {
                 });
           }
         } else {
+          if (showBottomSheet == true) {
+            showToast('Your Player Name is successfully registered.');
+            setState(() {
+              showBottomSheet = false;
+            });
+            if (loadingContext2 != null) {
+              Navigator.pop(loadingContext2!);
+            }
+          }
           // ゲーム状況(Current Status)取得
           dynamic ret =
               await promiseToFuture(getCurrentStatus(walletUser.addr));
           var objStr = jsonToString(ret);
           var objJs = jsonDecode(objStr);
           if (ret == null) {
-            widget.callback(
-                'other-game-info', GameObject.getOtherGameInfo(), null, null);
+            widget.callback('other-game-info', player.playerId,
+                GameObject.getOtherGameInfo(), null, null);
           } else if (ret.toString().startsWith('1')) {
             double num = double.parse(ret);
             if (num > 1685510325) {
@@ -253,15 +268,15 @@ class StartButtonsState extends State<StartButtons> {
             if (objJs['game_started'] == false && gameStarted == false) {
               dynamic data = await promiseToFuture(
                   getMariganCards(walletUser.addr, int.parse(player.playerId)));
-              widget.callback('matching-success', setGameInfo(objJs),
-                  setMariganCards(data), null);
+              widget.callback('matching-success', player.playerId,
+                  setGameInfo(objJs), setMariganCards(data), null);
               if (dcontext1 != null) {
                 Navigator.pop(dcontext1!);
               }
               battleStartAnimation();
             } else if (objJs['game_started'] == true) {
-              widget.callback(
-                  'started-game-info', setGameInfo(objJs), null, null);
+              widget.callback('started-game-info', player.playerId,
+                  setGameInfo(objJs), null, null);
             }
             print('Set gameStarted = true.');
             gameStarted = true;
@@ -285,7 +300,7 @@ class StartButtonsState extends State<StartButtons> {
       setState(() {
         cardList = objJs;
       });
-      widget.callback('card-info', null, null, objJs);
+      widget.callback('card-info', player.playerId, null, null, objJs);
     } catch (e) {}
   }
 
@@ -301,6 +316,10 @@ class StartButtonsState extends State<StartButtons> {
         setState(() {
           balance = double.parse(yourInfo['balance']);
         });
+        if (cyberEnergy != null &&
+            cyberEnergy! < int.parse(yourInfo['cyber_energy'])) {
+          showToast('EN is successfull charged.');
+        }
         setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
         int win = 0;
         for (int i = 0; i < yourInfo['score'].length; i++) {
@@ -323,17 +342,26 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   void setupWallet(user) {
-    if (walletUser.addr == '') {
-      String? addr = getAddr(user);
-      if (addr == null) {
-        setState(() => walletUser = WalletUser(''));
-      } else {
-        setState(() => walletUser = WalletUser(addr));
-        if (player.uuid == '') {
-          getPlayerInfo();
-          widget.callback('game-is-ready', null, null, null);
+    try {
+      if (walletUser.addr == '') {
+        String? addr = getAddr(user);
+        if (addr == null) {
+          setState(() => walletUser = WalletUser(''));
+        } else {
+          setState(() => walletUser = WalletUser(addr));
+          if (player.uuid == '') {
+            getPlayerInfo();
+            widget.callback('game-is-ready', player.playerId, null, null, null);
+          }
         }
       }
+    } catch (e) {
+      showDialog(
+          context: context,
+          builder: (context) => const AlertDialog(
+              title: Text('Oops!'),
+              content: Text(
+                  'Please reload the browser. Maybe because changing the browser size, something went ..')));
     }
   }
 
@@ -400,6 +428,14 @@ class StartButtonsState extends State<StartButtons> {
               stream: timerComponent.events.stream,
               builder:
                   (BuildContext builderContext, AsyncSnapshot<int> snapshot) {
+                if (snapshot.data == 0 && dcontext1 != null) {
+                  Navigator.pop(dcontext1!);
+                  showToast('Try Again!');
+                }
+                String tenStr = '';
+                if (snapshot.data != null && snapshot.data! < 10) {
+                  tenStr = '0';
+                }
                 return Container(
                     width: 200.0,
                     height: 60.0,
@@ -419,7 +455,7 @@ class StartButtonsState extends State<StartButtons> {
                     ),
                     child: Center(
                         child: Text(
-                      '00:${snapshot.data.toString()}',
+                      '00:$tenStr${snapshot.data.toString()}',
                       style:
                           const TextStyle(color: Colors.black, fontSize: 46.0),
                     )));
@@ -517,7 +553,7 @@ class StartButtonsState extends State<StartButtons> {
                         onPressed: () {
                           // showGameLoading();
                           buyCyberEN();
-                          Future.delayed(const Duration(seconds: 3000), () {
+                          Future.delayed(const Duration(seconds: 4000), () {
                             if (loadingContext3 != null) {
                               Navigator.pop(loadingContext3!);
                             }
@@ -664,7 +700,7 @@ class StartButtonsState extends State<StartButtons> {
                   ? 'connect to wallet→'
                   : (player.uuid == ''
                       ? 'Address: ${walletUser.addr} '
-                      : 'Player: ${player.nickname} '),
+                      : 'Hello! ${player.nickname}. Click the button to start the game→'),
               style: const TextStyle(color: Colors.white, fontSize: 26.0),
             ),
             Visibility(
@@ -1017,7 +1053,7 @@ class StartButtonsState extends State<StartButtons> {
     Fluttertoast.showToast(
         msg: message,
         toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
+        gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,

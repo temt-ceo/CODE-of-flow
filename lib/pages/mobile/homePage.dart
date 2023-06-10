@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
@@ -9,6 +12,7 @@ import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/putCardModel.dart';
+import 'package:CodeOfFlow/models/GameServerProcess.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
@@ -35,6 +39,7 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
+  String playerId = '';
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -204,7 +209,19 @@ class HomePageState extends State<HomePage> {
   }
 
   void listenBCGGameServerProcess() async {
-    await apiService.subscribeBCGGameServerProcess();
+    GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
+    print(6665555);
+    print(ret);
+    if (ret != null) {
+      print(ret.id);
+      print(ret.type);
+      print(ret.message);
+      print(playerId);
+      print(ret.playerId);
+      if (playerId == ret.playerId) {
+        showToast(ret.message);
+      }
+    }
   }
 
   @override
@@ -321,7 +338,7 @@ class HomePageState extends State<HomePage> {
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.fromLTRB(
-                            r(150.0), r(200.0), r(30.0), r(0.0)),
+                            r(150.0), r(200.0), r(30.0), r(5.0)),
                         child: DragTargetWidget(
                             'trigger',
                             '${imagePath}trigger/trigger.png',
@@ -395,7 +412,12 @@ class HomePageState extends State<HomePage> {
           floatingActionButton: SizedBox(
               height: r(1000),
               child: StartButtons(gameProgressStatus,
-                  (status, data, mariganCards, cardInfo) {
+                  (status, _playerId, data, mariganCards, cardInfo) {
+                if (playerId != _playerId) {
+                  setState(() {
+                    playerId = _playerId;
+                  });
+                }
                 switch (status) {
                   case 'game-is-ready':
                     doAnimation();
@@ -420,5 +442,16 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void showToast(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 }

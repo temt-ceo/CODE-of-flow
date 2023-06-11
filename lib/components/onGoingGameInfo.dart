@@ -85,7 +85,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
     // Turn End
     void turnEnd() async {
-      widget.canOperate(false);
       showGameLoading();
       var ret = await apiService.saveGameServerProcess(
           'turn_change', '', widget.info!.you.toString());
@@ -138,7 +137,13 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         setState(() {
           percentIndicatorValue = 0.0;
         });
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.canOperate(false);
+        });
       } else {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          widget.canOperate(true);
+        });
         var displayValue = turnEndTime.difference(now).inSeconds / 60;
         setState(() {
           percentIndicatorValue = displayValue > 1 ? 1 : displayValue;

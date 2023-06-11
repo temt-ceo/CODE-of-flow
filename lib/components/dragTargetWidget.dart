@@ -156,6 +156,7 @@ class DragTargetState extends State<DragTargetWidget> {
         return true;
       } else {
         if (widget.canOperate == false) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
           return false;
         }
         if (widget.info != null &&

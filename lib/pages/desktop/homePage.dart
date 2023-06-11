@@ -42,6 +42,7 @@ class HomePageState extends State<HomePage> {
   BuildContext? loadingContext;
   int? actedCardPosition;
   String playerId = '';
+  bool canOperate = true;
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -204,6 +205,12 @@ class HomePageState extends State<HomePage> {
     setState(() => cardInfos = cardInfo);
   }
 
+  void setCanOperate(flg) {
+    setState(() {
+      canOperate = flg;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -246,8 +253,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool canOperate = true;
-
     return LayoutBuilder(builder: (layoutContext, constraints) {
       final wRes = constraints.maxWidth / desktopWidth;
       double r(double val) {
@@ -429,12 +434,8 @@ class HomePageState extends State<HomePage> {
                               ),
                             ))))),
             gameObject != null
-                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId),
-                    (limitOver) {
-                    setState(() {
-                      canOperate = limitOver;
-                    });
-                  }, r)
+                ? OnGoingGameInfo(
+                    gameObject, getCardInfo(tappedCardId), setCanOperate, r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,

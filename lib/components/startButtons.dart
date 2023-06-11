@@ -69,13 +69,15 @@ external String jsonToString(dynamic obj);
 
 typedef void StringCallback(String val, String playerId, GameObject? data,
     List<List<int>>? mariganCards, dynamic cardInfo);
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class StartButtons extends StatefulWidget {
   int gameProgressStatus;
   final StringCallback callback;
   final bool isEnglish;
+  final ResponsiveSizeChangeFunction r;
 
-  StartButtons(this.gameProgressStatus, this.callback, this.isEnglish);
+  StartButtons(this.gameProgressStatus, this.callback, this.isEnglish, this.r);
 
   @override
   StartButtonsState createState() => StartButtonsState();
@@ -107,6 +109,7 @@ class StartButtonsState extends State<StartButtons> {
   double imagePosition = 0.0;
   double? balance;
   int? cyberEnergy;
+  String yourName = '';
   String yourScore = '';
   String enemyName = '';
   String enemyScore = '';
@@ -155,6 +158,8 @@ class StartButtonsState extends State<StartButtons> {
                 barrierColor: Colors.transparent,
                 builder: (buildContext) {
                   loadingContext2 = buildContext;
+
+                  // プレイヤー名を入力させるダイアログを表示
                   return SizedBox(
                       child: Padding(
                           padding:
@@ -335,6 +340,13 @@ class StartButtonsState extends State<StartButtons> {
         }
         setState(
             () => yourScore = '${yourInfo['score'].length} games ${win} win');
+        setState(() => yourName = yourInfo['player_name']);
+        if (gameStarted) {
+          var opponentInfo = objJs[1];
+          setState(() =>
+              enemyScore = '${opponentInfo['score'].length} games ${win} win');
+          setState(() => enemyName = opponentInfo['player_name']);
+        }
       }
     }
   }
@@ -644,21 +656,24 @@ class StartButtonsState extends State<StartButtons> {
       Visibility(
           visible: balance != null && walletUser.addr != '',
           child: Positioned(
-              left: 75,
+              left: widget.r(75.0),
               top: 0,
               child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: <Widget>[
                     SizedBox(
-                        width: widget.isEnglish ? 213.0 : 172.0,
+                        width: widget.isEnglish
+                            ? widget.r(213.0)
+                            : widget.r(172.0),
                         child: Text(
                           '${L10n.of(context)!.balance} ${balance.toString()}',
-                          style: const TextStyle(
-                              color: Colors.lightGreen, fontSize: 26.0),
+                          style: TextStyle(
+                              color: Colors.lightGreen,
+                              fontSize: widget.r(26.0)),
                         )),
                     Container(
-                        width: 22.0,
-                        height: 22.0,
+                        width: widget.r(22.0),
+                        height: widget.r(22.0),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                               image:
@@ -669,34 +684,79 @@ class StartButtonsState extends State<StartButtons> {
       Visibility(
           visible: cyberEnergy != null && walletUser.addr != '',
           child: Positioned(
-            left: 75,
-            top: 32,
+            left: widget.r(75.0),
+            top: widget.r(32.0),
             child: SizedBox(
                 width: 300.0,
                 child: Row(children: <Widget>[
-                  const Text(
+                  Text(
                     'EN:  ',
                     style: TextStyle(
                         color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: 16.0),
+                        fontSize: widget.r(16.0)),
                   ),
                   Text(
                     '${cyberEnergy.toString()} / 200',
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: 18.0),
+                        fontSize: widget.r(18.0)),
                   ),
-                  const SizedBox(width: 20.0),
-                  Text(
-                    yourScore,
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 247, 245, 245),
-                        fontSize: 18.0),
-                  ),
+                  SizedBox(width: widget.r(20.0)),
+                  Visibility(
+                      visible: gameStarted != true,
+                      child: Text(
+                        yourScore,
+                        style: TextStyle(
+                            color: const Color.fromARGB(255, 247, 245, 245),
+                            fontSize: widget.r(18.0)),
+                      )),
                 ])),
           )),
+      Visibility(
+        visible: gameStarted == true,
+        child: Stack(children: [
+          Positioned(
+              left: 0.0,
+              top: widget.r(82.0),
+              child: Text(
+                '$enemyName :',
+                style: TextStyle(
+                    color: const Color.fromARGB(255, 247, 245, 245),
+                    fontSize: widget.r(20.0)),
+              )),
+          Positioned(
+            left: widget.r(350.0),
+            top: widget.r(82.0),
+            child: Text(
+              enemyScore,
+              style: TextStyle(
+                  color: const Color.fromARGB(255, 247, 245, 245),
+                  fontSize: widget.r(16.0)),
+            ),
+          ),
+          Positioned(
+              left: 0.0,
+              top: widget.r(222.0),
+              child: Text(
+                '$yourName :',
+                style: TextStyle(
+                    color: const Color.fromARGB(255, 247, 245, 245),
+                    fontSize: widget.r(20.0)),
+              )),
+          Positioned(
+            left: widget.r(350.0),
+            top: widget.r(222.0),
+            child: Text(
+              yourScore,
+              style: TextStyle(
+                  color: const Color.fromARGB(255, 247, 245, 245),
+                  fontSize: widget.r(16.0)),
+            ),
+          ),
+        ]),
+      ),
       Padding(
-          padding: const EdgeInsets.only(top: 5.0),
+          padding: EdgeInsets.only(top: widget.r(5.0)),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Visibility(
@@ -707,17 +767,18 @@ class StartButtonsState extends State<StartButtons> {
                       : (player.uuid == ''
                           ? 'Address: ${walletUser.addr} '
                           : 'Hello! ${player.nickname}. Click the button to start the game→'),
-                  style: const TextStyle(color: Colors.white, fontSize: 26.0),
+                  style:
+                      TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
                 )),
             Visibility(
                 visible: walletUser.addr == '',
-                child: const SizedBox(width: 10)),
+                child: SizedBox(width: widget.r(10.0))),
             Visibility(
                 visible: walletUser.addr == '',
-                child: const SizedBox(
-                    width: 50.0,
-                    height: 50.0,
-                    child: FloatingActionButton(
+                child: SizedBox(
+                    width: widget.r(50.0),
+                    height: widget.r(50.0),
+                    child: const FloatingActionButton(
                       onPressed: authenticate,
                       tooltip: 'Authenticate',
                       child: Icon(Icons.key_outlined),
@@ -727,7 +788,7 @@ class StartButtonsState extends State<StartButtons> {
                     player.uuid != '' &&
                     gameStarted == false,
                 child: SizedBox(
-                    width: 130.0,
+                    width: widget.r(130.0),
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
                         onPressed: () async {
@@ -766,7 +827,7 @@ class StartButtonsState extends State<StartButtons> {
                     },
                     tooltip: 'Play',
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40.0),
+                      borderRadius: BorderRadius.circular(widget.r(40.0)),
                       child: Image.asset(
                         '${imagePath}button/editDeck.png',
                         fit: BoxFit.cover,
@@ -776,41 +837,41 @@ class StartButtonsState extends State<StartButtons> {
             Visibility(
                 visible: walletUser.addr != '',
                 child: SizedBox(
-                    width: 40.0,
-                    height: 40.0,
+                    width: widget.r(40.0),
+                    height: widget.r(40.0),
                     child: FloatingActionButton(
                       onPressed: signout,
                       tooltip: 'Sign Out',
                       child: const Icon(Icons.logout),
                     ))),
-            const SizedBox(width: 70),
+            SizedBox(width: widget.r(70)),
           ])),
       Visibility(
           visible: walletUser.addr == '',
           child: Stack(children: <Widget>[
             Positioned(
-                left: 40,
-                top: 30,
+                left: widget.r(40),
+                top: widget.r(30),
                 child: CircularPercentIndicator(
-                  radius: 45.0,
-                  lineWidth: 10.0,
+                  radius: widget.r(45.0),
+                  lineWidth: widget.r(10.0),
                   percent: 0.0,
                   backgroundWidth: 0.0,
                   center: Column(children: <Widget>[
-                    const SizedBox(height: 30.0),
+                    SizedBox(height: widget.r(30.0)),
                     Text('${0.0.toString()}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
                           decoration: TextDecoration.none,
-                          fontSize: 22.0,
+                          fontSize: widget.r(22.0),
                         )),
                   ]),
                   progressColor: const Color.fromARGB(255, 6, 178, 246),
                 )),
             Positioned(
-                left: 50,
-                top: 220,
-                child: ExpandableFAB(distance: 120, children: [
+                left: widget.r(50),
+                top: widget.r(220),
+                child: ExpandableFAB(distance: widget.r(120), children: [
                   FABActionButton(
                     icon: const Icon(Icons.create, color: Colors.white),
                     onPressed: () {
@@ -836,10 +897,10 @@ class StartButtonsState extends State<StartButtons> {
                   ),
                 ])),
             Positioned(
-              left: 168,
-              top: 148,
+              left: widget.r(168),
+              top: widget.r(148),
               child: ExpandableFAB(
-                distance: 120,
+                distance: widget.r(120),
                 children: [
                   FABActionButton(
                     icon: const Icon(Icons.person, color: Colors.white),
@@ -875,9 +936,9 @@ class StartButtonsState extends State<StartButtons> {
               ),
             ),
             Positioned(
-                left: 240,
-                top: 30,
-                child: ExpandableFAB(distance: 120, children: [
+                left: widget.r(240),
+                top: widget.r(30),
+                child: ExpandableFAB(distance: widget.r(120), children: [
                   FABActionButton(
                     icon: const Icon(Icons.person, color: Colors.white),
                     onPressed: () {
@@ -915,7 +976,7 @@ class StartButtonsState extends State<StartButtons> {
           child: Stack(children: <Widget>[
             CarouselSlider.builder(
               options: CarouselOptions(
-                  height: 700,
+                  height: widget.r(700),
                   aspectRatio: 14 / 9,
                   viewportFraction: 0.75, // 1.0:1つが全体に出る
                   initialPage: 0,
@@ -933,15 +994,16 @@ class StartButtonsState extends State<StartButtons> {
               },
             ),
             Positioned(
-                top: 15.0,
+                top: widget.r(15.0),
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
                       showCarousel = false;
                     });
                   },
-                  child: const Text('Close',
-                      style: TextStyle(color: Colors.black, fontSize: 28.0)),
+                  child: Text('Close',
+                      style: TextStyle(
+                          color: Colors.black, fontSize: widget.r(28.0))),
                 )),
           ])),
       Visibility(
@@ -950,7 +1012,7 @@ class StartButtonsState extends State<StartButtons> {
             CarouselSlider.builder(
               carouselController: cController,
               options: CarouselOptions(
-                  height: 300,
+                  height: widget.r(300),
                   // aspectRatio: 9 / 9,
                   viewportFraction: 0.4, // 1.0:1つが全体に出る
                   initialPage: 0,
@@ -967,18 +1029,18 @@ class StartButtonsState extends State<StartButtons> {
                 return buildCarouselImage2(index);
               },
             ),
-            const SizedBox(height: 32.0),
+            SizedBox(height: widget.r(32.0)),
             buildIndicator(),
             ElevatedButton(
               onPressed: () => cController.animateToPage(2),
-              child: Text('jump->'),
+              child: const Text('jump->'),
             ),
           ]))
     ]);
   }
 
   Widget buildCarouselImage(int index, dynamic card) => Padding(
-        padding: const EdgeInsets.only(left: 80.0),
+        padding: EdgeInsets.only(left: widget.r(80.0)),
         child: Row(children: <Widget>[
           card == null
               ? Container()
@@ -1028,13 +1090,14 @@ class StartButtonsState extends State<StartButtons> {
             child: high && cell != 'Ability'
                 ? Center(
                     child: SizedBox(
-                        height: 165.0,
-                        width: 750.0,
-                        child:
-                            Text(cell, style: const TextStyle(fontSize: 28.0))))
+                        height: widget.r(165.0),
+                        width: widget.r(750.0),
+                        child: Text(cell,
+                            style: TextStyle(fontSize: widget.r(28.0)))))
                 : Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(cell, style: const TextStyle(fontSize: 28.0))));
+                    padding: EdgeInsets.all(widget.r(12)),
+                    child: Text(cell,
+                        style: TextStyle(fontSize: widget.r(28.0)))));
       }).toList());
   Widget buildCarouselImage2(int index) => Container(
         width: MediaQuery.of(context).size.width,
@@ -1049,8 +1112,8 @@ class StartButtonsState extends State<StartButtons> {
         onDotClicked: (index) {
           cController.animateToPage(index);
         },
-        effect: const JumpingDotEffect(
-          verticalOffset: 5.0,
+        effect: JumpingDotEffect(
+          verticalOffset: widget.r(5.0),
           activeDotColor: Colors.orange,
           // dotColor: Colors.black12,
         ),
@@ -1063,6 +1126,6 @@ class StartButtonsState extends State<StartButtons> {
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.red,
         textColor: Colors.white,
-        fontSize: 16.0);
+        fontSize: widget.r(16.0));
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flash/flash.dart';
 
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
@@ -182,23 +183,21 @@ class HomePageState extends State<HomePage> {
     if (mariganCards != null) {
       setState(() => mariganCardList = mariganCards!);
       setState(() => mariganClickCount = 0);
-      print(999999999);
-      print(mariganCardList[mariganClickCount]);
       setState(() => handCards = mariganCardList[mariganClickCount]);
       setState(() => gameProgressStatus = 1);
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
-    }
-
-    // ハンドのブロックチェーンデータとの調整
-    List<int> _hand = [];
-    for (int i = 0; i < 7; i++) {
-      var cardId = gameObject!.yourHand[i.toString()];
-      if (cardId != null) {
-        _hand.add(int.parse(cardId));
+    } else {
+      // ハンドのブロックチェーンデータとの調整
+      List<int> _hand = [];
+      for (int i = 0; i < 7; i++) {
+        var cardId = gameObject!.yourHand[i.toString()];
+        if (cardId != null) {
+          _hand.add(int.parse(cardId));
+        }
       }
+      setState(() => handCards = _hand);
     }
-    setState(() => handCards = _hand);
   }
 
   void setCardInfo(cardInfo) {
@@ -247,6 +246,8 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    bool canOperate = true;
+
     return LayoutBuilder(builder: (layoutContext, constraints) {
       final wRes = constraints.maxWidth / desktopWidth;
       double r(double val) {
@@ -261,10 +262,10 @@ class HomePageState extends State<HomePage> {
                 top: r(445.0),
                 child: Row(children: <Widget>[
                   Padding(
-                      padding: EdgeInsets.only(left: r(15.0), top: r(10.0)),
+                      padding: EdgeInsets.only(left: r(10.0), top: r(20.0)),
                       child: Container(
-                        width: r(280.0),
-                        height: r(160.0),
+                        width: r(300.0),
+                        height: r(155.0),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('${imagePath}unit/bg-2.jpg'),
@@ -367,6 +368,7 @@ class HomePageState extends State<HomePage> {
                             cardInfos,
                             tapCard,
                             actedCardPosition,
+                            canOperate,
                             r),
                       ),
                       Padding(
@@ -379,14 +381,15 @@ class HomePageState extends State<HomePage> {
                             cardInfos,
                             tapCard,
                             actedCardPosition,
+                            canOperate,
                             r),
                       ),
                     ])),
             Visibility(
                 visible: gameProgressStatus == 1,
                 child: Positioned(
-                    left: r(320),
-                    top: r(425),
+                    left: r(730),
+                    top: r(500),
                     child: SizedBox(
                         width: r(100.0),
                         child: StreamBuilder<int>(
@@ -403,8 +406,8 @@ class HomePageState extends State<HomePage> {
             Visibility(
                 visible: mariganClickCount < 5 && gameProgressStatus == 1,
                 child: Positioned(
-                    left: r(500),
-                    top: r(425),
+                    left: r(900),
+                    top: r(500),
                     child: SizedBox(
                         width: r(100.0),
                         child: FloatingActionButton(
@@ -426,7 +429,12 @@ class HomePageState extends State<HomePage> {
                               ),
                             ))))),
             gameObject != null
-                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId), r)
+                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId),
+                    (limitOver) {
+                    setState(() {
+                      canOperate = limitOver;
+                    });
+                  }, r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -456,7 +464,7 @@ class HomePageState extends State<HomePage> {
                     setCardInfo(cardInfo);
                     break;
                 }
-              }, widget.enLocale)));
+              }, widget.enLocale, r)));
     });
   }
 

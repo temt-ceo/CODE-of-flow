@@ -17,10 +17,11 @@ class DragTargetWidget extends StatefulWidget {
   final dynamic cardInfos;
   final StringCallback tapCardCallback;
   int? actedCardPosition;
+  final bool canOperate;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos,
-      this.tapCardCallback, this.actedCardPosition, this.r);
+      this.tapCardCallback, this.actedCardPosition, this.canOperate, this.r);
 
   @override
   DragTargetState createState() => DragTargetState();
@@ -154,6 +155,9 @@ class DragTargetState extends State<DragTargetWidget> {
         _dropBloc.counterEventSink.add(DropAllowedEvent());
         return true;
       } else {
+        if (widget.canOperate == false) {
+          return false;
+        }
         if (widget.info != null &&
             widget.info!.isFirst != widget.info!.isFirstTurn) {
           _dropBloc.counterEventSink.add(DropDeniedEvent());

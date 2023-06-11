@@ -64,7 +64,7 @@ class DragBoxState extends State<DragBox> {
       child: isDroped
           ? Container()
           : Padding(
-              padding: EdgeInsets.only(left: widget.r(15.0)),
+              padding: EdgeInsets.only(left: widget.r(10.0)),
               child: Container(
                 width: widget.r(100.0),
                 height: widget.r(150.0),

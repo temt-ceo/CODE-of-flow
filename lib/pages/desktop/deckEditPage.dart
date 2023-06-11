@@ -227,6 +227,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                               cardInfos,
                               tapCard,
                               removedPosition,
+                              true,
                               r),
                         ),
                       ])),

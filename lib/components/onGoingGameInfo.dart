@@ -5,12 +5,14 @@ import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class OnGoingGameInfo extends StatefulWidget {
   final GameObject? info;
   final String cardText;
+  final ResponsiveSizeChangeFunction r;
 
-  const OnGoingGameInfo(this.info, this.cardText);
+  const OnGoingGameInfo(this.info, this.cardText, this.r);
 
   @override
   OnGoingGameInfoState createState() => OnGoingGameInfoState();
@@ -53,12 +55,33 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   @override
   Widget build(BuildContext context) {
     DateTime lastTurnEndTime;
-    double percentIndicatorValue = 100;
+    double percentIndicatorValue = 1.0;
+    int turn = 0;
+    bool isFirst = false;
+    bool isFirstTurn = false;
 
+    // ターン、先行後攻、現在は先行のターンか
+    if (turn != widget.info!.turn) {
+      setState(() {
+        turn = widget.info!.turn;
+      });
+    }
+    if (isFirst != widget.info!.isFirst) {
+      setState(() {
+        isFirst = widget.info!.isFirst;
+      });
+    }
+    if (isFirstTurn != widget.info!.isFirstTurn) {
+      setState(() {
+        isFirstTurn = widget.info!.isFirstTurn;
+      });
+    }
+
+    // 残り時間
     if (widget.info!.lastTimeTurnend != null) {
       lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
           double.parse(widget.info!.lastTimeTurnend!).toInt() * 1000);
-      final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 60));
+      final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
       final now = DateTime.now();
 
       if (turnEndTime.difference(now).inSeconds < 0) {
@@ -66,29 +89,30 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           percentIndicatorValue = 0.0;
         });
       } else {
+        var displayValue = turnEndTime.difference(now).inSeconds / 65;
         setState(() {
-          percentIndicatorValue = turnEndTime.difference(now).inSeconds / 60;
+          percentIndicatorValue = displayValue > 1 ? 1 : displayValue;
         });
       }
     }
 
     return Stack(children: <Widget>[
-      const Positioned(
-          left: 20.0,
-          top: 65.0,
+      Positioned(
+          left: widget.r(20.0),
+          top: widget.r(65.0),
           child: Text('Enemy:',
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.opponentLife; i++)
         Positioned(
-          left: 150.0 + i * 26,
-          top: 68.0,
+          left: widget.r(150.0 + i * 26),
+          top: widget.r(68.0),
           child: Container(
-            width: 25.0,
-            height: 25.0,
+            width: widget.r(25.0),
+            height: widget.r(25.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/enemyLife.png'),
@@ -105,22 +129,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 80.0,
-          top: 100.0,
+          left: widget.r(80.0),
+          top: widget.r(100.0),
           child: Text(
               'CP ${widget.info != null ? (widget.info!.opponentCp < 10 ? '0${widget.info!.opponentCp}' : widget.info!.opponentCp) : '--'}',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.opponentCp; i++)
         Positioned(
-          left: 152.0 + i * 20,
-          top: 105.0,
+          left: widget.r(152.0 + i * 20),
+          top: widget.r(105.0),
           child: Container(
-            width: 20.0,
-            height: 20.0,
+            width: widget.r(20.0),
+            height: widget.r(20.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/cp.png'),
@@ -137,31 +161,31 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 80.0,
-          top: 130.0,
+          left: widget.r(80.0),
+          top: widget.r(130.0),
           child: Text(
               'Dead - / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
-      const Positioned(
-          left: 320.0,
-          top: 100.0,
+      Positioned(
+          left: widget.r(320.0),
+          top: widget.r(100.0),
           child: Text('Hand',
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.opponentHand; i++)
         Positioned(
-          left: 400.0 + i * 21,
-          top: 103.0,
+          left: widget.r(400.0 + i * 21),
+          top: widget.r(103.0),
           child: Container(
-            width: 20.0,
-            height: 20.0,
+            width: widget.r(20.0),
+            height: widget.r(20.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/enemyHand.png'),
@@ -177,22 +201,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             ),
           ),
         ),
-      const Positioned(
-          left: 320.0,
-          top: 130.0,
+      Positioned(
+          left: widget.r(320.0),
+          top: widget.r(130.0),
           child: Text('Trigger',
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
         Positioned(
-          left: 400.0 + i * 26,
-          top: 133.0,
+          left: widget.r(400.0 + i * 26),
+          top: widget.r(133.0),
           child: Container(
-            width: 25.0,
-            height: 25.0,
+            width: widget.r(25.0),
+            height: widget.r(25.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/enemyHand.png'),
@@ -208,22 +232,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             ),
           ),
         ),
-      const Positioned(
-          left: 20.0,
-          top: 205.0,
+      Positioned(
+          left: widget.r(20.0),
+          top: widget.r(205.0),
           child: Text('Your Life:',
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.yourLife; i++)
         Positioned(
-          left: 150.0 + i * 26,
-          top: 208.0,
+          left: widget.r(150.0 + i * 26),
+          top: widget.r(208.0),
           child: Container(
-            width: 25.0,
-            height: 25.0,
+            width: widget.r(25.0),
+            height: widget.r(25.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/yourLife.png'),
@@ -240,22 +264,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 80.0,
-          top: 240.0,
+          left: widget.r(80.0),
+          top: widget.r(240.0),
           child: Text(
               'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       for (var i = 0; i < widget.info!.yourCp; i++)
         Positioned(
-          left: 152.0 + i * 20,
-          top: 245.0,
+          left: widget.r(152.0 + i * 20),
+          top: widget.r(245.0),
           child: Container(
-            width: 20.0,
-            height: 20.0,
+            width: widget.r(20.0),
+            height: widget.r(20.0),
             decoration: BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('${imagePath}button/cp.png'),
@@ -272,36 +296,36 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           ),
         ),
       Positioned(
-          left: 1320.0,
-          top: 540.0,
+          left: widget.r(1320.0),
+          top: widget.r(540.0),
           child: Text(
               'Deck ${widget.info != null ? widget.info!.yourRemainDeck.length : '--'}',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
-      const Positioned(
-          left: 1320.0,
-          top: 500.0,
+      Positioned(
+          left: widget.r(1320.0),
+          top: widget.r(500.0),
           child: Text('Dead -',
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 22.0,
+                fontSize: widget.r(22.0),
               ))),
       Positioned(
-          left: 30.0,
-          top: 490.0,
-          width: 270.0,
+          left: widget.r(30.0),
+          top: widget.r(490.0),
+          width: widget.r(270.0),
           child: Text(widget.cardText,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 16.0,
+                fontSize: widget.r(16.0),
               ))),
       Positioned(
-        left: 330.0,
+        left: widget.r(330.0),
         top: 0.0,
         child: Visibility(
             visible: widget.info != null
@@ -313,20 +337,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               percent: percentIndicatorValue,
               backgroundWidth: 0.0,
               center: Column(children: <Widget>[
-                const SizedBox(height: 30.0),
-                Text('${percentIndicatorValue.toString()} s',
-                    style: const TextStyle(
+                SizedBox(height: widget.r(30.0)),
+                Text(
+                    int.parse((percentIndicatorValue * 100).toString())
+                        .toString(),
+                    style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: 22.0,
+                      fontSize: widget.r(22.0),
                     )),
               ]),
               progressColor: const Color.fromARGB(255, 1, 247, 42),
             )),
       ),
       Positioned(
-          left: 1190.0,
-          top: 480.0,
+          left: widget.r(1190.0),
+          top: widget.r(480.0),
           child: Visibility(
             visible: widget.info != null
                 ? widget.info!.isFirst == widget.info!.isFirstTurn
@@ -339,13 +365,13 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               center: Column(children: <Widget>[
                 const SizedBox(height: 10.0),
                 Text('${percentIndicatorValue.toString()} s',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: 22.0,
+                      fontSize: widget.r(22.0),
                     )),
                 SizedBox(
-                    width: 90.0,
+                    width: widget.r(90.0),
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
                         onPressed: () async {

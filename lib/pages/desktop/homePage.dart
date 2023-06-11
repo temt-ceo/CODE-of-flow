@@ -182,7 +182,9 @@ class HomePageState extends State<HomePage> {
     if (mariganCards != null) {
       setState(() => mariganCardList = mariganCards!);
       setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCards![mariganClickCount]);
+      print(999999999);
+      print(mariganCardList[mariganClickCount]);
+      setState(() => handCards = mariganCardList[mariganClickCount]);
       setState(() => gameProgressStatus = 1);
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
@@ -211,16 +213,15 @@ class HomePageState extends State<HomePage> {
 
   void listenBCGGameServerProcess() async {
     GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
-    print(6665555);
-    print(ret);
     if (ret != null) {
+      print('$playerId , ${ret.playerId}');
       print(ret.message);
       if (playerId == ret.playerId) {
         if (ret.type == 'player_matching') {
           try {
-            String transactionId = ret.message.split('TransactionId:')[1];
+            String transactionId = ret.message.split(',TransactionID:')[1];
             displayMessage(ret.type,
-                "${ret.message.split(':')[1]} : ${ret.message.split(':')[2]}");
+                "The transaction of Player Matching is in progress.\n ${ret.message.split(',TransactionID:')[1]}");
             await Clipboard.setData(ClipboardData(text: transactionId));
           } catch (e) {
             debugPrint(e.toString());
@@ -385,9 +386,9 @@ class HomePageState extends State<HomePage> {
                 visible: gameProgressStatus == 1,
                 child: Positioned(
                     left: r(320),
-                    top: r(420),
+                    top: r(425),
                     child: SizedBox(
-                        width: r(120.0),
+                        width: r(100.0),
                         child: StreamBuilder<int>(
                             stream: _timer.events.stream,
                             builder: (BuildContext context,
@@ -396,16 +397,16 @@ class HomePageState extends State<HomePage> {
                                   child: Text(
                                 '0:0${snapshot.data.toString()}',
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: r(46.0)),
+                                    color: Colors.white, fontSize: r(42.0)),
                               ));
                             })))),
             Visibility(
                 visible: mariganClickCount < 5 && gameProgressStatus == 1,
                 child: Positioned(
                     left: r(500),
-                    top: r(420),
+                    top: r(425),
                     child: SizedBox(
-                        width: 120.0,
+                        width: r(100.0),
                         child: FloatingActionButton(
                             backgroundColor: Colors.transparent,
                             onPressed: () {
@@ -425,7 +426,7 @@ class HomePageState extends State<HomePage> {
                               ),
                             ))))),
             gameObject != null
-                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
+                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId), r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,

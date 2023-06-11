@@ -529,8 +529,8 @@ class StartButtonsState extends State<StartButtons> {
           context: context,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10.0),
-              topRight: Radius.circular(10.0),
+              topLeft: Radius.circular(20.0),
+              topRight: Radius.circular(20.0),
             ),
           ),
           backgroundColor: const Color.fromARGB(205, 248, 129, 2),
@@ -552,7 +552,7 @@ class StartButtonsState extends State<StartButtons> {
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), //丸み具合
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
@@ -596,7 +596,7 @@ class StartButtonsState extends State<StartButtons> {
       objJs['matched_time'],
       objJs['game_started'],
       objJs['last_time_turnend'],
-      objJs['enemy_attacking_cards'],
+      objJs['enemy_attacking_card'],
       int.parse(player.playerId),
       int.parse(objJs['your_cp']),
       objJs['your_field_unit'],
@@ -699,14 +699,16 @@ class StartButtonsState extends State<StartButtons> {
           padding: const EdgeInsets.only(top: 5.0),
           child:
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-            Text(
-              walletUser.addr == ''
-                  ? 'connect to wallet→'
-                  : (player.uuid == ''
-                      ? 'Address: ${walletUser.addr} '
-                      : 'Hello! ${player.nickname}. Click the button to start the game→'),
-              style: const TextStyle(color: Colors.white, fontSize: 26.0),
-            ),
+            Visibility(
+                visible: gameStarted == false,
+                child: Text(
+                  walletUser.addr == ''
+                      ? 'connect to wallet→'
+                      : (player.uuid == ''
+                          ? 'Address: ${walletUser.addr} '
+                          : 'Hello! ${player.nickname}. Click the button to start the game→'),
+                  style: const TextStyle(color: Colors.white, fontSize: 26.0),
+                )),
             Visibility(
                 visible: walletUser.addr == '',
                 child: const SizedBox(width: 10)),

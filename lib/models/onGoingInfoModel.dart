@@ -5,7 +5,7 @@ class GameObject {
   final String matchedTime;
   final bool gameStarted;
   final String? lastTimeTurnend;
-  final List<dynamic> enemyAttackingCards;
+  final dynamic enemyAttackingCard;
   final int you;
   int yourCp;
   final dynamic yourFieldUnit;
@@ -32,7 +32,7 @@ class GameObject {
       this.matchedTime,
       this.gameStarted,
       this.lastTimeTurnend,
-      this.enemyAttackingCards,
+      this.enemyAttackingCard,
       this.you,
       this.yourCp,
       this.yourFieldUnit,
@@ -53,7 +53,7 @@ class GameObject {
       this.opponentTriggerCards);
 
   static dynamic getOtherGameInfo() {
-    return GameObject(1, true, true, '1', true, '1', [], 1, 1, {}, 1, 1,
+    return GameObject(1, true, true, '1', true, '1', null, 1, 1, {}, 1, 1,
         {1: 16}, 1, [], {}, 1, 1, {}, 1, 1, 1, 1, 1, 1);
   }
 }

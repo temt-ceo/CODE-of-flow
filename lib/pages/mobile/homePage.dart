@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter/services.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -181,7 +182,9 @@ class HomePageState extends State<HomePage> {
     if (mariganCards != null) {
       setState(() => mariganCardList = mariganCards!);
       setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCards![mariganClickCount]);
+      print(999999999);
+      print(mariganCardList[mariganClickCount]);
+      setState(() => handCards = mariganCardList[mariganClickCount]);
       setState(() => gameProgressStatus = 1);
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
@@ -210,17 +213,35 @@ class HomePageState extends State<HomePage> {
 
   void listenBCGGameServerProcess() async {
     GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
-    print(6665555);
-    print(ret);
     if (ret != null) {
-      print(ret.id);
-      print(ret.type);
+      print('$playerId , ${ret.playerId}');
       print(ret.message);
-      print(playerId);
-      print(ret.playerId);
       if (playerId == ret.playerId) {
-        showToast(ret.message);
+        if (ret.type == 'player_matching') {
+          try {
+            String transactionId = ret.message.split(',TransactionID:')[1];
+            displayMessage(ret.type,
+                "The transaction of Player Matching is in progress.\n ${ret.message.split(',TransactionID:')[1]}");
+            await Clipboard.setData(ClipboardData(text: transactionId));
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        }
+      } else {
+        if (ret.type == 'player_matching') {
+          showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
+        }
       }
+    }
+  }
+
+  void displayMessage(type, transactionId) {
+    if (type == 'player_matching') {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+              // title: const Text('You entered in Alcana.'),
+              content: Text('$transactionId (Saved on clipboard.)')));
     }
   }
 
@@ -365,9 +386,9 @@ class HomePageState extends State<HomePage> {
                 visible: gameProgressStatus == 1,
                 child: Positioned(
                     left: r(320),
-                    top: r(420),
+                    top: r(425),
                     child: SizedBox(
-                        width: r(120.0),
+                        width: r(10.0),
                         child: StreamBuilder<int>(
                             stream: _timer.events.stream,
                             builder: (BuildContext context,
@@ -383,9 +404,9 @@ class HomePageState extends State<HomePage> {
                 visible: mariganClickCount < 5 && gameProgressStatus == 1,
                 child: Positioned(
                     left: r(500),
-                    top: r(420),
+                    top: r(425),
                     child: SizedBox(
-                        width: 120.0,
+                        width: 100.0,
                         child: FloatingActionButton(
                             backgroundColor: Colors.transparent,
                             onPressed: () {
@@ -405,7 +426,7 @@ class HomePageState extends State<HomePage> {
                               ),
                             ))))),
             gameObject != null
-                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId))
+                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId), r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -450,8 +471,9 @@ class HomePageState extends State<HomePage> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0);
+        backgroundColor: Colors.black,
+        textColor: Colors.blue,
+        fontSize: 22.0,
+        webPosition: 'left');
   }
 }

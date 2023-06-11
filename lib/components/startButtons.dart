@@ -533,7 +533,7 @@ class StartButtonsState extends State<StartButtons> {
               topRight: Radius.circular(10.0),
             ),
           ),
-          backgroundColor: Color.fromARGB(205, 248, 129, 2),
+          backgroundColor: const Color.fromARGB(205, 248, 129, 2),
           barrierColor: Colors.transparent,
           builder: (buildContext) {
             loadingContext3 = buildContext;
@@ -568,21 +568,19 @@ class StartButtonsState extends State<StartButtons> {
                         child: const Text('Insert 1FLOW coin.'),
                       )),
                       const SizedBox(height: 10.0),
-                      Text(
-                          'You currently have ${balance.toString()} FLOW coins.\n By pressing the button, you are asked to pay 1 coin.',
+                      Text(L10n.of(context)!.insufficientEN(balance.toString()),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                       const SizedBox(height: 8.0),
-                      const Text(
-                          'Press "Approve" button, then 100 EN will be added.\n But when you won this arcade game, you will get 0.5 FLOW in that time!',
+                      Text(L10n.of(context)!.insufficientEN2,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                       const SizedBox(height: 4.0),
-                      const Text('So you can increase your FLOW coins!!',
+                      Text(L10n.of(context)!.insufficientEN3,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                     ])));
           });
@@ -805,20 +803,20 @@ class StartButtonsState extends State<StartButtons> {
                           fontSize: 22.0,
                         )),
                   ]),
-                  progressColor: Color.fromARGB(255, 6, 178, 246),
+                  progressColor: const Color.fromARGB(255, 6, 178, 246),
                 )),
             Positioned(
                 left: 50,
                 top: 220,
                 child: ExpandableFAB(distance: 120, children: [
                   FABActionButton(
-                    icon: Icon(Icons.create, color: Colors.white),
+                    icon: const Icon(Icons.create, color: Colors.white),
                     onPressed: () {
-                      showToast('EN is successfull charged.');
+                      showToast('EN is successfully charged.');
                     },
                   ),
                   FABActionButton(
-                    icon: Icon(Icons.settings, color: Colors.white),
+                    icon: const Icon(Icons.settings, color: Colors.white),
                     onPressed: () {
                       setState(() {
                         showCarousel2 = true;
@@ -826,7 +824,7 @@ class StartButtonsState extends State<StartButtons> {
                     },
                   ),
                   FABActionButton(
-                    icon: Icon(Icons.add, color: Colors.white),
+                    icon: const Icon(Icons.add, color: Colors.white),
                     onPressed: () {
                       setState(() {
                         showCarousel = true;

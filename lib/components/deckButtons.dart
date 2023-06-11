@@ -5,8 +5,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_util';
 import 'dart:html' as html;
-import 'package:js/js.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:js/js.dart';
+
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
@@ -342,21 +345,19 @@ class DeckButtonsState extends State<DeckButtons> {
                         child: const Text('Insert 1FLOW coin.'),
                       )),
                       const SizedBox(height: 10.0),
-                      Text(
-                          'You currently have ${balance.toString()} FLOW coins.\n By pressing the button, you are asked to pay 1 coin.',
+                      Text(L10n.of(context)!.insufficientEN(balance.toString()),
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                       const SizedBox(height: 8.0),
-                      const Text(
-                          'Press "Approve" button, then 100 EN will be added.\n But when you won this arcade game, you will get 0.5 FLOW in that time!',
+                      Text(L10n.of(context)!.insufficientEN2,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                       const SizedBox(height: 4.0),
-                      const Text('So you can increase your FLOW coins!!',
+                      Text(L10n.of(context)!.insufficientEN3,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                     ])));
           });

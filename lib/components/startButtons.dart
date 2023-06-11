@@ -289,7 +289,6 @@ class StartButtonsState extends State<StartButtons> {
               widget.callback('started-game-info', player.playerId,
                   setGameInfo(objJs), null, null);
             }
-            print('Set gameStarted = true.');
             gameStarted = true;
           }
           // 残高を取得
@@ -600,7 +599,6 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   GameObject setGameInfo(objJs) {
-    print('setGameInfo');
     return GameObject(
       int.parse(objJs['turn']),
       objJs['is_first'],

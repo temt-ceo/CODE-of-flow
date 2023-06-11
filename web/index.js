@@ -114,7 +114,7 @@ window.getCurrentStatus = async function (address) {
       arg(address, t.Address)
     ]
   });
-  console.log(result);
+  // console.log(result);
   return result;
 };
 window.getMariganCards = async function (address, playerId) {
@@ -133,7 +133,7 @@ window.getMariganCards = async function (address, playerId) {
       arg(playerId, t.UInt32)
     ]
   });
-  console.log(result);
+  // console.log(result);
   return result
 };
 window.getCardInfo = async function () {
@@ -188,7 +188,7 @@ window.getBalance = async function (address, playerId) {
       arg(playerId, t.Optional(t.UInt32)),
     ]
   });
-  console.log(result);
+  // console.log(result);
   return result
 };
 window.getPlayerName = function(player) {

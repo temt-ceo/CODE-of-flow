@@ -238,6 +238,29 @@ class HomePageState extends State<HomePage> {
           showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
         }
       }
+      if (ret.type == 'turn_change') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: const Text('Turn Change!'),
+                    content: const Text(''),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
+        });
+      }
     }
   }
 

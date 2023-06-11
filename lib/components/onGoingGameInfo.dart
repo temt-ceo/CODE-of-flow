@@ -97,27 +97,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
       setState(() {
         canTurnEnd = false;
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showFlash(
-            context: context,
-            duration: const Duration(seconds: 4),
-            builder: (context, controller) {
-              return Flash(
-                controller: controller,
-                position: FlashPosition.bottom,
-                child: FlashBar(
-                  controller: controller,
-                  title: const Text('Turn Change!'),
-                  content: const Text(''),
-                  indicatorColor: Colors.blue,
-                  icon: const Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.blue,
-                  ),
-                ),
-              );
-            });
-      });
     }
 
     // 残り時間

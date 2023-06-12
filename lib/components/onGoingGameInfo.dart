@@ -1,10 +1,12 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:flash/flash.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
+import 'package:CodeOfFlow/models/TurnEndModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
@@ -27,6 +29,13 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   APIService apiService = APIService();
   BuildContext? loadingContext;
+  late DateTime lastTurnEndTime;
+  double percentIndicatorValue = 1.0;
+  String percentIndicatorValueStr = '60';
+  bool canTurnEnd = true;
+  int turn = 0;
+  bool isFirst = false;
+  bool isFirstTurn = false;
 
   void showGameLoading() {
     showDialog(
@@ -59,13 +68,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime lastTurnEndTime;
-    double percentIndicatorValue = 1.0;
-    bool canTurnEnd = true;
-    int turn = 0;
-    bool isFirst = false;
-    bool isFirstTurn = false;
-
     // ターン、先行後攻、現在は先行のターンか
     if (turn != widget.info!.turn) {
       setState(() {
@@ -84,19 +86,18 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
     }
 
     // Turn End
-    void turnEnd() async {
+    void turnEnd(fromOpponent) async {
       showGameLoading();
+      var message = TurnEndModel(fromOpponent);
+      print(jsonEncode(message));
       var ret = await apiService.saveGameServerProcess(
-          'turn_change', '', widget.info!.you.toString());
+          'turn_change', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
       debugPrint('transaction published');
       debugPrint(ret.toString());
       if (ret != null) {
         debugPrint(ret.message);
       }
-      setState(() {
-        canTurnEnd = false;
-      });
     }
 
     // 残り時間
@@ -107,29 +108,44 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
       final now = DateTime.now();
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
-        if (turnEndTime.difference(now).inSeconds == 0) {
+        if (turnEndTime.difference(now).inSeconds == 0 ||
+            turnEndTime.difference(now).inSeconds % 50 == 0) {
           // 対戦相手側の画面で実施(こちら側はターン終了ボタンがあるので)
-          if (widget.info!.isFirst == widget.info!.isFirstTurn) {
-            turnEnd();
+          if (widget.info!.isFirst != widget.info!.isFirstTurn) {
+            if (canTurnEnd == true) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                turnEnd(true);
+              });
+            }
+            setState(() {
+              canTurnEnd = false;
+            });
           }
         }
         setState(() {
           percentIndicatorValue = 0.0;
+          percentIndicatorValueStr = '0';
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           widget.canOperate(false);
         });
       } else {
+        setState(() {
+          canTurnEnd = true;
+        });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           widget.canOperate(true);
         });
         var displayValue = turnEndTime.difference(now).inSeconds / 60;
         setState(() {
           percentIndicatorValue = displayValue > 1 ? 1 : displayValue;
+          percentIndicatorValueStr = displayValue > 1
+              ? '60'
+              : turnEndTime.difference(now).inSeconds.toString();
         });
         if (widget.info!.isFirst == widget.info!.isFirstTurn) {
-          // 誤動作を防ぐために１５秒経過後に押せるようにする
-          if (percentIndicatorValue < 0.45) {
+          // 誤動作を防ぐために１0秒経過後に押せるようにする
+          if (percentIndicatorValue < 0.50) {
             setState(() {
               canTurnEnd = true;
             });
@@ -274,15 +290,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             ),
           ),
         ),
-      // Positioned(
-      //     left: widget.r(20.0),
-      //     top: widget.r(205.0),
-      //     child: Text('Your Life:',
-      //         style: TextStyle(
-      //           color: Colors.white,
-      //           decoration: TextDecoration.none,
-      //           fontSize: widget.r(22.0),
-      //         ))),
       for (var i = 0; i < widget.info!.yourLife; i++)
         Positioned(
           left: widget.r(150.0 + i * 21),
@@ -357,6 +364,16 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 fontSize: widget.r(22.0),
               ))),
       Positioned(
+          left: widget.r(1080.0),
+          top: widget.r(0.0),
+          child: Text(
+              'Turn $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
+              style: TextStyle(
+                color: Colors.white,
+                decoration: TextDecoration.none,
+                fontSize: widget.r(22.0),
+              ))),
+      Positioned(
           left: widget.r(30.0),
           top: widget.r(490.0),
           width: widget.r(270.0),
@@ -380,7 +397,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               backgroundWidth: 0.0,
               center: Column(children: <Widget>[
                 SizedBox(height: widget.r(30.0)),
-                Text('${int.parse((percentIndicatorValue * 60).toString())} s',
+                Text('$percentIndicatorValueStr s',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
@@ -404,7 +421,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               backgroundWidth: 0.0,
               center: Column(children: <Widget>[
                 SizedBox(height: widget.r(10.0)),
-                Text('${int.parse((percentIndicatorValue * 60).toString())} s',
+                Text('$percentIndicatorValueStr s',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
@@ -417,7 +434,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                         child: FloatingActionButton(
                             backgroundColor: Colors.transparent,
                             onPressed: () async {
-                              turnEnd();
+                              turnEnd(false);
                             },
                             tooltip: 'Turn End',
                             child: Image.asset(

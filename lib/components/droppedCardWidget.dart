@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
+
 const envFlavor = String.fromEnvironment('flavor');
 
 typedef void StringCallback(String val, int cardId, int? position);
@@ -13,7 +16,7 @@ class DroppedCardWidget extends StatefulWidget {
   final bool isSecondRow;
   final StringCallback tapCardCallback;
   final int index;
-  final bool canAttack;
+  final Stream<int> attack_stream;
   final ResponsiveSizeChangeFunction r;
 
   const DroppedCardWidget(
@@ -24,7 +27,7 @@ class DroppedCardWidget extends StatefulWidget {
       this.isSecondRow,
       this.tapCardCallback,
       this.index,
-      this.canAttack,
+      this.attack_stream,
       this.r);
 
   @override
@@ -34,159 +37,176 @@ class DroppedCardWidget extends StatefulWidget {
 class DroppedCardState extends State<DroppedCardWidget> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool isTapped = false;
+  bool canAttack = false;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-        left: widget.left,
-        bottom: widget.label == 'deck'
-            ? (widget.isSecondRow ? widget.r(40.0) : widget.r(220.0))
-            : (widget.isSecondRow ? widget.r(240.0) : widget.r(5.0)),
-        child: Stack(children: [
-          GestureDetector(
-              onTap: () {
-                setState(() {
-                  isTapped = !isTapped;
-                });
-                widget.tapCardCallback(
-                    'tapped', int.parse(widget.cardInfo['card_id']), null);
-              },
-              child: widget.label == 'deck'
-                  ? Container(
-                      width: widget.r(81.0),
-                      height: widget.r(115.0),
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(widget.imageUrl),
-                            fit: BoxFit.contain),
-                      ),
-                      child: Stack(children: <Widget>[
-                        Positioned(
-                            left: 0.0,
-                            top: 0.0,
-                            child: SizedBox(
-                                width: widget.r(20.0),
-                                height: widget.r(26.0),
-                                child: ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(widget.r(2.0)),
-                                    child: Container(
-                                        alignment: Alignment.topCenter,
-                                        color: widget.cardInfo?['type'] == '0'
-                                            ? Colors.red
-                                            : (widget.cardInfo?['type'] == '1'
-                                                ? const Color.fromARGB(
-                                                    255, 170, 153, 1)
-                                                : Colors.grey),
-                                        child: Text(
-                                            widget.cardInfo == null
-                                                ? ''
-                                                : widget.cardInfo?['cost'],
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              decoration: TextDecoration.none,
-                                              fontSize: widget.r(20.0),
-                                            )))))),
-                        widget.cardInfo?['bp'] == '0'
-                            ? Container()
-                            : Positioned(
-                                right: 0.0,
-                                bottom: 0.0,
-                                child: SizedBox(
-                                    width: widget.r(60.0),
-                                    height: widget.r(19.0),
-                                    child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(
-                                            widget.r(2.0)),
-                                        child: Container(
-                                            alignment: Alignment.centerRight,
-                                            color: const Color.fromARGB(
-                                                255, 52, 51, 51),
-                                            child: Text(
-                                                widget.cardInfo == null
-                                                    ? ''
-                                                    : widget.cardInfo?['bp'],
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  decoration:
-                                                      TextDecoration.none,
-                                                  fontSize: 16.0,
-                                                )))))),
-                      ]))
-                  : Container(
-                      width: widget.label == 'unit'
-                          ? widget.r(105)
-                          : widget.r(76), // TODO 380 / 440
-                      height: widget.label == 'unit'
-                          ? widget.r(150)
-                          : widget.r(108), // TODO 380 / 440
-                      child: widget.label == 'unit'
-                          ? Stack(children: <Widget>[
-                              Container(
-                                decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        alignment: Alignment.topLeft,
-                                        image: AssetImage(widget.imageUrl),
-                                        fit: BoxFit.cover)),
-                              )
-                            ])
-                          : Center(
-                              child: Padding(
-                              padding: EdgeInsets.only(bottom: widget.r(19.0)),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        alignment: FractionalOffset.topCenter,
-                                        image: AssetImage(widget.imageUrl),
-                                        fit: BoxFit.fitWidth)),
-                              ),
-                            )))),
-          isTapped
-              ? (widget.label == 'deck'
-                  ? Positioned(
-                      left: widget.r(16.0),
-                      top: widget.r(30.0),
-                      child: FloatingActionButton(
-                          backgroundColor: Colors.transparent,
-                          onPressed: () {
-                            widget.tapCardCallback(
-                                'remove',
-                                int.parse(widget.cardInfo['card_id']),
-                                widget.index);
-                          },
-                          tooltip: 'Remove',
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(40.0),
-                            child: Image.asset(
-                              '${imagePath}button/remove.png',
-                              fit: BoxFit.cover,
+    return StreamBuilder(
+        stream: widget.attack_stream,
+        initialData: 0,
+        builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+          return Positioned(
+              left: widget.left,
+              bottom: widget.label == 'deck'
+                  ? (widget.isSecondRow ? widget.r(40.0) : widget.r(220.0))
+                  : (widget.isSecondRow ? widget.r(227.0) : widget.r(7.0)),
+              child: Stack(children: [
+                GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        isTapped = !isTapped;
+                      });
+                      widget.tapCardCallback('tapped',
+                          int.parse(widget.cardInfo['card_id']), widget.index);
+                    },
+                    child: widget.label == 'deck'
+                        ? Container(
+                            width: widget.r(81.0),
+                            height: widget.r(115.0),
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(widget.imageUrl),
+                                  fit: BoxFit.contain),
                             ),
-                          )),
-                    )
-                  : widget.label == 'unit' && widget.canAttack
-                      ? Positioned(
-                          left: widget.r(28.0),
-                          top: widget.r(50.0),
-                          child: FloatingActionButton(
-                              backgroundColor: Colors.transparent,
-                              onPressed: () {
-                                widget.tapCardCallback(
-                                    'attack',
-                                    int.parse(widget.cardInfo['card_id']),
-                                    widget.index);
-                              },
-                              tooltip: 'Attack',
-                              child: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.circular(widget.r(40.0)),
-                                child: Image.asset(
-                                  '${imagePath}button/attack.png',
-                                  fit: BoxFit.cover,
-                                ),
-                              )),
-                        )
-                      : Container())
-              : Container(),
-        ]));
+                            child: Stack(children: <Widget>[
+                              Positioned(
+                                  left: 0.0,
+                                  top: 0.0,
+                                  child: SizedBox(
+                                      width: widget.r(20.0),
+                                      height: widget.r(26.0),
+                                      child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(
+                                              widget.r(2.0)),
+                                          child: Container(
+                                              alignment: Alignment.topCenter,
+                                              color: widget.cardInfo?['type'] ==
+                                                      '0'
+                                                  ? Colors.red
+                                                  : (widget.cardInfo?['type'] ==
+                                                          '1'
+                                                      ? const Color.fromARGB(
+                                                          255, 170, 153, 1)
+                                                      : Colors.grey),
+                                              child: Text(
+                                                  widget.cardInfo == null
+                                                      ? ''
+                                                      : widget
+                                                          .cardInfo?['cost'],
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    decoration:
+                                                        TextDecoration.none,
+                                                    fontSize: widget.r(20.0),
+                                                  )))))),
+                              widget.cardInfo?['bp'] == '0'
+                                  ? Container()
+                                  : Positioned(
+                                      right: 0.0,
+                                      bottom: 0.0,
+                                      child: SizedBox(
+                                          width: widget.r(60.0),
+                                          height: widget.r(19.0),
+                                          child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      widget.r(2.0)),
+                                              child: Container(
+                                                  alignment:
+                                                      Alignment.centerRight,
+                                                  color: const Color.fromARGB(
+                                                      255, 52, 51, 51),
+                                                  child: Text(
+                                                      widget.cardInfo == null
+                                                          ? ''
+                                                          : widget
+                                                              .cardInfo?['bp'],
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        decoration:
+                                                            TextDecoration.none,
+                                                        fontSize: 16.0,
+                                                      )))))),
+                            ]))
+                        : Container(
+                            width: widget.label == 'unit'
+                                ? widget.r(105)
+                                : widget.r(76), // TODO 380 / 440
+                            height: widget.label == 'unit'
+                                ? widget.r(150)
+                                : widget.r(108), // TODO 380 / 440
+                            child: widget.label == 'unit'
+                                ? Stack(children: <Widget>[
+                                    Container(
+                                      decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              alignment: Alignment.topLeft,
+                                              image:
+                                                  AssetImage(widget.imageUrl),
+                                              fit: BoxFit.cover)),
+                                    )
+                                  ])
+                                : Center(
+                                    child: Padding(
+                                    padding:
+                                        EdgeInsets.only(bottom: widget.r(19.0)),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                              alignment:
+                                                  FractionalOffset.topCenter,
+                                              image:
+                                                  AssetImage(widget.imageUrl),
+                                              fit: BoxFit.fitWidth)),
+                                    ),
+                                  )))),
+                isTapped
+                    ? (widget.label == 'deck'
+                        ? Positioned(
+                            left: widget.r(16.0),
+                            top: widget.r(30.0),
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  widget.tapCardCallback(
+                                      'remove',
+                                      int.parse(widget.cardInfo['card_id']),
+                                      widget.index);
+                                },
+                                tooltip: 'Remove',
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  child: Image.asset(
+                                    '${imagePath}button/remove.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )),
+                          )
+                        : widget.label == 'unit' && snapshot.data == 1
+                            ? Positioned(
+                                left: widget.r(28.0),
+                                top: widget.r(50.0),
+                                child: FloatingActionButton(
+                                    backgroundColor: Colors.transparent,
+                                    onPressed: () {
+                                      widget.tapCardCallback(
+                                          'attack',
+                                          int.parse(widget.cardInfo['card_id']),
+                                          widget.index);
+                                    },
+                                    tooltip: 'Attack',
+                                    child: ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.circular(widget.r(40.0)),
+                                      child: Image.asset(
+                                        '${imagePath}button/attack.png',
+                                        fit: BoxFit.cover,
+                                      ),
+                                    )),
+                              )
+                            : Container())
+                    : Container(),
+              ]));
+        });
   }
 }

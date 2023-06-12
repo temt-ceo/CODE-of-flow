@@ -29,5 +29,7 @@
   "nameConfirmText": "If you are satisfied with {name}, please click the button below.",
   "insufficientEN": "'You currently have {balance} FLOW coins.\n By pressing the button, you are asked to pay 1 FLOW coin.'",
   "insufficientEN2": "Press \"Approve\" button, then 100 EN will be added.\n But when you won this arcade game, you will get 0.5 FLOW at that time!",
-  "insufficientEN3": "So you can increase your FLOW coins if you continue to win!!"
+  "insufficientEN3": "So you can increase your FLOW coins if you continue to win!!",
+  "isFirst": "First attack",
+  "isNotFirst": "First attack"
 }

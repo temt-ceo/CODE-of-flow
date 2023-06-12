@@ -29,5 +29,7 @@
   "nameConfirmText": " {name}でよろしければ, 以下のボタンを押して下さい。",
   "insufficientEN": "'あなたは現在 {balance} FLOW コインをお持ちです。\n 以下のボタンを押すと1FLOWコインを支払って良いか聞かれます。'",
   "insufficientEN2": "\"承認する\"ボタンを押すと, 100ENが追加されます。\n しかし、このアーケードゲームに勝つと0.5FLOWがその時にもらえますよ!",
-  "insufficientEN3": "だからゲームに勝ち続けるとFLOWコインを増やすことができるんです!!"
+  "insufficientEN3": "だからゲームに勝ち続けるとFLOWコインを増やすことができるんです!!",
+  "isFirst": "先攻",
+  "isNotFirst": "後攻"
 }

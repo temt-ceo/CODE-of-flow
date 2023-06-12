@@ -5,6 +5,8 @@ import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
 import 'package:CodeOfFlow/components/deckButtons.dart';
 import 'package:CodeOfFlow/components/droppedCardWidget.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
+import 'package:CodeOfFlow/models/attackModel.dart';
+import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 typedef void StringCallback(String val, int cardId, int? position);
@@ -18,10 +20,19 @@ class DragTargetWidget extends StatefulWidget {
   final StringCallback tapCardCallback;
   int? actedCardPosition;
   final bool canOperate;
+  final Stream<int> attack_stream;
   final ResponsiveSizeChangeFunction r;
 
-  DragTargetWidget(this.label, this.imageUrl, this.info, this.cardInfos,
-      this.tapCardCallback, this.actedCardPosition, this.canOperate, this.r);
+  DragTargetWidget(
+      this.label,
+      this.imageUrl,
+      this.info,
+      this.cardInfos,
+      this.tapCardCallback,
+      this.actedCardPosition,
+      this.canOperate,
+      this.attack_stream,
+      this.r);
 
   @override
   DragTargetState createState() => DragTargetState();
@@ -29,21 +40,89 @@ class DragTargetWidget extends StatefulWidget {
 
 class DragTargetState extends State<DragTargetWidget> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  BuildContext? loadingContext;
+  APIService apiService = APIService();
   List<Widget> dropedList = [];
   List<Widget> dropedListEnemy = [];
   List<Widget> dropedListSecond = [];
   final DropAllowBloc _dropBloc = DropAllowBloc();
+  dynamic yourFieldUnit;
+  dynamic opponentFieldUnit;
+  bool canAttack = false;
+  int? attackSignalPosition = 0;
+
+  void showGameLoading() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (buildContext) {
+        loadingContext = buildContext;
+        return Container(
+          color: Colors.transparent,
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void closeGameLoading() {
+    if (loadingContext != null) {
+      Navigator.pop(loadingContext!);
+    }
+  }
+
+  void attack() async {
+    print(2222);
+    showGameLoading();
+    var objStr2 = jsonToString(widget.info!.yourTriggerCards);
+    var objJs2 = jsonDecode(objStr2);
+    List<int?> triggerPositions = [null, null, null, null];
+    for (int i = 1; i <= 4; i++) {
+      if (objJs2[i.toString()] != null) {
+        triggerPositions[i - 1] = objJs2[i.toString()];
+      }
+    }
+    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
+        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
+    List<int> usedInterceptCard = [];
+    var message = AttackModel(
+        widget.actedCardPosition!, null, triggerCards, usedInterceptCard);
+    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+        jsonEncode(message), widget.info!.you.toString());
+    closeGameLoading();
+    debugPrint('transaction published');
+    debugPrint(ret.toString());
+    if (ret != null) {
+      debugPrint(ret.message);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (widget.info != null) {
+      setState(() {
+        yourFieldUnit = widget.info!.yourFieldUnit;
+      });
+      setState(() {
+        opponentFieldUnit = widget.info!.opponentFieldUnit;
+      });
+    }
+
     // print(
     //     '除去orアタック(remove or attack card position): ${widget.actedCardPosition}');
     if (widget.info != null && widget.label == 'unit') {
-      var objStr = jsonToString(widget.info!.yourFieldUnit);
-      var objJs = jsonDecode(objStr);
       for (int i = 1; i <= 5; i++) {
-        if (objJs[i.toString()] != null && i > dropedList.length) {
-          var cardIdStr = objJs[i.toString()];
+        if (yourFieldUnit[i.toString()] != null && i > dropedList.length) {
+          var cardIdStr = yourFieldUnit[i.toString()];
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
           dropedList.add(DroppedCardWidget(
@@ -53,16 +132,15 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
-              dropedList.length,
-              false,
+              i - 1,
+              widget.attack_stream,
               widget.r));
         }
       }
-      var objStr2 = jsonToString(widget.info!.opponentFieldUnit);
-      var objJs2 = jsonDecode(objStr2);
       for (int i = 1; i <= 5; i++) {
-        if (objJs2[i.toString()] != null && i > dropedListEnemy.length) {
-          var cardIdStr = objJs2[i.toString()];
+        if (opponentFieldUnit[i.toString()] != null &&
+            i > dropedListEnemy.length) {
+          var cardIdStr = opponentFieldUnit[i.toString()];
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
           dropedListEnemy.add(DroppedCardWidget(
@@ -72,8 +150,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               true,
               widget.tapCardCallback,
-              dropedList.length,
-              false,
+              i - 1,
+              widget.attack_stream,
               widget.r));
         }
       }
@@ -93,8 +171,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
-              dropedList.length,
-              false,
+              i - 1,
+              widget.attack_stream,
               widget.r));
         }
       }
@@ -105,6 +183,17 @@ class DragTargetState extends State<DragTargetWidget> {
       if (widget.actedCardPosition != null) {
         dropedList.removeAt(widget.actedCardPosition!);
         setState(() => widget.actedCardPosition = null);
+      }
+    } else if (widget.label == 'unit') {
+      // Attack card.
+      if (widget.actedCardPosition != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          attack();
+        });
+        setState(() => {
+              attackSignalPosition = widget.actedCardPosition,
+              widget.actedCardPosition = null
+            });
       }
     }
 
@@ -122,7 +211,7 @@ class DragTargetState extends State<DragTargetWidget> {
             true,
             widget.tapCardCallback,
             dropedList.length + dropedListSecond.length,
-            false,
+            widget.attack_stream,
             widget.r));
       } else {
         dropedList.add(DroppedCardWidget(
@@ -138,11 +227,7 @@ class DragTargetState extends State<DragTargetWidget> {
             false,
             widget.tapCardCallback,
             dropedList.length,
-            widget.label == 'unit' && widget.info != null
-                ? (widget.info!.isFirst == widget.info!.isFirstTurn
-                    ? true
-                    : false)
-                : false,
+            widget.attack_stream,
             widget.r));
       }
       _dropBloc.counterEventSink.add(DropLeaveEvent());
@@ -239,6 +324,27 @@ class DragTargetState extends State<DragTargetWidget> {
               ),
               child: widget.label == 'unit'
                   ? Stack(children: <Widget>[
+                      Positioned(
+                        left: widget.r(
+                            (attackSignalPosition! >= 2 ? -150.0 : 20.0) +
+                                attackSignalPosition! * 120.0),
+                        top: widget.r(-5.0),
+                        child: Container(
+                          width: widget
+                              .r(attackSignalPosition! >= 2 ? 350.0 : 186.0),
+                          height: widget.r(240.0),
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.7,
+                                image: AssetImage(attackSignalPosition! >= 2
+                                    ? '${imagePath}unit/attackSignal2.png'
+                                    : '${imagePath}unit/attackSignal.png'),
+                                fit: BoxFit.cover),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 30.0),
                       Stack(children: dropedListEnemy),
                       Stack(children: dropedList),
                     ])

@@ -114,7 +114,7 @@ window.getCurrentStatus = async function (address) {
       arg(address, t.Address)
     ]
   });
-  // console.log(result);
+  console.log(result);
   return result;
 };
 window.getMariganCards = async function (address, playerId) {

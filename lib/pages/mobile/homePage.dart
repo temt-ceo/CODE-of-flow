@@ -6,6 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flash/flash.dart';
 
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
 import 'package:CodeOfFlow/components/draggableCardWidget.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/onGoingGameInfo.dart';
@@ -32,6 +34,7 @@ class HomePageState extends State<HomePage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   APIService apiService = APIService();
+  final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   GameObject? gameObject;
   List<List<int>> mariganCardList = [];
   int mariganClickCount = 0;
@@ -41,7 +44,63 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
+  int? attackSignalPosition = 0;
   String playerId = '';
+  bool canOperate = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // GraphQL Subscription
+    listenBCGGameServerProcess();
+  }
+
+  void listenBCGGameServerProcess() async {
+    GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
+    if (ret != null) {
+      print('$playerId , ${ret.playerId}');
+      print(ret.message);
+      if (playerId == ret.playerId) {
+        if (ret.type == 'player_matching') {
+          try {
+            String transactionId = ret.message.split(',TransactionID:')[1];
+            displayMessage(ret.type,
+                "The transaction of Player Matching is in progress.\n ${ret.message.split(',TransactionID:')[1]}");
+            await Clipboard.setData(ClipboardData(text: transactionId));
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        }
+      } else {
+        if (ret.type == 'player_matching') {
+          showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
+        }
+      }
+      if (ret.type == 'turn_change') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: const Text('Turn Change!'),
+                    content: const Text(''),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
+        });
+      }
+    }
+  }
 
   void doAnimation() {
     setState(() => cardPosition = 400.0);
@@ -93,6 +152,7 @@ class HomePageState extends State<HomePage> {
       });
     } else if (message == 'attack') {
       setState(() {
+        attackSignalPosition = index;
         actedCardPosition = index;
       });
     }
@@ -109,17 +169,16 @@ class HomePageState extends State<HomePage> {
             int.parse(cardInfos[cardId.toString()]['cost']);
       });
     }
-    var objStr = jsonToString(gameObject!.yourFieldUnit);
-    var objJs = jsonDecode(objStr);
 
     List<int?> unitPositions = [null, null, null, null, null];
     for (int i = 1; i <= 5; i++) {
-      if (objJs[i.toString()] == null) {
+      if (gameObject!.yourFieldUnit[i.toString()] == null) {
         unitPositions[i - 1] = cardId;
-        print('フィールド$iにカードを置きました!');
+        // print('フィールド$iにカードを置きました!');
         break;
-      } else {
-        unitPositions[i - 1] = objJs[i.toString()];
+        // } else {
+        //   unitPositions[i - 1] =
+        //       int.parse(gameObject!.yourFieldUnit[i.toString()]);
       }
     }
     var objStr2 = jsonToString(gameObject!.yourTriggerCards);
@@ -190,13 +249,29 @@ class HomePageState extends State<HomePage> {
     } else {
       // ハンドのブロックチェーンデータとの調整
       List<int> _hand = [];
-      for (int i = 0; i < 7; i++) {
+      for (int i = 1; i <= 7; i++) {
         var cardId = gameObject!.yourHand[i.toString()];
         if (cardId != null) {
           _hand.add(int.parse(cardId));
         }
       }
       setState(() => handCards = _hand);
+      if (gameObject!.isFirst == gameObject!.isFirstTurn) {
+        if (gameObject!.lastTimeTurnend != null) {
+          DateTime lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
+              double.parse(gameObject!.lastTimeTurnend!).toInt() * 1000);
+          final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
+          final now = DateTime.now();
+
+          if (turnEndTime.difference(now).inSeconds > 0) {
+            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+          } else {
+            attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
+          }
+        }
+      } else {
+        attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
+      }
     }
   }
 
@@ -204,34 +279,10 @@ class HomePageState extends State<HomePage> {
     setState(() => cardInfos = cardInfo);
   }
 
-  @override
-  void initState() {
-    super.initState();
-    listenBCGGameServerProcess();
-  }
-
-  void listenBCGGameServerProcess() async {
-    GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
-    if (ret != null) {
-      print('$playerId , ${ret.playerId}');
-      print(ret.message);
-      if (playerId == ret.playerId) {
-        if (ret.type == 'player_matching') {
-          try {
-            String transactionId = ret.message.split(',TransactionID:')[1];
-            displayMessage(ret.type,
-                "The transaction of Player Matching is in progress.\n ${ret.message.split(',TransactionID:')[1]}");
-            await Clipboard.setData(ClipboardData(text: transactionId));
-          } catch (e) {
-            debugPrint(e.toString());
-          }
-        }
-      } else {
-        if (ret.type == 'player_matching') {
-          showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
-        }
-      }
-    }
+  void setCanOperate(flg) {
+    setState(() {
+      canOperate = flg;
+    });
   }
 
   void displayMessage(type, transactionId) {
@@ -246,8 +297,6 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    bool canOperate = true;
-
     return LayoutBuilder(builder: (layoutContext, constraints) {
       final wRes = constraints.maxWidth / desktopWidth;
       double r(double val) {
@@ -369,6 +418,7 @@ class HomePageState extends State<HomePage> {
                             tapCard,
                             actedCardPosition,
                             canOperate,
+                            attackStatusBloc.attack_stream,
                             r),
                       ),
                       Padding(
@@ -382,6 +432,7 @@ class HomePageState extends State<HomePage> {
                             tapCard,
                             actedCardPosition,
                             canOperate,
+                            attackStatusBloc.attack_stream,
                             r),
                       ),
                     ])),
@@ -429,13 +480,35 @@ class HomePageState extends State<HomePage> {
                               ),
                             ))))),
             gameObject != null
-                ? OnGoingGameInfo(gameObject, getCardInfo(tappedCardId),
-                    (limitOver) {
-                    setState(() {
-                      canOperate = limitOver;
-                    });
-                  }, r)
+                ? OnGoingGameInfo(
+                    gameObject, getCardInfo(tappedCardId), setCanOperate, r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
+            StreamBuilder(
+                stream: attackStatusBloc.attack_stream,
+                initialData: 0,
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  return snapshot.data == 1 || snapshot.data == 2
+                      ? Positioned(
+                          left: r(attackSignalPosition! == 2 ||
+                                  attackSignalPosition! == 0
+                              ? 760.0
+                              : 850.0),
+                          top: r(0.0),
+                          child: Container(
+                            width: r(50.0),
+                            height: r(50.0),
+                            decoration: BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.7,
+                                  image: AssetImage(
+                                      '${imagePath}unit/attackTarget.png'),
+                                  fit: BoxFit.cover),
+                            ),
+                          ),
+                        )
+                      : Container();
+                }),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

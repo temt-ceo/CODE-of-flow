@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
 import 'package:CodeOfFlow/components/draggableCardWidgetForDeckEditor.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
@@ -24,6 +26,7 @@ class DeckEditPage extends StatefulWidget {
 class DeckEditPageState extends State<DeckEditPage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   APIService apiService = APIService();
   GameObject? gameObject;
   List<List<int>> mariganCardList = [];
@@ -228,6 +231,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                               tapCard,
                               removedPosition,
                               true,
+                              attackStatusBloc.attack_stream,
                               r),
                         ),
                       ])),

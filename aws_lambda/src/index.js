@@ -78,11 +78,11 @@ const FlowTransactions = {
   turnChange: `
     import CodeOfFlowAlpha12 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, attacking_cards: [UInt8], enemy_skill_target: {UInt8: UInt8}, trigger_cards: {UInt8: UInt16}, used_intercept_position: {UInt8: [UInt8]}) {
+    transaction(player_id: UInt32, from_opponent: Bool) {
       prepare(signer: AuthAccount) {
         let admin = signer.borrow<&CodeOfFlowAlpha12.Admin>(from: CodeOfFlowAlpha12.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
-        admin.turn_change(player_id: player_id, attacking_cards: attacking_cards, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_position: used_intercept_position)
+        admin.turn_change(player_id: player_id, from_opponent: from_opponent)
       }
       execute {
         log("success")
@@ -198,6 +198,7 @@ exports.handler = async function (event) {
     async function authorizationFunctionProposer(account) {
       KEY_ID_IT = !KEY_ID_IT || KEY_ID_IT > 5 ? 1 : KEY_ID_IT + 1
       fs.writeFileSync('/tmp/sequence.txt', KEY_ID_IT.toString());
+      console.log('KEY_ID_IT', KEY_ID_IT);
       return {
         ...account,
         tempId: `${ADDRESS}-${KEY_ID_IT}`,
@@ -247,9 +248,9 @@ exports.handler = async function (event) {
       })
     } else if (input.type === "put_card_on_the_field") {
       const arg1 = [];
-      arg1.push({
-        key: 1, value: message.arg1['1'],
-      });
+      if (message.arg1['1']) {
+        arg1.push({key: 1, value: message.arg1['1']});
+      }
       if (message.arg1['2']) {
         arg1.push({key: 2, value: message.arg1['2']});
       }
@@ -268,7 +269,6 @@ exports.handler = async function (event) {
         {key: 3, value: message.arg3['3'] || 0},
         {key: 4, value: message.arg3['4'] || 0},
       ];
-      console.log('====DEBUG====', player_id, arg1, message.arg2, arg3, message.arg4);
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.putCardOnField,
         args: (arg, t) => [
@@ -293,6 +293,7 @@ exports.handler = async function (event) {
         cadence: FlowTransactions.turnChange,
         args: (arg, t) => [
           arg(player_id, t.UInt32),
+          arg(message.arg1, t.Bool),
         ],
         proposer: authorizationFunctionProposer,
         payer: authorizationFunction,
@@ -311,8 +312,9 @@ exports.handler = async function (event) {
         {key: 3, value: message.arg3['3'] || 0},
         {key: 4, value: message.arg3['4'] || 0},
       ];
+      console.log('====DEBUG====', player_id, message.arg1, message.arg2, arg3, message.arg4);
       transactionId = await fcl.mutate({
-        cadence: FlowTransactions.turnChange,
+        cadence: FlowTransactions.attack,
         args: (arg, t) => [
           arg(player_id, t.UInt32),
           arg(message.arg1, t.UInt8), // attacking_card_position
@@ -332,7 +334,7 @@ exports.handler = async function (event) {
       })
     } else if (input.type === "defence_action") {
       transactionId = await fcl.mutate({
-        cadence: FlowTransactions.startYourTurn,
+        cadence: FlowTransactions.defenceAction,
         args: (arg, t) => [
           arg(player_id, t.UInt32),
           arg(message.arg1, t.Optional(t.UInt8)), // blocked_unit

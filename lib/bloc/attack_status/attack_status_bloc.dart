@@ -24,9 +24,9 @@ class AttackStatusBloc {
   void _mapEventToState(AttackEvent event) {
     if (event is AttackAllowedEvent) {
       _attack_status = 1;
-    } else if (event is AttackingEvent) {
+    } else if (event is BattlingEvent) {
       _attack_status = 2;
-    } else if (event is AttackFinishedEvent) {
+    } else if (event is BattleFinishedEvent) {
       _attack_status = 3;
     } else {
       _attack_status = 0;

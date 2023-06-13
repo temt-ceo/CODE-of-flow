@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flash/flash.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
@@ -17,6 +19,7 @@ import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/putCardModel.dart';
 import 'package:CodeOfFlow/models/GameServerProcess.dart';
+import 'package:CodeOfFlow/models/defenceActionModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
@@ -44,9 +47,15 @@ class HomePageState extends State<HomePage> {
   dynamic cardInfos;
   BuildContext? loadingContext;
   int? actedCardPosition;
-  int? attackSignalPosition = 0;
+  int? attackSignalPosition;
   String playerId = '';
   bool canOperate = true;
+  final cController = CarouselController();
+  int activeIndex = 0;
+  bool showDefenceUnitsCarousel = false;
+  int? opponentDefendPosition;
+  List<int>? yourUsedInterceptCard;
+  List<int>? opponentUsedInterceptCard;
 
   @override
   void initState() {
@@ -58,25 +67,37 @@ class HomePageState extends State<HomePage> {
   void listenBCGGameServerProcess() async {
     GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
     if (ret != null) {
-      print('$playerId , ${ret.playerId}');
+      print('No. ${ret.playerId} : ${ret.type}');
       print(ret.message);
-      if (playerId == ret.playerId) {
-        if (ret.type == 'player_matching') {
-          try {
-            String transactionId = ret.message.split(',TransactionID:')[1];
-            displayMessage(ret.type,
-                "The transaction of Player Matching is in progress.\n ${ret.message.split(',TransactionID:')[1]}");
-            await Clipboard.setData(ClipboardData(text: transactionId));
-          } catch (e) {
-            debugPrint(e.toString());
-          }
-        }
-      } else {
-        if (ret.type == 'player_matching') {
-          showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
-        }
-      }
-      if (ret.type == 'turn_change') {
+      if (ret.type == 'player_matching' && playerId == ret.playerId) {
+        String transactionId = ret.message.split(',TransactionID:')[1];
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: const Text('Player Matching is in progress.'),
+                    content: Text(
+                        'Transaction is in progress. Transaction ID: $transactionId'),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
+        });
+      } else if (ret.type == 'player_matching') {
+        showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
+      } else if (ret.type == 'turn_change' &&
+          (gameObject!.you.toString() == ret.playerId ||
+              gameObject!.opponent.toString() == ret.playerId)) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           showFlash(
               context: context,
@@ -98,7 +119,87 @@ class HomePageState extends State<HomePage> {
                 );
               });
         });
+      } else if (ret.type == 'attack' &&
+          (gameObject!.opponent.toString() == ret.playerId)) {
+        showDefenceUnitsCarousel = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: Text(L10n.of(context)!.opponentAttack),
+                    content: const Text(''),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
+        });
+        attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+      } else if (ret.type == 'battle_reaction' &&
+          (gameObject!.you.toString() == ret.playerId ||
+              gameObject!.opponent.toString() == ret.playerId)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: const Text('Turn Change!'),
+                    content: const Text(''),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
+        });
+        attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+      } else if (ret.type == 'defence_action' &&
+          (gameObject!.you.toString() == ret.playerId ||
+              gameObject!.opponent.toString() == ret.playerId)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          setState(() {
+            attackSignalPosition = null;
+            actedCardPosition = null;
+          });
+        });
+        attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
       }
+    }
+  }
+
+  void block(int activeIndex) async {
+    setState(() {
+      opponentDefendPosition = activeIndex + 1;
+      yourUsedInterceptCard = [];
+      opponentUsedInterceptCard = [];
+    });
+    // Battle Reaction
+    showGameLoading();
+    var message = DefenceActionModel(opponentDefendPosition!,
+        yourUsedInterceptCard!, opponentUsedInterceptCard!);
+    var ret = await apiService.saveGameServerProcess(
+        'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+    closeGameLoading();
+    debugPrint('== transaction published ==');
+    debugPrint('== ${ret.toString()} ==');
+    if (ret != null) {
+      debugPrint(ret.message);
     }
   }
 
@@ -140,6 +241,24 @@ class HomePageState extends State<HomePage> {
         return ret.split('|')[cardId! - 1];
       }
       return '';
+    } else {
+      return '';
+    }
+  }
+
+  String getCardName(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return cardInfo['name'];
+    } else {
+      return '';
+    }
+  }
+
+  String getCardBP(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return cardInfo['bp'];
     } else {
       return '';
     }
@@ -283,16 +402,6 @@ class HomePageState extends State<HomePage> {
     setState(() {
       canOperate = flg;
     });
-  }
-
-  void displayMessage(type, transactionId) {
-    if (type == 'player_matching') {
-      showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-              // title: const Text('You entered in Alcana.'),
-              content: Text('$transactionId (Saved on clipboard.)')));
-    }
   }
 
   @override
@@ -439,7 +548,7 @@ class HomePageState extends State<HomePage> {
             Visibility(
                 visible: gameProgressStatus == 1,
                 child: Positioned(
-                    left: r(730),
+                    left: r(800),
                     top: r(500),
                     child: SizedBox(
                         width: r(100.0),
@@ -481,34 +590,593 @@ class HomePageState extends State<HomePage> {
                             ))))),
             gameObject != null
                 ? OnGoingGameInfo(
-                    gameObject, getCardInfo(tappedCardId), setCanOperate, r)
+                    gameObject,
+                    getCardInfo(tappedCardId),
+                    setCanOperate,
+                    attackStatusBloc.attack_stream,
+                    opponentDefendPosition,
+                    yourUsedInterceptCard,
+                    opponentUsedInterceptCard,
+                    r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
-            StreamBuilder(
-                stream: attackStatusBloc.attack_stream,
-                initialData: 0,
-                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                  return snapshot.data == 1 || snapshot.data == 2
-                      ? Positioned(
-                          left: r(attackSignalPosition! == 2 ||
-                                  attackSignalPosition! == 0
-                              ? 760.0
-                              : 850.0),
-                          top: r(0.0),
-                          child: Container(
-                            width: r(50.0),
-                            height: r(50.0),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              image: DecorationImage(
-                                  opacity: 0.7,
-                                  image: AssetImage(
-                                      '${imagePath}unit/attackTarget.png'),
-                                  fit: BoxFit.cover),
-                            ),
-                          ),
-                        )
-                      : Container();
-                }),
+            // StreamBuilder(
+            //     stream: attackStatusBloc.attack_stream,
+            //     initialData: 0,
+            //     builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+            //       return Visibility(
+            Visibility(
+                visible: attackSignalPosition != null,
+                child: Positioned(
+                  left: r(attackSignalPosition != null &&
+                          (attackSignalPosition! == 2 ||
+                              attackSignalPosition! == 0)
+                      ? 760.0
+                      : 850.0),
+                  top: r(0.0),
+                  child: Container(
+                    width: r(50.0),
+                    height: r(50.0),
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      image: DecorationImage(
+                          opacity: 0.8,
+                          image:
+                              AssetImage('${imagePath}unit/attackTarget.png'),
+                          fit: BoxFit.cover),
+                    ),
+                  ),
+                )),
+            // }),
+            Positioned(
+              left: r(648.0),
+              top: r(154.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Enemy's 1st Unit Name
+            Positioned(
+                left: r(650.0),
+                top: r(157.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['1'] != null
+                        ? (gameObject!.opponentFieldUnitAction['1'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.opponentFieldUnit['1'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Enemy's 1st Unit BP
+            Positioned(
+                left: r(650.0),
+                top: r(179.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['1'] != null
+                        ? (gameObject!.opponentFieldUnitAction['1'] == '1' ||
+                                    gameObject!.opponentFieldUnitAction['1'] ==
+                                        '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.opponentFieldUnit['1'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(783.0),
+              top: r(154.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Enemy's 2st Unit Name
+            Positioned(
+                left: r(785.0),
+                top: r(157.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['2'] != null
+                        ? (gameObject!.opponentFieldUnitAction['2'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.opponentFieldUnit['2'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Enemy's 2st Unit BP
+            Positioned(
+                left: r(785.0),
+                top: r(179.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['2'] != null
+                        ? (gameObject!.opponentFieldUnitAction['2'] == '1' ||
+                                    gameObject!.opponentFieldUnitAction['2'] ==
+                                        '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.opponentFieldUnit['2'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(918.0),
+              top: r(154.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Enemy's 3st Unit Name
+            Positioned(
+                left: r(920.0),
+                top: r(157.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['3'] != null
+                        ? (gameObject!.opponentFieldUnitAction['3'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.opponentFieldUnit['3'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Enemy's 3st Unit BP
+            Positioned(
+                left: r(920.0),
+                top: r(179.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['3'] != null
+                        ? (gameObject!.opponentFieldUnitAction['3'] == '1' ||
+                                    gameObject!.opponentFieldUnitAction['3'] ==
+                                        '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.opponentFieldUnit['3'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(1053.0),
+              top: r(154.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Enemy's 4st Unit Name
+            Positioned(
+                left: r(1055.0),
+                top: r(157.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['4'] != null
+                        ? (gameObject!.opponentFieldUnitAction['4'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.opponentFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Enemy's 4st Unit BP
+            Positioned(
+                left: r(1055.0),
+                top: r(179.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['4'] != null
+                        ? (gameObject!.opponentFieldUnitAction['4'] == '1' ||
+                                    gameObject!.opponentFieldUnitAction['4'] ==
+                                        '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.opponentFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(1188.0),
+              top: r(154.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Enemy's 5st Unit Name
+            Positioned(
+                left: r(1190.0),
+                top: r(157.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['5'] != null
+                        ? (gameObject!.opponentFieldUnitAction['5'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.opponentFieldUnit['5'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Enemy's 5st Unit BP
+            Positioned(
+                left: r(1190.0),
+                top: r(179.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null &&
+                            gameObject!.opponentFieldUnit['5'] != null
+                        ? (gameObject!.opponentFieldUnitAction['5'] == '1' ||
+                                    gameObject!.opponentFieldUnitAction['5'] ==
+                                        '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.opponentFieldUnit['5'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(648.0),
+              top: r(380.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Your 1st Unit Name
+            Positioned(
+                left: r(650.0),
+                top: r(383.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['1'] != null
+                        ? (gameObject!.yourFieldUnitAction['1'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.yourFieldUnit['1'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Your 1st Unit BP
+            Positioned(
+                left: r(650.0),
+                top: r(405.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['1'] != null
+                        ? (gameObject!.yourFieldUnitAction['1'] == '1' ||
+                                    gameObject!.yourFieldUnitAction['1'] == '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.yourFieldUnit['1'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(783.0),
+              top: r(380.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Your 2st Unit Name
+            Positioned(
+                left: r(785.0),
+                top: r(383.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['2'] != null
+                        ? (gameObject!.yourFieldUnitAction['2'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.yourFieldUnit['2'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Your 2st Unit BP
+            Positioned(
+                left: r(785.0),
+                top: r(405.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['2'] != null
+                        ? (gameObject!.yourFieldUnitAction['2'] == '1' ||
+                                    gameObject!.yourFieldUnitAction['2'] == '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.yourFieldUnit['2'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(918.0),
+              top: r(380.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Your 3st Unit Name
+            Positioned(
+                left: r(920.0),
+                top: r(383.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['3'] != null
+                        ? (gameObject!.yourFieldUnitAction['3'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.yourFieldUnit['3'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Your 3st Unit BP
+            Positioned(
+                left: r(920.0),
+                top: r(405.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['3'] != null
+                        ? (gameObject!.yourFieldUnitAction['3'] == '1' ||
+                                    gameObject!.yourFieldUnitAction['3'] == '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.yourFieldUnit['3'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(1053.0),
+              top: r(380.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Your 4st Unit Name
+            Positioned(
+                left: r(1055.0),
+                top: r(383.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
+                        ? (gameObject!.yourFieldUnitAction['4'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.yourFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Your 4st Unit BP
+            Positioned(
+                left: r(1055.0),
+                top: r(405.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
+                        ? (gameObject!.yourFieldUnitAction['4'] == '1' ||
+                                    gameObject!.yourFieldUnitAction['4'] == '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.yourFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Positioned(
+              left: r(1188.0),
+              top: r(380.0),
+              child: Container(
+                width: r(90.0),
+                height: r(50.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.8,
+                      image: AssetImage('${imagePath}unit/status.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
+            // Your 5st Unit Name
+            Positioned(
+                left: r(1190.0),
+                top: r(383.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
+                        ? (gameObject!.yourFieldUnitAction['5'] == '2'
+                                ? '🗡️'
+                                : '　') +
+                            getCardName(gameObject!.yourFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            // Your 5st Unit BP
+            Positioned(
+                left: r(1190.0),
+                top: r(405.0),
+                width: r(80.0),
+                child: Text(
+                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
+                        ? (gameObject!.yourFieldUnitAction['5'] == '1' ||
+                                    gameObject!.yourFieldUnitAction['5x'] == '2'
+                                ? '🛡️'
+                                : '　') +
+                            getCardBP(gameObject!.yourFieldUnit['4'])
+                        : '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: r(16.0),
+                    ))),
+            Visibility(
+                visible: showDefenceUnitsCarousel == true,
+                child: Column(children: <Widget>[
+                  CarouselSlider.builder(
+                    carouselController: cController,
+                    options: CarouselOptions(
+                        height: r(300),
+                        // aspectRatio: 9 / 9,
+                        viewportFraction: 0.4, // 1.0:1つが全体に出る
+                        initialPage: 0,
+                        enableInfiniteScroll: true,
+                        enlargeCenterPage: true,
+                        scrollDirection: Axis.horizontal,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            activeIndex = index;
+                          });
+                        }),
+                    itemCount: 4,
+                    itemBuilder: (context, index, realIndex) {
+                      return Container(
+                        width: MediaQuery.of(context).size.width,
+                        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
+                        color: Colors.grey,
+                        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
+                      );
+                    },
+                  ),
+                  SizedBox(height: r(32.0)),
+                  buildIndicator(),
+                  ElevatedButton(
+                    onPressed: () => block(activeIndex),
+                    child: const Text('Block'),
+                  ),
+                ])),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(
@@ -525,6 +1193,7 @@ class HomePageState extends State<HomePage> {
                     doAnimation();
                     break;
                   case 'matching-success':
+                    debugPrint('playerId: $playerId $status');
                     setDataAndMarigan(data, mariganCards);
                     break;
                   case 'started-game-info':
@@ -557,4 +1226,17 @@ class HomePageState extends State<HomePage> {
         fontSize: 22.0,
         webPosition: 'left');
   }
+
+  Widget buildIndicator() => AnimatedSmoothIndicator(
+        activeIndex: activeIndex,
+        count: 4,
+        onDotClicked: (index) {
+          cController.animateToPage(index);
+        },
+        effect: const JumpingDotEffect(
+          verticalOffset: 4.0,
+          activeDotColor: Colors.orange,
+          // dotColor: Colors.black12,
+        ),
+      );
 }

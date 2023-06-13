@@ -424,6 +424,7 @@ class StartButtonsState extends State<StartButtons> {
   Future<void> gameStart() async {
     showGameLoading();
     // Call GraphQL method.
+    print('Matching Player: ${player.playerId}');
     var ret = await apiService.saveGameServerProcess(
         'player_matching', '', player.playerId);
     closeGameLoading();
@@ -606,7 +607,6 @@ class StartButtonsState extends State<StartButtons> {
       objJs['matched_time'],
       objJs['game_started'],
       objJs['last_time_turnend'],
-      objJs['enemy_attacking_card'],
       int.parse(player.playerId),
       int.parse(objJs['your_cp']),
       objJs['your_field_unit'],
@@ -625,6 +625,8 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(objJs['opponent_life']),
       int.parse(objJs['opponent_remain_deck']),
       int.parse(objJs['opponent_trigger_cards']),
+      objJs['your_attacking_card'],
+      objJs['enemy_attacking_card'],
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:CodeOfFlow/components/deckButtons.dart';
 import 'package:CodeOfFlow/components/droppedCardWidget.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/attackModel.dart';
+import 'package:CodeOfFlow/models/defenceActionModel.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
@@ -49,7 +50,7 @@ class DragTargetState extends State<DragTargetWidget> {
   dynamic yourFieldUnit;
   dynamic opponentFieldUnit;
   bool canAttack = false;
-  int? attackSignalPosition = 0;
+  int? attackSignalPosition;
 
   void showGameLoading() {
     showDialog(
@@ -76,7 +77,6 @@ class DragTargetState extends State<DragTargetWidget> {
   }
 
   void attack() async {
-    print(2222);
     showGameLoading();
     var objStr2 = jsonToString(widget.info!.yourTriggerCards);
     var objJs2 = jsonDecode(objStr2);
@@ -90,15 +90,33 @@ class DragTargetState extends State<DragTargetWidget> {
         triggerPositions[1], triggerPositions[2], triggerPositions[3]);
     List<int> usedInterceptCard = [];
     var message = AttackModel(
-        widget.actedCardPosition!, null, triggerCards, usedInterceptCard);
-    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
-        jsonEncode(message), widget.info!.you.toString());
+        (widget.actedCardPosition! + 1), null, triggerCards, usedInterceptCard);
+    var ret = await apiService.saveGameServerProcess(
+        'attack', jsonEncode(message), widget.info!.you.toString());
     closeGameLoading();
-    debugPrint('transaction published');
-    debugPrint(ret.toString());
+    debugPrint('== transaction published ==');
+    debugPrint('== ${ret.toString()} ==');
     if (ret != null) {
       debugPrint(ret.message);
     }
+
+    // 敵ユニットがいない場合、そのままダメージへ
+    showGameLoading();
+    List<int> yourUsedInterceptCard = [];
+    List<int> opponentUsedInterceptCard = [];
+    var message2 = DefenceActionModel(
+        null, yourUsedInterceptCard, opponentUsedInterceptCard);
+    var ret2 = await apiService.saveGameServerProcess(
+        'defence_action', jsonEncode(message2), widget.info!.you.toString());
+    closeGameLoading();
+    debugPrint('== transaction published ==');
+    debugPrint('== ${ret2.toString()} ==');
+    if (ret2 != null) {
+      debugPrint(ret2.message);
+    }
+    setState(() {
+      attackSignalPosition = null;
+    });
   }
 
   @override
@@ -186,178 +204,201 @@ class DragTargetState extends State<DragTargetWidget> {
       }
     } else if (widget.label == 'unit') {
       // Attack card.
-      if (widget.actedCardPosition != null) {
+      if (widget.actedCardPosition != null && attackSignalPosition == null) {
+        attackSignalPosition = widget.actedCardPosition;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           attack();
         });
-        setState(() => {
-              attackSignalPosition = widget.actedCardPosition,
-              widget.actedCardPosition = null
-            });
       }
     }
+    return StreamBuilder(
+        stream: widget.attack_stream,
+        initialData: 0,
+        builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+          // バトル終了検知
+          if (snapshot.data == 3) {
+            setState(() {
+              attackSignalPosition = null;
+            });
+          }
 
-    return DragTarget<String>(onAccept: (String cardIdStr) {
-      var cardId = int.parse(cardIdStr);
-      var imageUrl = cardId > 16
-          ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-          : '${imagePath}unit/card_${cardId.toString()}.jpeg';
-      if (widget.label == 'deck' && dropedList.length >= 15) {
-        dropedListSecond.add(DroppedCardWidget(
-            widget.r(90.0 * dropedListSecond.length - 1 + 10),
-            imageUrl,
-            widget.label,
-            widget.cardInfos[cardIdStr],
-            true,
-            widget.tapCardCallback,
-            dropedList.length + dropedListSecond.length,
-            widget.attack_stream,
-            widget.r));
-      } else {
-        dropedList.add(DroppedCardWidget(
-            widget.label == 'deck'
-                ? widget.r(86.0 * dropedList.length - 1 + 10)
-                : (widget.label == 'unit'
-                    ? widget.r(132.0 * dropedList.length - 1 + 20)
-                    : widget.r(
-                        93.0 * dropedList.length - 1 + 17)), // TODO 380 / 440
-            imageUrl,
-            widget.label,
-            widget.cardInfos[cardIdStr],
-            false,
-            widget.tapCardCallback,
-            dropedList.length,
-            widget.attack_stream,
-            widget.r));
-      }
-      _dropBloc.counterEventSink.add(DropLeaveEvent());
-    }, onWillAccept: (String? cardIdStr) {
-      if (widget.label == 'deck') {
-        if (dropedListSecond.length >= 15) {
-          _dropBloc.counterEventSink.add(DropDeniedEvent());
-          return false;
-        }
-        _dropBloc.counterEventSink.add(DropAllowedEvent());
-        return true;
-      } else {
-        if (widget.canOperate == false) {
-          _dropBloc.counterEventSink.add(DropDeniedEvent());
-          return false;
-        }
-        if (widget.info != null &&
-            widget.info!.isFirst != widget.info!.isFirstTurn) {
-          _dropBloc.counterEventSink.add(DropDeniedEvent());
-          return false;
-        }
-        var cardId = int.parse(cardIdStr!);
-        var imageUrl = cardId > 16
-            ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-            : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+          return DragTarget<String>(onAccept: (String cardIdStr) {
+            var cardId = int.parse(cardIdStr);
+            var imageUrl = cardId > 16
+                ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
+                : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+            if (widget.label == 'deck' && dropedList.length >= 15) {
+              dropedListSecond.add(DroppedCardWidget(
+                  widget.r(90.0 * dropedListSecond.length - 1 + 10),
+                  imageUrl,
+                  widget.label,
+                  widget.cardInfos[cardIdStr],
+                  true,
+                  widget.tapCardCallback,
+                  dropedList.length + dropedListSecond.length,
+                  widget.attack_stream,
+                  widget.r));
+            } else {
+              dropedList.add(DroppedCardWidget(
+                  widget.label == 'deck'
+                      ? widget.r(86.0 * dropedList.length - 1 + 10)
+                      : (widget.label == 'unit'
+                          ? widget.r(132.0 * dropedList.length - 1 + 20)
+                          : widget.r(93.0 * dropedList.length -
+                              1 +
+                              17)), // TODO 380 / 440
+                  imageUrl,
+                  widget.label,
+                  widget.cardInfos[cardIdStr],
+                  false,
+                  widget.tapCardCallback,
+                  dropedList.length,
+                  widget.attack_stream,
+                  widget.r));
+            }
+            _dropBloc.counterEventSink.add(DropLeaveEvent());
+          }, onWillAccept: (String? cardIdStr) {
+            if (widget.label == 'deck') {
+              if (dropedListSecond.length >= 15) {
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
+              _dropBloc.counterEventSink.add(DropAllowedEvent());
+              return true;
+            } else {
+              if (widget.canOperate == false) {
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
+              if (widget.info != null &&
+                  widget.info!.isFirst != widget.info!.isFirstTurn) {
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
+              var cardId = int.parse(cardIdStr!);
+              var imageUrl = cardId > 16
+                  ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
+                  : '${imagePath}unit/card_${cardId.toString()}.jpeg';
 
-        if (widget.label == 'unit' && imageUrl.startsWith('${imagePath}unit')) {
-          if (widget.info != null) {
-            // カード情報がない。
-            if (widget.cardInfos == null ||
-                widget.cardInfos[cardIdStr] == null) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
+              if (widget.label == 'unit' &&
+                  imageUrl.startsWith('${imagePath}unit')) {
+                if (widget.info != null) {
+                  // カード情報がない。
+                  if (widget.cardInfos == null ||
+                      widget.cardInfos[cardIdStr] == null) {
+                    _dropBloc.counterEventSink.add(DropDeniedEvent());
+                    return false;
+                  }
+                  var cardData = widget.cardInfos[cardIdStr];
+                  if (int.parse(cardData['cost']) > widget.info!.yourCp) {
+                    _dropBloc.counterEventSink.add(DropDeniedEvent());
+                    return false;
+                  }
+                }
+                if (dropedList.length >= 5) {
+                  _dropBloc.counterEventSink.add(DropDeniedEvent());
+                  return false;
+                }
+                _dropBloc.counterEventSink.add(DropAllowedEvent());
+                return true;
+              } else if (widget.label == 'trigger' &&
+                  imageUrl!.startsWith('${imagePath}trigger')) {
+                _dropBloc.counterEventSink.add(DropAllowedEvent());
+                return true;
+              } else {
+                if (dropedList.length >= 4) {
+                  _dropBloc.counterEventSink.add(DropDeniedEvent());
+                  return false;
+                }
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
             }
-            var cardData = widget.cardInfos[cardIdStr];
-            if (int.parse(cardData['cost']) > widget.info!.yourCp) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
-            }
-          }
-          if (dropedList.length >= 5) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          _dropBloc.counterEventSink.add(DropAllowedEvent());
-          return true;
-        } else if (widget.label == 'trigger' &&
-            imageUrl!.startsWith('${imagePath}trigger')) {
-          _dropBloc.counterEventSink.add(DropAllowedEvent());
-          return true;
-        } else {
-          if (dropedList.length >= 4) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          _dropBloc.counterEventSink.add(DropDeniedEvent());
-          return false;
-        }
-      }
-    }, onLeave: (String? item) {
-      _dropBloc.counterEventSink.add(DropLeaveEvent());
-    }, builder: (
-      BuildContext context,
-      List<dynamic> accepted,
-      List<dynamic> rejected,
-    ) {
-      return StreamBuilder(
-          stream: _dropBloc.bg_color,
-          initialData: 0xFFFFFFFF,
-          builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-            return Container(
-              width: widget.label == 'deck'
-                  ? widget.r(1320.0)
-                  : (widget.label == 'unit'
-                      ? widget.r(690.0)
-                      : widget.r(380.0)),
-              height: widget.label == 'deck'
-                  ? widget.r(350.0)
-                  : (widget.label == 'unit'
-                      ? widget.r(380.0)
-                      : widget.r(112.0)),
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                    image: AssetImage(widget.imageUrl), fit: BoxFit.cover),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(snapshot.data ?? 0xFFFFFFFF),
-                    spreadRadius: 5,
-                    blurRadius: 7,
-                    offset: Offset(
-                        widget.r(2), widget.r(5)), // changes position of shadow
-                  ),
-                ],
-              ),
-              child: widget.label == 'unit'
-                  ? Stack(children: <Widget>[
-                      Positioned(
-                        left: widget.r(
-                            (attackSignalPosition! >= 2 ? -150.0 : 20.0) +
-                                attackSignalPosition! * 120.0),
-                        top: widget.r(-5.0),
-                        child: Container(
-                          width: widget
-                              .r(attackSignalPosition! >= 2 ? 350.0 : 186.0),
-                          height: widget.r(240.0),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.7,
-                                image: AssetImage(attackSignalPosition! >= 2
-                                    ? '${imagePath}unit/attackSignal2.png'
-                                    : '${imagePath}unit/attackSignal.png'),
-                                fit: BoxFit.cover),
-                          ),
+          }, onLeave: (String? item) {
+            _dropBloc.counterEventSink.add(DropLeaveEvent());
+          }, builder: (
+            BuildContext context,
+            List<dynamic> accepted,
+            List<dynamic> rejected,
+          ) {
+            return StreamBuilder(
+                stream: _dropBloc.bg_color,
+                initialData: 0xFFFFFFFF,
+                builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+                  return Container(
+                    width: widget.label == 'deck'
+                        ? widget.r(1320.0)
+                        : (widget.label == 'unit'
+                            ? widget.r(690.0)
+                            : widget.r(380.0)),
+                    height: widget.label == 'deck'
+                        ? widget.r(350.0)
+                        : (widget.label == 'unit'
+                            ? widget.r(380.0)
+                            : widget.r(112.0)),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(widget.imageUrl),
+                          fit: BoxFit.cover),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Color(snapshot.data ?? 0xFFFFFFFF),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset: Offset(widget.r(2),
+                              widget.r(5)), // changes position of shadow
                         ),
-                      ),
-                      const SizedBox(height: 30.0),
-                      Stack(children: dropedListEnemy),
-                      Stack(children: dropedList),
-                    ])
-                  : (widget.label == 'deck'
-                      ? Stack(children: <Widget>[
-                          Stack(children: dropedList),
-                          Stack(children: dropedListSecond),
-                        ])
-                      : Stack(
-                          children: dropedList,
-                        )),
-            );
+                      ],
+                    ),
+                    child: widget.label == 'unit'
+                        ? Stack(children: <Widget>[
+                            Visibility(
+                                visible: attackSignalPosition != null,
+                                child: Positioned(
+                                  left: widget.r(
+                                      (attackSignalPosition != null &&
+                                                  attackSignalPosition! >= 2
+                                              ? -150.0
+                                              : 20.0) +
+                                          (attackSignalPosition != null
+                                              ? attackSignalPosition! * 120.0
+                                              : 0)),
+                                  top: widget.r(-5.0),
+                                  child: Container(
+                                    width: widget.r(
+                                        attackSignalPosition != null &&
+                                                attackSignalPosition! >= 2
+                                            ? 350.0
+                                            : 186.0),
+                                    height: widget.r(240.0),
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      image: DecorationImage(
+                                          opacity: 0.8,
+                                          image: AssetImage(attackSignalPosition !=
+                                                      null &&
+                                                  attackSignalPosition! >= 2
+                                              ? '${imagePath}unit/attackSignal2.png'
+                                              : '${imagePath}unit/attackSignal.png'),
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                )),
+                            const SizedBox(height: 30.0),
+                            Stack(children: dropedListEnemy),
+                            Stack(children: dropedList),
+                          ])
+                        : (widget.label == 'deck'
+                            ? Stack(children: <Widget>[
+                                Stack(children: dropedList),
+                                Stack(children: dropedListSecond),
+                              ])
+                            : Stack(
+                                children: dropedList,
+                              )),
+                  );
+                });
           });
-    });
+        });
   }
 }

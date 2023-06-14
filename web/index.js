@@ -29,14 +29,14 @@ window.createPlayer = async function (playerName) {
     cadence: `
       import FlowToken from 0x7e60df042a9c0868
       import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+      import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
       transaction(nickname: String) {
         prepare(signer: AuthAccount) {
           let FlowTokenReceiver = signer.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 
-          signer.save(<- CodeOfFlowAlpha14.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlowAlpha14.PlayerStoragePath)
-          signer.link<&CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}>(CodeOfFlowAlpha14.PlayerPublicPath, target: CodeOfFlowAlpha14.PlayerStoragePath)
+          signer.save(<- CodeOfFlowAlpha15.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlowAlpha15.PlayerStoragePath)
+          signer.link<&CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}>(CodeOfFlowAlpha15.PlayerPublicPath, target: CodeOfFlowAlpha15.PlayerStoragePath)
           }
         execute {
           log("success")
@@ -58,13 +58,13 @@ window.buyCyberEN = async () => {
     cadence: `
       import FlowToken from 0x7e60df042a9c0868
       import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+      import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
       transaction() {
         prepare(signer: AuthAccount) {
           let payment <- signer.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!.withdraw(amount: 1.0) as! @FlowToken.Vault
 
-          let player = signer.borrow<&CodeOfFlowAlpha14.Player>(from: CodeOfFlowAlpha14.PlayerStoragePath)
+          let player = signer.borrow<&CodeOfFlowAlpha15.Player>(from: CodeOfFlowAlpha15.PlayerStoragePath)
               ?? panic("Could not borrow reference to the Owner's Player Resource.")
           player.buy_en(payment: <- payment)
         }
@@ -87,10 +87,10 @@ window.buyCyberEN = async () => {
 window.isRegistered = async function (address) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
-    pub fun main(address: Address): &CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}? {
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address): &CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}? {
         let account = getAccount(address)
-        return account.getCapability<&CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}>(CodeOfFlowAlpha14.PlayerPublicPath).borrow()
+        return account.getCapability<&CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}>(CodeOfFlowAlpha15.PlayerPublicPath).borrow()
     }
     `,
     args: (arg, t) => [
@@ -102,10 +102,10 @@ window.isRegistered = async function (address) {
 window.getCurrentStatus = async function (address) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
     pub fun main(address: Address): AnyStruct {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}>(CodeOfFlowAlpha14.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}>(CodeOfFlowAlpha15.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_current_status()
     }
@@ -120,17 +120,17 @@ window.getCurrentStatus = async function (address) {
 window.getMariganCards = async function (address, playerId) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
-    pub fun main(address: Address, player_id: UInt32): [[UInt16]] {
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address, player_id: UInt): [[UInt16]] {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}>(CodeOfFlowAlpha14.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}>(CodeOfFlowAlpha15.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_marigan_cards(player_id: player_id)
     }
     `,
     args: (arg, t) => [
       arg(address, t.Address),
-      arg(playerId, t.UInt32)
+      arg(playerId, t.UInt)
     ]
   });
   // console.log(result);
@@ -139,9 +139,9 @@ window.getMariganCards = async function (address, playerId) {
 window.getCardInfo = async function () {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
-    pub fun main(): {UInt16: CodeOfFlowAlpha14.CardStruct} {
-        return CodeOfFlowAlpha14.getCardInfo()
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    pub fun main(): {UInt16: CodeOfFlowAlpha15.CardStruct} {
+        return CodeOfFlowAlpha15.getCardInfo()
     }
     `,
     args: (arg, t) => [
@@ -155,16 +155,16 @@ window.getBalance = async function (address, playerId) {
     cadence: `
     import FlowToken from 0x7e60df042a9c0868
     import FungibleToken from 0x9a0766d93b6608b7
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    pub fun main(address: Address, player_id: UInt32?): [CodeOfFlowAlpha14.CyberScoreStruct] {
+    pub fun main(address: Address, player_id: UInt?): [CodeOfFlowAlpha15.CyberScoreStruct] {
         let account = getAccount(address)
         let vaultRef = account.getCapability(/public/flowTokenBalance).borrow<&FlowToken.Vault{FungibleToken.Balance}>()
             ?? panic("Could not borrow Balance reference to the Vault")
 
-        var retArr: [CodeOfFlowAlpha14.CyberScoreStruct] = []
+        var retArr: [CodeOfFlowAlpha15.CyberScoreStruct] = []
         if player_id != nil {
-          let cap = getAccount(address).getCapability<&CodeOfFlowAlpha14.Player{CodeOfFlowAlpha14.IPlayerPublic}>(CodeOfFlowAlpha14.PlayerPublicPath).borrow()
+          let cap = getAccount(address).getCapability<&CodeOfFlowAlpha15.Player{CodeOfFlowAlpha15.IPlayerPublic}>(CodeOfFlowAlpha15.PlayerPublicPath).borrow()
               ?? panic("Doesn't have capability!")
 
           let player_arr = cap.get_players_score()
@@ -177,7 +177,7 @@ window.getBalance = async function (address, playerId) {
           }
           return retArr
         }
-        let guestData = CodeOfFlowAlpha14.CyberScoreStruct(player_name: "Guest")
+        let guestData = CodeOfFlowAlpha15.CyberScoreStruct(player_name: "Guest")
         guestData.balance = vaultRef.balance
         retArr.append(guestData)
         return retArr
@@ -185,7 +185,7 @@ window.getBalance = async function (address, playerId) {
     `,
     args: (arg, t) => [
       arg(address, t.Address),
-      arg(playerId, t.Optional(t.UInt32)),
+      arg(playerId, t.Optional(t.UInt)),
     ]
   });
   // console.log(result);
@@ -9163,7 +9163,7 @@ var defaultDecoders = {
   Int8: decodeImplicit,
   UInt16: decodeImplicit,
   Int16: decodeImplicit,
-  UInt32: decodeImplicit,
+  UInt: decodeImplicit,
   Int32: decodeImplicit,
   UInt64: decodeImplicit,
   Int64: decodeImplicit,
@@ -14332,23 +14332,23 @@ var Int16 = type("Int16", function (v) {
 }, function (v) {
   return v;
 });
-var UInt32 = type("UInt32", function (v) {
+var UInt = type("UInt", function (v) {
   if (isNumber(v) && isInteger(v)) {
-    numberValuesDeprecationNotice("UInt32");
+    numberValuesDeprecationNotice("UInt");
     return {
-      type: "UInt32",
+      type: "UInt",
       value: v.toString()
     };
   }
 
   if (isString(v)) {
     return {
-      type: "UInt32",
+      type: "UInt",
       value: v
     };
   }
 
-  throwTypeError("Expected integer for UInt32");
+  throwTypeError("Expected integer for UInt");
 }, function (v) {
   return v;
 });
@@ -14901,7 +14901,7 @@ exports.UInt = UInt;
 exports.UInt128 = UInt128;
 exports.UInt16 = UInt16;
 exports.UInt256 = UInt256;
-exports.UInt32 = UInt32;
+exports.UInt = UInt;
 exports.UInt64 = UInt64;
 exports.UInt8 = UInt8;
 exports.Void = Void;
@@ -17720,7 +17720,7 @@ Buffer.prototype.readUInt16BE = function readUInt16BE (offset, noAssert) {
   return (this[offset] << 8) | this[offset + 1]
 }
 
-Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
+Buffer.prototype.readUIntLE = function readUIntLE (offset, noAssert) {
   offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
@@ -17730,7 +17730,7 @@ Buffer.prototype.readUInt32LE = function readUInt32LE (offset, noAssert) {
       (this[offset + 3] * 0x1000000)
 }
 
-Buffer.prototype.readUInt32BE = function readUInt32BE (offset, noAssert) {
+Buffer.prototype.readUIntBE = function readUIntBE (offset, noAssert) {
   offset = offset >>> 0
   if (!noAssert) checkOffset(offset, 4, this.length)
 
@@ -17911,7 +17911,7 @@ Buffer.prototype.writeUInt16BE = function writeUInt16BE (value, offset, noAssert
   return offset + 2
 }
 
-Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert) {
+Buffer.prototype.writeUIntLE = function writeUIntLE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
   if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)
@@ -17922,7 +17922,7 @@ Buffer.prototype.writeUInt32LE = function writeUInt32LE (value, offset, noAssert
   return offset + 4
 }
 
-Buffer.prototype.writeUInt32BE = function writeUInt32BE (value, offset, noAssert) {
+Buffer.prototype.writeUIntBE = function writeUIntBE (value, offset, noAssert) {
   value = +value
   offset = offset >>> 0
   if (!noAssert) checkInt(this, value, offset, 4, 0xffffffff, 0)

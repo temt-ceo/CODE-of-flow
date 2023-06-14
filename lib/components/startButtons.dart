@@ -140,7 +140,9 @@ class StartButtonsState extends State<StartButtons> {
         widget.callback('other-game-info', player.playerId,
             GameObject.getOtherGameInfo(), null, null);
       } else {
-        if (player.playerId == '') {
+        if (player.playerId == '_') {
+          return;
+        } else if (player.playerId == '') {
           // Playerリソース未インポート
           if (showBottomSheet == false && mounted) {
             setState(() {
@@ -337,6 +339,9 @@ class StartButtonsState extends State<StartButtons> {
         if (cyberEnergy != null &&
             cyberEnergy! < int.parse(yourInfo['cyber_energy'])) {
           showToast('EN is successfull charged.');
+          if (loadingContext3 != null) {
+            Navigator.pop(loadingContext3!);
+          }
         }
         setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
         int win = 0;
@@ -413,6 +418,7 @@ class StartButtonsState extends State<StartButtons> {
           () => player = PlayerResource(playerUUId!, playerId!, playerName!));
     } else {
       print('Not Imporing.');
+      setState(() => player = PlayerResource('', '', ''));
     }
   }
 
@@ -591,11 +597,6 @@ class StartButtonsState extends State<StartButtons> {
                         onPressed: () {
                           // showGameLoading();
                           buyCyberEN();
-                          Future.delayed(const Duration(seconds: 4000), () {
-                            if (loadingContext3 != null) {
-                              Navigator.pop(loadingContext3!);
-                            }
-                          });
                         },
                         child: const Text('Insert 1FLOW coin.'),
                       )),
@@ -621,16 +622,19 @@ class StartButtonsState extends State<StartButtons> {
 
   GameObject setGameInfo(objJs) {
     int yourDefendableUnitLength = 0;
-    if (objJs['your_field_unit']['4'] != null) {
-      yourDefendableUnitLength = 4;
-    } else if (objJs['your_field_unit']['3'] != null) {
-      yourDefendableUnitLength = 3;
-    } else if (objJs['your_field_unit']['2'] != null) {
-      yourDefendableUnitLength = 2;
-    } else if (objJs['your_field_unit']['1'] != null) {
-      yourDefendableUnitLength = 1;
+    for (int i = 1; i <= int.parse(objJs['your_field_unit_length']); i++) {
+      if (objJs['your_field_unit_action'][i.toString()] == '1' ||
+          objJs['your_field_unit_action'][i.toString()] == '2') {
+        yourDefendableUnitLength++;
+      }
     }
-
+    int opponentDefendableUnitLength = 0;
+    for (int i = 1; i <= int.parse(objJs['opponent_field_unit_length']); i++) {
+      if (objJs['opponent_field_unit_action'][i.toString()] == '1' ||
+          objJs['opponent_field_unit_action'][i.toString()] == '2') {
+        opponentDefendableUnitLength++;
+      }
+    }
     return GameObject(
       int.parse(objJs['turn']),
       objJs['is_first'],
@@ -642,6 +646,7 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(objJs['your_cp']),
       objJs['your_field_unit'],
       yourDefendableUnitLength,
+      opponentDefendableUnitLength,
       objJs['your_field_unit_action'],
       objJs['your_field_unit_bp_amount_of_change'],
       objJs['your_hand'],

@@ -28,9 +28,10 @@
   "inputPlayerName": "Please input a Player Name.",
   "nameConfirmText": "If you are satisfied with {name} in player name, please click the button below.",
   "insufficientEN": "'You currently have {balance} FLOW coins.\n By pressing the button, you are asked to pay 1 FLOW coin.'",
-  "insufficientEN2": "Press \"Approve\" button, then 100 EN will be added.\n But when you won this arcade game, you will get 0.5 FLOW at that time.",
+  "insufficientEN2": "Press \"Approve\" button, then 100 EN will be added.\n\n In this arcade game, when you won a game, you will get 0.5 FLOW at that time.",
   "insufficientEN3": "",
   "isFirst": "First attack",
   "isNotFirst": "First attack",
-  "opponentAttack": "The opponent is attacking!"
+  "opponentAttack": "The opponent is attacking!",
+  "opponentBlocking": "Blocked by enemy unit!"
 }

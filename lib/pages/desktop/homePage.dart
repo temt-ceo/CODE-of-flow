@@ -171,7 +171,7 @@ class HomePageState extends State<HomePage> {
                       position: FlashPosition.bottom,
                       child: FlashBar(
                         controller: controller,
-                        title: const Text('Turn Change!'),
+                        title: Text(L10n.of(context)!.opponentBlocking),
                         content: const Text(''),
                         indicatorColor: Colors.blue,
                         icon: const Icon(
@@ -356,6 +356,27 @@ class HomePageState extends State<HomePage> {
       var ret = await apiService.saveGameServerProcess(
           'game_start', jsonEncode(handCards), gameObject!.you.toString());
       closeGameLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showFlash(
+            context: context,
+            duration: const Duration(seconds: 4),
+            builder: (context, controller) {
+              return Flash(
+                controller: controller,
+                position: FlashPosition.bottom,
+                child: FlashBar(
+                  controller: controller,
+                  title: const Text('Game Start.'),
+                  content: const Text(''),
+                  indicatorColor: Colors.blue,
+                  icon: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.blue,
+                  ),
+                ),
+              );
+            });
+      });
       debugPrint('transaction published');
       if (ret != null) {
         debugPrint(ret.message);
@@ -662,6 +683,7 @@ class HomePageState extends State<HomePage> {
                     yourUsedInterceptCard,
                     opponentUsedInterceptCard,
                     actedCardPosition,
+                    cardInfos,
                     r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
             Visibility(

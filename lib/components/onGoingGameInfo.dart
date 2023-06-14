@@ -23,6 +23,7 @@ class OnGoingGameInfo extends StatefulWidget {
   List<int>? yourUsedInterceptCard;
   List<int>? opponentUsedInterceptCard;
   int? actedCardPosition;
+  final dynamic cardInfos;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
@@ -34,6 +35,7 @@ class OnGoingGameInfo extends StatefulWidget {
       this.yourUsedInterceptCard,
       this.opponentUsedInterceptCard,
       this.actedCardPosition,
+      this.cardInfos,
       this.r);
 
   @override
@@ -123,12 +125,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           (diff != null && diff % 10 == 0)) {
         if (apiCalled == false) {
           apiCalled = true;
-          setState(() {
-            widget.actedCardPosition = null;
-            widget.opponentDefendPosition = null;
-            widget.yourUsedInterceptCard = null;
-            widget.opponentUsedInterceptCard = null;
-          });
           showGameLoading();
           var message = DefenceActionModel(
               widget.opponentDefendPosition,
@@ -138,11 +134,17 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               widget.opponentUsedInterceptCard == null
                   ? []
                   : widget.opponentUsedInterceptCard!);
+          setState(() {
+            widget.actedCardPosition = null;
+            widget.opponentDefendPosition = null;
+            widget.yourUsedInterceptCard = null;
+            widget.opponentUsedInterceptCard = null;
+          });
           var ret = await apiService.saveGameServerProcess('defence_action',
               jsonEncode(message), widget.info!.you.toString());
           print('defence_action $message');
           closeGameLoading();
-          debugPrint('== transaction published ==');
+          debugPrint('== defence_action transaction published ==');
           debugPrint('== ${ret.toString()} ==');
           if (ret != null) {
             debugPrint(ret.message);
@@ -162,10 +164,43 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               7 - now.difference(battleReactionUpdateTime!).inSeconds;
         });
         if (reactionLimitTime != null && reactionLimitTime! < 0) {
+          String flashMsg = '';
+          if (widget.opponentDefendPosition != null) {
+            String y_card_id =
+                widget.info!.yourFieldUnit[widget.actedCardPosition.toString()];
+            String o_card_id = widget
+                .info!.opponentFieldUnit[widget.actedCardPosition.toString()];
+            flashMsg = widget.cardInfos[y_card_id]['name'] +
+                ' VS ' +
+                widget.cardInfos[o_card_id]['name'];
+          }
+
           // 時間制限を超えた場合、バトル判定処理実行へ
           WidgetsBinding.instance.addPostFrameCallback((_) {
             actionDecided(null);
           });
+          showFlash(
+              context: context,
+              duration: const Duration(seconds: 4),
+              builder: (context, controller) {
+                return Flash(
+                  controller: controller,
+                  position: FlashPosition.bottom,
+                  child: FlashBar(
+                    controller: controller,
+                    title: Text(widget.opponentDefendPosition == null
+                        ? 'Player Damage!'
+                        : 'Battle!!'),
+                    content: Text(
+                        widget.opponentDefendPosition == null ? '' : flashMsg),
+                    indicatorColor: Colors.blue,
+                    icon: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                    ),
+                  ),
+                );
+              });
         }
         // 10秒経過時も判定処理へ
       } else if (now.difference(battleStartTime).inSeconds > 10) {
@@ -561,8 +596,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             Visibility(
                 visible: reactionLimitTime != null && reactionLimitTime! > 0,
                 child: Positioned(
-                    left: widget.r(800),
-                    top: widget.r(500),
+                    left: widget.r(900),
+                    top: widget.r(300),
                     child: SizedBox(
                         width: widget.r(100.0),
                         child: Center(

@@ -6,11 +6,11 @@ const { SHA3 } = require("sha3");
 
 const FlowTransactions = {
   matchingStart: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32) {
+    transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.matching_start(player_id: player_id)
       }
@@ -20,11 +20,11 @@ const FlowTransactions = {
     }
   `,
   gameStart: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, drawed_cards: [UInt16]) {
+    transaction(player_id: UInt, drawed_cards: [UInt16]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.game_start(player_id: player_id, drawed_cards: drawed_cards)
       }
@@ -34,11 +34,11 @@ const FlowTransactions = {
     }
   `,
   putCardOnField: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, unit_card: {UInt8: UInt16}, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
+    transaction(player_id: UInt, unit_card: {UInt8: UInt16}, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.put_card_on_the_field(player_id: player_id, unit_card: unit_card, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_positions: used_intercept_positions)
       }
@@ -48,11 +48,11 @@ const FlowTransactions = {
     }
   `,
   attack: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, attack_unit: UInt8, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
+    transaction(player_id: UInt, attack_unit: UInt8, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.attack(player_id: player_id, attack_unit: attack_unit, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_positions: used_intercept_positions)
       }
@@ -62,11 +62,11 @@ const FlowTransactions = {
     }
   `,
   defenceAction: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, opponent_defend_position: UInt8?, your_used_intercept_positions: [UInt8], opponent_used_intercept_positions: [UInt8]) {
+    transaction(player_id: UInt, opponent_defend_position: UInt8?, your_used_intercept_positions: [UInt8], opponent_used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.defence_action(player_id: player_id, opponent_defend_position: opponent_defend_position, your_used_intercept_positions: your_used_intercept_positions, opponent_used_intercept_positions: opponent_used_intercept_positions)
       }
@@ -76,11 +76,11 @@ const FlowTransactions = {
     }
   `,
   turnChange: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, from_opponent: Bool) {
+    transaction(player_id: UInt, from_opponent: Bool) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.turn_change(player_id: player_id, from_opponent: from_opponent)
       }
@@ -90,11 +90,11 @@ const FlowTransactions = {
     }
   `,
   startYourTurn: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32, blocked_unit: {UInt8: UInt8}, used_intercept_position: {UInt8: UInt8}) {
+    transaction(player_id: UInt, blocked_unit: {UInt8: UInt8}, used_intercept_position: {UInt8: UInt8}) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.start_your_turn_and_draw_two_cards(player_id: player_id, blocked_unit: blocked_unit, used_intercept_position: used_intercept_position)
       }
@@ -104,11 +104,11 @@ const FlowTransactions = {
     }
   `,
   surrendar: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32) {
+    transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.surrendar(player_id: player_id)
       }
@@ -118,11 +118,11 @@ const FlowTransactions = {
     }
   `,
   claimWin: `
-    import CodeOfFlowAlpha14 from 0x9e447fb949c3f1b6
+    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt32) {
+    transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha14.Admin>(from: CodeOfFlowAlpha14.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.claimWin(player_id: player_id)
       }
@@ -179,7 +179,7 @@ exports.handler = async function (event) {
     const PRIVATE_KEY = JSON.parse(response.SecretString)?.SmartContractPK;
     const ADDRESS = "0x9e447fb949c3f1b6";
     const KEY_ID = 0;
-    const CONTRACT_NAME = "CodeOfFlowAlpha14";
+    const CONTRACT_NAME = "CodeOfFlowAlpha15";
 
     const sign = (message) => {
       const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY, "hex"))
@@ -229,7 +229,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.matchingStart,
         args: (arg, t) => [
-          arg(player_id, t.UInt32)
+          arg(player_id, t.UInt)
         ],
         proposer: authorizationFunctionProposer,
         payer: authorizationFunction,
@@ -245,7 +245,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.gameStart,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
           arg(message, t.Array(t.UInt16))
         ],
         proposer: authorizationFunctionProposer,
@@ -284,7 +284,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.putCardOnField,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
           arg(arg1, t.Dictionary({ key: t.UInt8, value: t.UInt16 })), // unit_card
           arg(message.arg2, t.UInt8), // enemy_skill_target
           arg(arg3, t.Dictionary({ key: t.UInt8, value: t.UInt16 })), // trigger_cards
@@ -304,7 +304,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.turnChange,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
           arg(message.arg1, t.Bool),
         ],
         proposer: authorizationFunctionProposer,
@@ -327,7 +327,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.attack,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
           arg(message.arg1, t.UInt8), // attacking_card_position
           arg(message.arg2 || null, t.Optional(t.UInt8)), // enemy_skill_target
           arg(arg3, t.Dictionary({ key: t.UInt8, value: t.UInt16 })), // trigger_cards
@@ -347,7 +347,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.defenceAction,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
           arg(message.arg1, t.Optional(t.UInt8)), // opponent_defend_position
           arg(message.arg2, t.Array(t.UInt8)), // your_used_intercept_positions
           arg(message.arg3, t.Array(t.UInt8)), // opponent_used_intercept_positions
@@ -366,7 +366,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.surrendar,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
         ],
         proposer: authorizationFunctionProposer,
         payer: authorizationFunction,
@@ -382,7 +382,7 @@ exports.handler = async function (event) {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.claimWin,
         args: (arg, t) => [
-          arg(player_id, t.UInt32),
+          arg(player_id, t.UInt),
         ],
         proposer: authorizationFunctionProposer,
         payer: authorizationFunction,

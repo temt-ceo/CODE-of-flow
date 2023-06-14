@@ -171,7 +171,7 @@ class HomePageState extends State<HomePage> {
                       position: FlashPosition.bottom,
                       child: FlashBar(
                         controller: controller,
-                        title: const Text('Turn Change!'),
+                        title: Text(L10n.of(context)!.opponentBlocking),
                         content: const Text(''),
                         indicatorColor: Colors.blue,
                         icon: const Icon(
@@ -204,6 +204,7 @@ class HomePageState extends State<HomePage> {
 
   void block(int activeIndex) async {
     setState(() {
+      showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
       yourUsedInterceptCard = [];
       opponentUsedInterceptCard = [];
@@ -355,6 +356,27 @@ class HomePageState extends State<HomePage> {
       var ret = await apiService.saveGameServerProcess(
           'game_start', jsonEncode(handCards), gameObject!.you.toString());
       closeGameLoading();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showFlash(
+            context: context,
+            duration: const Duration(seconds: 4),
+            builder: (context, controller) {
+              return Flash(
+                controller: controller,
+                position: FlashPosition.bottom,
+                child: FlashBar(
+                  controller: controller,
+                  title: const Text('Game Start.'),
+                  content: const Text(''),
+                  indicatorColor: Colors.blue,
+                  icon: const Icon(
+                    Icons.info_outline_rounded,
+                    color: Colors.blue,
+                  ),
+                ),
+              );
+            });
+      });
       debugPrint('transaction published');
       if (ret != null) {
         debugPrint(ret.message);
@@ -661,6 +683,7 @@ class HomePageState extends State<HomePage> {
                     yourUsedInterceptCard,
                     opponentUsedInterceptCard,
                     actedCardPosition,
+                    cardInfos,
                     r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
             Visibility(
@@ -1206,9 +1229,9 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(300),
+                        height: r(400),
                         // aspectRatio: 9 / 9,
-                        viewportFraction: 0.4, // 1.0:1つが全体に出る
+                        viewportFraction: 1, // 1.0:1つが全体に出る
                         initialPage: 0,
                         enableInfiniteScroll: true,
                         enlargeCenterPage: true,
@@ -1218,13 +1241,14 @@ class HomePageState extends State<HomePage> {
                             activeIndex = index;
                           });
                         }),
-                    itemCount: 4,
+                    itemCount: gameObject == null
+                        ? 0
+                        : gameObject!.yourDefendableUnitLength,
                     itemBuilder: (context, index, realIndex) {
-                      print(gameObject!.yourFieldUnit);
                       var cardId =
                           gameObject!.yourFieldUnit[(index + 1).toString()];
                       return Image.asset(
-                        '${imagePath}unit/card_$cardId}.jpeg',
+                        '${imagePath}unit/card_$cardId.jpeg',
                         fit: BoxFit.cover,
                       );
                     },
@@ -1288,7 +1312,7 @@ class HomePageState extends State<HomePage> {
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
-        count: 4,
+        count: gameObject == null ? 0 : gameObject!.yourDefendableUnitLength,
         onDotClicked: (index) {
           cController.animateToPage(index);
         },

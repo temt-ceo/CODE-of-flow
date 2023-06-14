@@ -95,25 +95,26 @@ class DragTargetState extends State<DragTargetWidget> {
       var ret = await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
-      debugPrint('== transaction published ==');
+      debugPrint('== attack transaction published ==');
       debugPrint('== ${ret.toString()} ==');
       if (ret != null) {
         debugPrint(ret.message);
       }
-
-      // 敵ユニットがいない場合、そのままダメージへ
-      showGameLoading();
-      List<int> yourUsedInterceptCard = [];
-      List<int> opponentUsedInterceptCard = [];
-      var message2 = DefenceActionModel(
-          null, yourUsedInterceptCard, opponentUsedInterceptCard);
-      var ret2 = await apiService.saveGameServerProcess(
-          'defence_action', jsonEncode(message2), widget.info!.you.toString());
-      closeGameLoading();
-      debugPrint('== transaction published ==');
-      debugPrint('== ${ret2.toString()} ==');
-      if (ret2 != null) {
-        debugPrint(ret2.message);
+      if (widget.info!.opponentDefendableUnitLength == 0) {
+        // 敵ユニットがいない場合、そのままダメージへ
+        showGameLoading();
+        List<int> yourUsedInterceptCard = [];
+        List<int> opponentUsedInterceptCard = [];
+        var message2 = DefenceActionModel(
+            null, yourUsedInterceptCard, opponentUsedInterceptCard);
+        var ret2 = await apiService.saveGameServerProcess('defence_action',
+            jsonEncode(message2), widget.info!.you.toString());
+        closeGameLoading();
+        debugPrint('== NO GARD defence_action transaction published ==');
+        debugPrint('== ${ret2.toString()} ==');
+        if (ret2 != null) {
+          debugPrint(ret2.message);
+        }
       }
     }
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/services.dart';
 
+import 'package:amplify_api/amplify_api.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flash/flash.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -65,126 +66,145 @@ class HomePageState extends State<HomePage> {
   }
 
   void listenBCGGameServerProcess() async {
-    GameServerProcess? ret = await apiService.subscribeBCGGameServerProcess();
-    if (ret != null) {
-      print('No. ${ret.playerId} : ${ret.type}');
-      print(ret.message);
-      if (ret.type == 'player_matching' && playerId == ret.playerId) {
-        String transactionId = ret.message.split(',TransactionID:')[1];
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showFlash(
-              context: context,
-              duration: const Duration(seconds: 4),
-              builder: (context, controller) {
-                return Flash(
-                  controller: controller,
-                  position: FlashPosition.bottom,
-                  child: FlashBar(
-                    controller: controller,
-                    title: const Text('Player Matching is in progress.'),
-                    content: Text(
-                        'Transaction is in progress. Transaction ID: $transactionId'),
-                    indicatorColor: Colors.blue,
-                    icon: const Icon(
-                      Icons.info_outline_rounded,
-                      color: Colors.blue,
-                    ),
-                  ),
-                );
-              });
-        });
-      } else if (ret.type == 'player_matching') {
-        showToast("No. ${ret.playerId} has entered in Alcana. Let's battle!");
-      } else if (ret.type == 'turn_change' &&
-          (gameObject!.you.toString() == ret.playerId ||
-              gameObject!.opponent.toString() == ret.playerId)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showFlash(
-              context: context,
-              duration: const Duration(seconds: 4),
-              builder: (context, controller) {
-                return Flash(
-                  controller: controller,
-                  position: FlashPosition.bottom,
-                  child: FlashBar(
-                    controller: controller,
-                    title: const Text('Turn Change!'),
-                    content: const Text(''),
-                    indicatorColor: Colors.blue,
-                    icon: const Icon(
-                      Icons.info_outline_rounded,
-                      color: Colors.blue,
-                    ),
-                  ),
-                );
-              });
-        });
-      } else if (ret.type == 'attack' &&
-          (gameObject!.opponent.toString() == ret.playerId)) {
-        showDefenceUnitsCarousel = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showFlash(
-              context: context,
-              duration: const Duration(seconds: 4),
-              builder: (context, controller) {
-                return Flash(
-                  controller: controller,
-                  position: FlashPosition.bottom,
-                  child: FlashBar(
-                    controller: controller,
-                    title: Text(L10n.of(context)!.opponentAttack),
-                    content: const Text(''),
-                    indicatorColor: Colors.blue,
-                    icon: const Icon(
-                      Icons.info_outline_rounded,
-                      color: Colors.blue,
-                    ),
-                  ),
-                );
-              });
-        });
-        attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-      } else if (ret.type == 'battle_reaction' &&
-          (gameObject!.you.toString() == ret.playerId ||
-              gameObject!.opponent.toString() == ret.playerId)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          showFlash(
-              context: context,
-              duration: const Duration(seconds: 4),
-              builder: (context, controller) {
-                return Flash(
-                  controller: controller,
-                  position: FlashPosition.bottom,
-                  child: FlashBar(
-                    controller: controller,
-                    title: const Text('Turn Change!'),
-                    content: const Text(''),
-                    indicatorColor: Colors.blue,
-                    icon: const Icon(
-                      Icons.info_outline_rounded,
-                      color: Colors.blue,
-                    ),
-                  ),
-                );
-              });
-        });
-        attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-      } else if (ret.type == 'defence_action' &&
-          (gameObject!.you.toString() == ret.playerId ||
-              gameObject!.opponent.toString() == ret.playerId)) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          setState(() {
-            attackSignalPosition = null;
-            actedCardPosition = null;
-          });
-        });
-        attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
-      }
-    }
+    Stream<GraphQLResponse<GameServerProcess>> operation =
+        apiService.subscribeBCGGameServerProcess();
+    operation.listen(
+      (event) {
+        print('*** Subscription event data received: ${event.data}');
+        var ret = event.data;
+        if (ret != null) {
+          print('No. ${ret.playerId} : ${ret.type}');
+          print(ret.message);
+          if (ret.type == 'player_matching' && playerId == ret.playerId) {
+            String transactionId = ret.message.split(',TransactionID:')[1];
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        title: const Text('Player Matching is in progress.'),
+                        content: Text('Transaction ID: $transactionId'),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+          } else if (ret.type == 'player_matching') {
+            showToast(
+                "No. ${ret.playerId} has entered in Alcana. Let's battle!");
+          } else if (ret.type == 'turn_change' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        title: const Text('Turn Change!'),
+                        content: const Text(''),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+          } else if (ret.type == 'attack' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId)) {
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+          } else if (ret.type == 'attack' &&
+              gameObject != null &&
+              (gameObject!.opponent.toString() == ret.playerId)) {
+            showDefenceUnitsCarousel = true;
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        title: Text(L10n.of(context)!.opponentAttack),
+                        content: const Text(''),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+          } else if (ret.type == 'battle_reaction' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        title: const Text('Turn Change!'),
+                        content: const Text(''),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+          } else if (ret.type == 'defence_action' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
+            attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  attackSignalPosition = null;
+                  actedCardPosition = null;
+                });
+              }
+            });
+          }
+        }
+      },
+      onError: (Object e) => debugPrint('Error in subscription stream: $e'),
+    );
   }
 
   void block(int activeIndex) async {
     setState(() {
+      showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
       yourUsedInterceptCard = [];
       opponentUsedInterceptCard = [];
@@ -343,6 +363,35 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void gameEnd(bool isWin) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (builderContext) {
+          return Container(
+            width: 200.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage('${imagePath}unit/battleStart2.png'),
+                  fit: BoxFit.cover),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0xFFFFFFFF),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: Offset(2, 5), // changes position of shadow
+                ),
+              ],
+            ),
+            child: Center(
+                child: Text(isWin ? 'You Win' : 'You Lose',
+                    style: const TextStyle(
+                        color: Colors.white, fontSize: (42.0)))),
+          );
+        });
+  }
+
   final _timer = TimerComponent();
   void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCards) {
     if (gameProgressStatus < 2) {
@@ -355,6 +404,21 @@ class HomePageState extends State<HomePage> {
         }
       }
       setState(() => gameObject = data);
+    } else if (gameObject != null) {
+      // ゲーム終了
+      if (gameObject!.yourLife > gameObject!.opponentLife) {
+        // Win
+        gameEnd(true);
+      } else if (gameObject!.yourLife < gameObject!.opponentLife) {
+        // Lose
+        gameEnd(false);
+      } else if (gameObject!.isFirst == gameObject!.isFirstTurn) {
+        // Lose
+        gameEnd(false);
+      } else {
+        // Win
+        gameEnd(true);
+      }
     }
 
     // マリガン時のみこちらへ
@@ -385,11 +449,11 @@ class HomePageState extends State<HomePage> {
           if (turnEndTime.difference(now).inSeconds > 0) {
             attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
           } else {
-            attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
+            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
           }
         }
       } else {
-        attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
+        attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
       }
     }
   }
@@ -597,13 +661,9 @@ class HomePageState extends State<HomePage> {
                     opponentDefendPosition,
                     yourUsedInterceptCard,
                     opponentUsedInterceptCard,
+                    actedCardPosition,
                     r)
                 : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
-            // StreamBuilder(
-            //     stream: attackStatusBloc.attack_stream,
-            //     initialData: 0,
-            //     builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-            //       return Visibility(
             Visibility(
                 visible: attackSignalPosition != null,
                 child: Positioned(
@@ -612,21 +672,20 @@ class HomePageState extends State<HomePage> {
                               attackSignalPosition! == 0)
                       ? 760.0
                       : 850.0),
-                  top: r(0.0),
+                  top: r(-2.0),
                   child: Container(
-                    width: r(50.0),
-                    height: r(50.0),
+                    width: r(75.0),
+                    height: r(75.0),
                     decoration: BoxDecoration(
                       color: Colors.transparent,
                       image: DecorationImage(
-                          opacity: 0.8,
+                          opacity: 0.7,
                           image:
                               AssetImage('${imagePath}unit/attackTarget.png'),
                           fit: BoxFit.cover),
                     ),
                   ),
                 )),
-            // }),
             Positioned(
               left: r(648.0),
               top: r(154.0),
@@ -1148,9 +1207,9 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(300),
+                        height: r(400),
                         // aspectRatio: 9 / 9,
-                        viewportFraction: 0.4, // 1.0:1つが全体に出る
+                        viewportFraction: 1, // 1.0:1つが全体に出る
                         initialPage: 0,
                         enableInfiniteScroll: true,
                         enlargeCenterPage: true,
@@ -1160,13 +1219,15 @@ class HomePageState extends State<HomePage> {
                             activeIndex = index;
                           });
                         }),
-                    itemCount: 4,
+                    itemCount: gameObject == null
+                        ? 0
+                        : gameObject!.yourDefendableUnitLength,
                     itemBuilder: (context, index, realIndex) {
-                      return Container(
-                        width: MediaQuery.of(context).size.width,
-                        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
-                        color: Colors.grey,
-                        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
+                      var cardId =
+                          gameObject!.yourFieldUnit[(index + 1).toString()];
+                      return Image.asset(
+                        '${imagePath}unit/card_$cardId.jpeg',
+                        fit: BoxFit.cover,
                       );
                     },
                   ),
@@ -1229,7 +1290,7 @@ class HomePageState extends State<HomePage> {
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
-        count: 4,
+        count: gameObject == null ? 0 : gameObject!.yourDefendableUnitLength,
         onDotClicked: (index) {
           cController.animateToPage(index);
         },

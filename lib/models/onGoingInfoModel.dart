@@ -8,6 +8,8 @@ class GameObject {
   final int you;
   int yourCp;
   final dynamic yourFieldUnit;
+  final int yourDefendableUnitLength;
+  final int opponentDefendableUnitLength;
   final dynamic yourFieldUnitAction;
   final dynamic yourFieldUnitBpAmountOfChange;
   final dynamic yourHand;
@@ -36,6 +38,8 @@ class GameObject {
     this.you,
     this.yourCp,
     this.yourFieldUnit,
+    this.yourDefendableUnitLength,
+    this.opponentDefendableUnitLength,
     this.yourFieldUnitAction,
     this.yourFieldUnitBpAmountOfChange,
     this.yourHand,
@@ -56,7 +60,7 @@ class GameObject {
   );
 
   static dynamic getOtherGameInfo() {
-    return GameObject(1, true, true, '1', true, '1', 1, 1, {}, 1, 1, {1: 16}, 1,
-        [], {}, 1, 1, {}, 1, 1, 1, 1, 1, 1, null, null);
+    return GameObject(1, true, true, '1', true, '1', 1, 1, {}, 0, 0, 1, 1,
+        {1: 16}, 1, [], {}, 1, 1, {}, 1, 1, 1, 1, 1, 1, null, null);
   }
 }

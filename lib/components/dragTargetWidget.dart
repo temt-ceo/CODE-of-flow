@@ -77,46 +77,45 @@ class DragTargetState extends State<DragTargetWidget> {
   }
 
   void attack() async {
-    showGameLoading();
-    var objStr2 = jsonToString(widget.info!.yourTriggerCards);
-    var objJs2 = jsonDecode(objStr2);
-    List<int?> triggerPositions = [null, null, null, null];
-    for (int i = 1; i <= 4; i++) {
-      if (objJs2[i.toString()] != null) {
-        triggerPositions[i - 1] = objJs2[i.toString()];
+    if (widget.actedCardPosition != null) {
+      showGameLoading();
+      var objStr2 = jsonToString(widget.info!.yourTriggerCards);
+      var objJs2 = jsonDecode(objStr2);
+      List<int?> triggerPositions = [null, null, null, null];
+      for (int i = 1; i <= 4; i++) {
+        if (objJs2[i.toString()] != null) {
+          triggerPositions[i - 1] = objJs2[i.toString()];
+        }
+      }
+      TriggerCards triggerCards = TriggerCards(triggerPositions[0],
+          triggerPositions[1], triggerPositions[2], triggerPositions[3]);
+      List<int> usedInterceptCard = [];
+      var message = AttackModel((widget.actedCardPosition! + 1), null,
+          triggerCards, usedInterceptCard);
+      var ret = await apiService.saveGameServerProcess(
+          'attack', jsonEncode(message), widget.info!.you.toString());
+      closeGameLoading();
+      debugPrint('== transaction published ==');
+      debugPrint('== ${ret.toString()} ==');
+      if (ret != null) {
+        debugPrint(ret.message);
+      }
+
+      // 敵ユニットがいない場合、そのままダメージへ
+      showGameLoading();
+      List<int> yourUsedInterceptCard = [];
+      List<int> opponentUsedInterceptCard = [];
+      var message2 = DefenceActionModel(
+          null, yourUsedInterceptCard, opponentUsedInterceptCard);
+      var ret2 = await apiService.saveGameServerProcess(
+          'defence_action', jsonEncode(message2), widget.info!.you.toString());
+      closeGameLoading();
+      debugPrint('== transaction published ==');
+      debugPrint('== ${ret2.toString()} ==');
+      if (ret2 != null) {
+        debugPrint(ret2.message);
       }
     }
-    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
-        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
-    List<int> usedInterceptCard = [];
-    var message = AttackModel(
-        (widget.actedCardPosition! + 1), null, triggerCards, usedInterceptCard);
-    var ret = await apiService.saveGameServerProcess(
-        'attack', jsonEncode(message), widget.info!.you.toString());
-    closeGameLoading();
-    debugPrint('== transaction published ==');
-    debugPrint('== ${ret.toString()} ==');
-    if (ret != null) {
-      debugPrint(ret.message);
-    }
-
-    // 敵ユニットがいない場合、そのままダメージへ
-    showGameLoading();
-    List<int> yourUsedInterceptCard = [];
-    List<int> opponentUsedInterceptCard = [];
-    var message2 = DefenceActionModel(
-        null, yourUsedInterceptCard, opponentUsedInterceptCard);
-    var ret2 = await apiService.saveGameServerProcess(
-        'defence_action', jsonEncode(message2), widget.info!.you.toString());
-    closeGameLoading();
-    debugPrint('== transaction published ==');
-    debugPrint('== ${ret2.toString()} ==');
-    if (ret2 != null) {
-      debugPrint(ret2.message);
-    }
-    setState(() {
-      attackSignalPosition = null;
-    });
   }
 
   @override
@@ -217,8 +216,10 @@ class DragTargetState extends State<DragTargetWidget> {
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
           // バトル終了検知
           if (snapshot.data == 3) {
-            setState(() {
-              attackSignalPosition = null;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                attackSignalPosition = null;
+              });
             });
           }
 

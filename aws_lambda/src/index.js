@@ -136,6 +136,8 @@ const FlowTransactions = {
 exports.handler = async function (event) {
   console.log("Event", JSON.stringify(event, 3))
   const input = event.arguments?.input || {};
+  let player_id = input.playerId ? parseInt(input.playerId) : 0;
+
   if (input.type === "battle_reaction") {
     return {
       id: new Date().getTime(),
@@ -147,11 +149,8 @@ exports.handler = async function (event) {
     };
   }
 
-  let player_id;
   let transactionId;
   try {
-
-    player_id = input.playerId ? parseInt(input.playerId) : 0;
     let message = input.message ? JSON.parse(input.message) : {};
 
     var KEY_ID_IT = 1

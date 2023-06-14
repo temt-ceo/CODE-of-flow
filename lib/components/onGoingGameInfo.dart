@@ -22,6 +22,7 @@ class OnGoingGameInfo extends StatefulWidget {
   int? opponentDefendPosition;
   List<int>? yourUsedInterceptCard;
   List<int>? opponentUsedInterceptCard;
+  int? actedCardPosition;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
@@ -32,6 +33,7 @@ class OnGoingGameInfo extends StatefulWidget {
       this.opponentDefendPosition,
       this.yourUsedInterceptCard,
       this.opponentUsedInterceptCard,
+      this.actedCardPosition,
       this.r);
 
   @override
@@ -51,6 +53,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   bool isFirstTurn = false;
   DateTime? battleReactionUpdateTime;
   int? reactionLimitTime;
+  bool apiCalled = false;
 
   void showGameLoading() {
     showDialog(
@@ -72,7 +75,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
   void closeGameLoading() {
     if (loadingContext != null) {
-      Navigator.pop(loadingContext!);
+      Navigator.of(loadingContext!, rootNavigator: true).pop();
     }
   }
 
@@ -115,69 +118,99 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
       }
     }
 
-    // Defence Action
-    void defenceActionDecided() async {
-      showGameLoading();
-
-      var message = DefenceActionModel(
-          widget.opponentDefendPosition,
-          widget.yourUsedInterceptCard == null
-              ? []
-              : widget.yourUsedInterceptCard!,
-          widget.opponentUsedInterceptCard == null
-              ? []
-              : widget.opponentUsedInterceptCard!);
-      var ret = await apiService.saveGameServerProcess(
-          'defence_action', jsonEncode(message), widget.info!.you.toString());
-      closeGameLoading();
-      debugPrint('== transaction published ==');
-      debugPrint('== ${ret.toString()} ==');
-      if (ret != null) {
-        debugPrint(ret.message);
+    void actionDecided(int? diff) async {
+      if (widget.actedCardPosition != null ||
+          (diff != null && diff % 10 == 0)) {
+        if (apiCalled == false) {
+          apiCalled = true;
+          setState(() {
+            widget.actedCardPosition = null;
+            widget.opponentDefendPosition = null;
+            widget.yourUsedInterceptCard = null;
+            widget.opponentUsedInterceptCard = null;
+          });
+          showGameLoading();
+          var message = DefenceActionModel(
+              widget.opponentDefendPosition,
+              widget.yourUsedInterceptCard == null
+                  ? []
+                  : widget.yourUsedInterceptCard!,
+              widget.opponentUsedInterceptCard == null
+                  ? []
+                  : widget.opponentUsedInterceptCard!);
+          var ret = await apiService.saveGameServerProcess('defence_action',
+              jsonEncode(message), widget.info!.you.toString());
+          print('defence_action $message');
+          closeGameLoading();
+          debugPrint('== transaction published ==');
+          debugPrint('== ${ret.toString()} ==');
+          if (ret != null) {
+            debugPrint(ret.message);
+          }
+        }
+      } else {
+        apiCalled = false;
       }
     }
 
+    // Defence Action
+    void defenceActionDecided(DateTime battleStartTime, DateTime now) {
+      if (battleReactionUpdateTime != null &&
+          now.difference(battleReactionUpdateTime!).inSeconds > 0) {
+        setState(() {
+          reactionLimitTime =
+              7 - now.difference(battleReactionUpdateTime!).inSeconds;
+        });
+        if (reactionLimitTime != null && reactionLimitTime! < 0) {
+          // 時間制限を超えた場合、バトル判定処理実行へ
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            actionDecided(null);
+          });
+        }
+        // 10秒経過時も判定処理へ
+      } else if (now.difference(battleStartTime).inSeconds > 10) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          actionDecided(now.difference(battleStartTime).inSeconds);
+        });
+      }
+    }
+
+    // ===============
+    // === 判定開始 ===
+    // ===============
     // 残り時間
     if (widget.info!.lastTimeTurnend != null) {
       lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
           double.parse(widget.info!.lastTimeTurnend!).toInt() * 1000);
       var turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
       final now = DateTime.now();
+      late DateTime battleStartTime;
 
       // バトル中ならそれ以前の時間まで止める
       if (widget.info!.yourAttackingCard != null &&
           widget.info!.isFirst == widget.info!.isFirstTurn) {
         var attackedTime = widget.info!.yourAttackingCard['attacked_time'];
         if (attackedTime != null) {
-          var battleStartTime = DateTime.fromMillisecondsSinceEpoch(
+          battleStartTime = DateTime.fromMillisecondsSinceEpoch(
               double.parse(attackedTime).toInt() * 1000);
           if (now.difference(battleStartTime).inSeconds > 0) {
             turnEndTime = turnEndTime.add(
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
+        defenceActionDecided(battleStartTime, now);
       } else if (widget.info!.enemyAttackingCard != null &&
           widget.info!.isFirst != widget.info!.isFirstTurn) {
         var attackedTime = widget.info!.enemyAttackingCard['attacked_time'];
         if (attackedTime != null) {
-          var battleStartTime = DateTime.fromMillisecondsSinceEpoch(
+          battleStartTime = DateTime.fromMillisecondsSinceEpoch(
               double.parse(attackedTime).toInt() * 1000);
           if (now.difference(battleStartTime).inSeconds > 0) {
             turnEndTime = turnEndTime.add(
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
-        if (battleReactionUpdateTime != null &&
-            now.difference(battleReactionUpdateTime!).inSeconds > 0) {
-          setState(() {
-            reactionLimitTime =
-                6 - now.difference(battleReactionUpdateTime!).inSeconds;
-          });
-          if (reactionLimitTime != null && reactionLimitTime! < 0) {
-            // 時間制限を超えた場合、バトル判定処理実行へ
-            defenceActionDecided();
-          }
-        }
+        defenceActionDecided(battleStartTime, now);
       }
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
@@ -204,9 +237,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           widget.canOperate(false);
         });
       } else {
-        setState(() {
-          canTurnEnd = true;
-        });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           widget.canOperate(true);
         });
@@ -218,12 +248,17 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               : turnEndTime.difference(now).inSeconds.toString();
         });
         if (widget.info!.isFirst == widget.info!.isFirstTurn) {
-          // 誤動作を防ぐために１0秒経過後に押せるようにする
-          if (percentIndicatorValue < 0.50) {
+          // 誤動作を防ぐために5秒経過後に押せるようにする
+          if (percentIndicatorValue < 0.55 &&
+              widget.info!.yourAttackingCard == null) {
             setState(() {
               canTurnEnd = true;
             });
           }
+        } else {
+          setState(() {
+            canTurnEnd = true;
+          });
         }
       }
     }
@@ -234,8 +269,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
           // バトルリアクション時間更新
           if (snapshot.data == 2) {
-            setState(() {
-              battleReactionUpdateTime = DateTime.now();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              setState(() {
+                battleReactionUpdateTime = DateTime.now();
+              });
             });
           }
 

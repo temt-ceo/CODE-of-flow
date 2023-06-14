@@ -99,13 +99,14 @@ class StartButtonsState extends State<StartButtons> {
   final nameController = TextEditingController();
   APIService apiService = APIService();
   WalletUser walletUser = WalletUser('');
-  PlayerResource player = PlayerResource('', '', '');
+  PlayerResource player = PlayerResource('', '_', '');
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool showBottomSheet = false;
   bool showBottomSheet2 = false;
   bool onTyping = false;
   bool onClickButton = false;
   bool gameStarted = false;
+  bool getBalanceFlg = true;
   double imagePosition = 0.0;
   double? balance;
   int? cyberEnergy;
@@ -268,12 +269,16 @@ class StartButtonsState extends State<StartButtons> {
           if (ret == null) {
             widget.callback('other-game-info', player.playerId,
                 GameObject.getOtherGameInfo(), null, null);
+            gameStarted = false;
+            getBalanceFlg = true;
           } else if (ret.toString().startsWith('1')) {
             double num = double.parse(ret);
             if (num > 1685510325) {
               // debugPrint(
               //     'matching.. ${(timer.tick * 2).toString()}s');
             }
+            gameStarted = false;
+            getBalanceFlg = true;
           } else if (objJs['game_started'] == true ||
               objJs['game_started'] == false) {
             if (objJs['game_started'] == false && gameStarted == false) {
@@ -291,8 +296,10 @@ class StartButtonsState extends State<StartButtons> {
             }
             gameStarted = true;
           }
-          // 残高を取得
-          getBalances();
+          if (getBalanceFlg == true) {
+            // 残高を取得
+            getBalances();
+          }
         }
       }
     });
@@ -315,6 +322,7 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   void getBalances() async {
+    getBalanceFlg = false;
     if (walletUser.addr != '') {
       // 保有$Flow残高取得
       dynamic ret = await promiseToFuture(getBalance(walletUser.addr,
@@ -333,17 +341,29 @@ class StartButtonsState extends State<StartButtons> {
         setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
         int win = 0;
         for (int i = 0; i < yourInfo['score'].length; i++) {
-          if (int.parse(yourInfo['score'][i]) == 1) {
-            win++;
+          for (final key in yourInfo['score'][i].keys) {
+            final value = yourInfo['score'][i][key];
+            if (value == '1') {
+              win++;
+            }
           }
         }
         setState(
             () => yourScore = '${yourInfo['score'].length} games ${win} win');
         setState(() => yourName = yourInfo['player_name']);
-        if (gameStarted) {
+        if (gameStarted && objJs.length > 1) {
           var opponentInfo = objJs[1];
+          int win2 = 0;
+          for (int i = 0; i < opponentInfo['score'].length; i++) {
+            for (final key in opponentInfo['score'][i].keys) {
+              final value = opponentInfo['score'][i][key];
+              if (value == '1') {
+                win2++;
+              }
+            }
+          }
           setState(() =>
-              enemyScore = '${opponentInfo['score'].length} games ${win} win');
+              enemyScore = '${opponentInfo['score'].length} games ${win2} win');
           setState(() => enemyName = opponentInfo['player_name']);
         }
       }
@@ -600,6 +620,17 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   GameObject setGameInfo(objJs) {
+    int yourDefendableUnitLength = 0;
+    if (objJs['your_field_unit']['4'] != null) {
+      yourDefendableUnitLength = 4;
+    } else if (objJs['your_field_unit']['3'] != null) {
+      yourDefendableUnitLength = 3;
+    } else if (objJs['your_field_unit']['2'] != null) {
+      yourDefendableUnitLength = 2;
+    } else if (objJs['your_field_unit']['1'] != null) {
+      yourDefendableUnitLength = 1;
+    }
+
     return GameObject(
       int.parse(objJs['turn']),
       objJs['is_first'],
@@ -610,6 +641,7 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(player.playerId),
       int.parse(objJs['your_cp']),
       objJs['your_field_unit'],
+      yourDefendableUnitLength,
       objJs['your_field_unit_action'],
       objJs['your_field_unit_bp_amount_of_change'],
       objJs['your_hand'],

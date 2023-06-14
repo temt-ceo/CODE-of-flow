@@ -42,16 +42,7 @@ class APIService {
     return null;
   }
 
-  Future<GameServerProcess?> subscribeBCGGameServerProcess() async {
-    // const graphQLDocument = r'''
-    //     subscription onCreateCommentByPostId($id: ID!) {
-    //       onCommentByPostId(postCommentsId: $id) {
-    //         content
-    //         id
-    //         postCommentsId
-    //       }
-    //     }
-    //   ''';
+  Stream<GraphQLResponse<GameServerProcess>> subscribeBCGGameServerProcess() {
     const graphQLDocument = r'''
       subscription OnCreateBCGGameServerProcess(
         $filter: ModelSubscriptionBCGGameServerProcessFilterInput
@@ -73,16 +64,15 @@ class APIService {
       subscriptionRequest,
       onEstablished: () => print('Subscription established'),
     );
-
-    try {
-      await for (var event in operation) {
-        print('*** Subscription event data received: ${event.data}');
-        return event.data;
-      }
-      // return ret;
-    } on Exception catch (e) {
-      print('Error in subscription stream: $e');
-      return null;
-    }
+    return operation;
+    // try {
+    //   await for (var event in operation) {
+    //     print('*** Subscription event data received: ${event.data}');
+    //     return event.data;
+    //   }
+    // } on Exception catch (e) {
+    //   print('Error in subscription stream: $e');
+    //   return null;
+    // }
   }
 }

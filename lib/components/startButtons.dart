@@ -13,6 +13,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:quickalert/quickalert.dart';
 
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
@@ -63,6 +64,9 @@ external String? getPlayerName(dynamic player);
 
 @JS('getCardInfo')
 external dynamic getCardInfo();
+
+@JS('getPlayerDeck')
+external dynamic getPlayerDeck(String? address, int playerId);
 
 @JS('jsonToString')
 external String jsonToString(dynamic obj);
@@ -124,6 +128,7 @@ class StartButtonsState extends State<StartButtons> {
   int activeIndex = 0;
   final cController = CarouselController();
   dynamic cardList;
+  List<dynamic> userDeck = [];
 
   late StreamController<bool> _wait;
 
@@ -416,6 +421,8 @@ class StartButtonsState extends State<StartButtons> {
       debugPrint('PlayerId: $playerId');
       setState(
           () => player = PlayerResource(playerUUId!, playerId!, playerName!));
+      userDeck = await promiseToFuture(
+          getPlayerDeck(walletUser.addr, int.parse(playerId!)));
     } else {
       print('Not Imporing.');
       setState(() => player = PlayerResource('', '', ''));
@@ -672,17 +679,43 @@ class StartButtonsState extends State<StartButtons> {
     for (int i = 0; i < 5; i++) {
       retArr.add([]);
       for (int j = 0; j < 4; j++) {
-        retArr[i].add(int.parse(arr[i][j]));
+        var card_id = userDeck[int.parse(arr[i][j])];
+        retArr[i].add(card_id);
       }
     }
     return retArr;
   }
 
   void signout() {
-    unauthenticate();
-    setState(() => walletUser = WalletUser(''));
-    setState(() => player = PlayerResource('', '', ''));
-    setState(() => showBottomSheet = false);
+    if (gameStarted == true) {
+      QuickAlert.show(
+          context: context,
+          type: QuickAlertType.confirm,
+          text: 'Do you want to surrender?',
+          confirmBtnText: 'Yes',
+          cancelBtnText: 'No',
+          confirmBtnColor: Colors.blue,
+          onConfirmBtnTap: () async {
+            showGameLoading();
+            var ret = await apiService.saveGameServerProcess(
+                'surrender', '', player.playerId);
+            closeGameLoading();
+            if (ret != null) {
+              debugPrint(ret.message);
+              QuickAlert.show(
+                context: context,
+                type: QuickAlertType.error,
+                title: 'You Lose...',
+                text: 'Try Again!',
+              );
+            }
+          });
+    } else {
+      unauthenticate();
+      setState(() => walletUser = WalletUser(''));
+      setState(() => player = PlayerResource('', '', ''));
+      setState(() => showBottomSheet = false);
+    }
   }
 
   @override
@@ -862,7 +895,7 @@ class StartButtonsState extends State<StartButtons> {
                     onPressed: () {
                       html.window.location.href = 'deck_edit';
                     },
-                    tooltip: 'Play',
+                    tooltip: 'Edit your card deck',
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(widget.r(40.0)),
                       child: Image.asset(
@@ -878,8 +911,9 @@ class StartButtonsState extends State<StartButtons> {
                     height: widget.r(40.0),
                     child: FloatingActionButton(
                       onPressed: signout,
-                      tooltip: 'Sign Out',
-                      child: const Icon(Icons.logout),
+                      tooltip: gameStarted ? 'Surrender' : 'Sign Out',
+                      child: Icon(Icons.logout,
+                          color: gameStarted ? Colors.amber : Colors.grey),
                     ))),
             SizedBox(width: widget.r(70)),
           ])),

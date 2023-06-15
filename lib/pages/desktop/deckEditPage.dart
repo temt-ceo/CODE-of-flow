@@ -8,7 +8,6 @@ import 'package:CodeOfFlow/components/draggableCardWidgetForDeckEditor.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
 import 'package:CodeOfFlow/components/deckButtons.dart';
-import 'package:CodeOfFlow/components/timerComponent.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 import 'package:CodeOfFlow/services/api_service.dart';
@@ -32,19 +31,11 @@ class DeckEditPageState extends State<DeckEditPage> {
   List<List<int>> mariganCardList = [];
   int mariganClickCount = 0;
   List<int> handCards = [];
+  List<dynamic> playerDeck = [];
   int gameProgressStatus = 0;
   int? tappedCardId;
   dynamic cardInfos;
   BuildContext? loadingContext;
-  int? removedCardId;
-  int? removedPosition;
-
-  void doAnimation() {
-    setState(() => cardPosition = 400.0);
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      setState(() => cardPosition = 0.0);
-    });
-  }
 
   void showGameLoading() {
     showDialog(
@@ -70,69 +61,20 @@ class DeckEditPageState extends State<DeckEditPage> {
     }
   }
 
-  void putCard(cardId) async {}
+  void putCard(cardId) async {
+    playerDeck.add(cardId.toString());
+    setState(() => playerDeck = playerDeck);
+  }
+
   void tapCard(message, cardId, index) {
     if (message == 'tapped') {
       setState(() {
         tappedCardId = cardId;
-        removedPosition = null;
       });
     } else if (message == 'remove') {
-      setState(() {
-        removedCardId = cardId;
-        removedPosition = index;
-      });
+      playerDeck.removeAt(index);
+      setState(() => playerDeck = playerDeck);
     }
-  }
-
-  void battleStart() async {
-    gameProgressStatus = 2;
-    // Call GraphQL method.
-    if (gameObject != null) {
-      showGameLoading();
-      var ret = await apiService.saveGameServerProcess(
-          'game_start', jsonEncode(handCards), gameObject!.you.toString());
-      closeGameLoading();
-      debugPrint('transaction published');
-      if (ret != null) {
-        debugPrint(ret.message);
-      }
-    }
-  }
-
-  final _timer = TimerComponent();
-  void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCards) {
-    if (gameProgressStatus < 2) {
-      setState(() => gameProgressStatus = 2); // リロードなどの対応
-    }
-    if (data != null) {
-      if (gameObject != null) {
-        if (data.yourCp > gameObject!.yourCp) {
-          data.yourCp = gameObject!.yourCp;
-        }
-      }
-      setState(() => gameObject = data);
-    }
-
-    // マリガン時のみこちらへ
-    if (mariganCards != null) {
-      setState(() => mariganCardList = mariganCards!);
-      setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCards![mariganClickCount]);
-      setState(() => gameProgressStatus = 1);
-      // Start Marigan.
-      _timer.countdownStart(8, battleStart);
-    }
-
-    // ハンドのブロックチェーンデータとの調整
-    List<int> _hand = [];
-    for (int i = 0; i < 7; i++) {
-      var cardId = gameObject!.yourHand[i.toString()];
-      if (cardId != null) {
-        _hand.add(int.parse(cardId));
-      }
-    }
-    setState(() => handCards = _hand);
   }
 
   @override
@@ -159,6 +101,10 @@ class DeckEditPageState extends State<DeckEditPage> {
 
   void setCardInfo(cardInfo) {
     setState(() => cardInfos = cardInfo);
+  }
+
+  void setPlayerDeck(dynamic userDeck) {
+    setState(() => playerDeck = userDeck);
   }
 
   @override
@@ -208,7 +154,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                                               cardId,
                                               putCard,
                                               cardInfos[cardId.toString()],
-                                              removedCardId,
+                                              playerDeck,
                                               r)),
                               ],
                             ))),
@@ -229,9 +175,10 @@ class DeckEditPageState extends State<DeckEditPage> {
                               gameObject,
                               cardInfos,
                               tapCard,
-                              removedPosition,
+                              null,
                               true,
                               attackStatusBloc.attack_stream,
+                              playerDeck,
                               r),
                         ),
                       ])),
@@ -239,20 +186,11 @@ class DeckEditPageState extends State<DeckEditPage> {
             DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'deckEditor'),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-          floatingActionButton: DeckButtons(gameProgressStatus,
-              (status, data, mariganCards, cardInfo) {
+          floatingActionButton: DeckButtons(gameProgressStatus, playerDeck,
+              (status, userDeck, cardInfo) {
             switch (status) {
-              case 'game-is-ready':
-                doAnimation();
-                break;
-              case 'matching-success':
-                setDataAndMarigan(data, mariganCards);
-                break;
-              case 'started-game-info':
-                setDataAndMarigan(data, null);
-                break;
-              case 'other-game-info':
-                setDataAndMarigan(data, null);
+              case 'player-deck':
+                setPlayerDeck(userDeck);
                 break;
               case 'card-info':
                 setCardInfo(cardInfo);

@@ -9,11 +9,11 @@ class DragBoxForDeckEditor extends StatefulWidget {
   final int cardId;
   final StringCallback putCardCallback;
   final dynamic cardInfo;
-  int? pushBackedCardId;
+  List<dynamic> playerDeck;
   final ResponsiveSizeChangeFunction r;
 
   DragBoxForDeckEditor(this.cardId, this.putCardCallback, this.cardInfo,
-      this.pushBackedCardId, this.r);
+      this.playerDeck, this.r);
 
   @override
   DragBoxForDeckEditorState createState() => DragBoxForDeckEditorState();
@@ -26,13 +26,13 @@ class DragBoxForDeckEditorState extends State<DragBoxForDeckEditor> {
 
   @override
   Widget build(BuildContext context) {
-    // デッキから返却されたカードを+1
-    if (widget.pushBackedCardId != null &&
-        widget.pushBackedCardId == widget.cardId &&
-        maxCount < 3) {
-      setState(() => maxCount = maxCount + 1);
-      setState(() => widget.pushBackedCardId = null);
+    maxCount = 3;
+    for (int i = 0; i < widget.playerDeck.length; i++) {
+      if (widget.cardId == int.parse(widget.playerDeck[i])) {
+        maxCount--;
+      }
     }
+
     var imageUrl = widget.cardId > 16
         ? '${imagePath}trigger/card_${widget.cardId.toString()}.jpeg'
         : '${imagePath}unit/card_${widget.cardId.toString()}.jpeg';

@@ -172,6 +172,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                       'remove',
                                       int.parse(widget.cardInfo['card_id']),
                                       widget.index);
+                                  isTapped = false;
                                 },
                                 tooltip: 'Remove',
                                 child: ClipRRect(

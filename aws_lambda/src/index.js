@@ -5,12 +5,26 @@ const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client
 const { SHA3 } = require("sha3");
 
 const FlowTransactions = {
+  saveDeck: `
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
+
+    transaction(player_id: UInt, user_deck: [UInt16]) {
+      prepare(signer: AuthAccount) {
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
+          ?? panic("Could not borrow reference to the Administrator Resource.")
+        admin.save_deck(player_id: player_id, user_deck: user_deck)
+      }
+      execute {
+        log("success")
+      }
+    }
+  `,
   matchingStart: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.matching_start(player_id: player_id)
       }
@@ -20,11 +34,11 @@ const FlowTransactions = {
     }
   `,
   gameStart: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, drawed_cards: [UInt16]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.game_start(player_id: player_id, drawed_cards: drawed_cards)
       }
@@ -34,11 +48,11 @@ const FlowTransactions = {
     }
   `,
   putCardOnField: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, unit_card: {UInt8: UInt16}, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.put_card_on_the_field(player_id: player_id, unit_card: unit_card, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_positions: used_intercept_positions)
       }
@@ -48,11 +62,11 @@ const FlowTransactions = {
     }
   `,
   attack: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, attack_unit: UInt8, enemy_skill_target: UInt8?, trigger_cards: {UInt8: UInt16}, used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.attack(player_id: player_id, attack_unit: attack_unit, enemy_skill_target: enemy_skill_target, trigger_cards: trigger_cards, used_intercept_positions: used_intercept_positions)
       }
@@ -62,11 +76,11 @@ const FlowTransactions = {
     }
   `,
   defenceAction: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, opponent_defend_position: UInt8?, your_used_intercept_positions: [UInt8], opponent_used_intercept_positions: [UInt8]) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.defence_action(player_id: player_id, opponent_defend_position: opponent_defend_position, your_used_intercept_positions: your_used_intercept_positions, opponent_used_intercept_positions: opponent_used_intercept_positions)
       }
@@ -76,11 +90,11 @@ const FlowTransactions = {
     }
   `,
   turnChange: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, from_opponent: Bool) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.turn_change(player_id: player_id, from_opponent: from_opponent)
       }
@@ -90,11 +104,11 @@ const FlowTransactions = {
     }
   `,
   startYourTurn: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt, blocked_unit: {UInt8: UInt8}, used_intercept_position: {UInt8: UInt8}) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.start_your_turn_and_draw_two_cards(player_id: player_id, blocked_unit: blocked_unit, used_intercept_position: used_intercept_position)
       }
@@ -103,14 +117,14 @@ const FlowTransactions = {
       }
     }
   `,
-  surrendar: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+  surrender: `
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
-        admin.surrendar(player_id: player_id)
+        admin.surrender(player_id: player_id)
       }
       execute {
         log("success")
@@ -118,11 +132,11 @@ const FlowTransactions = {
     }
   `,
   claimWin: `
-    import CodeOfFlowAlpha15 from 0x9e447fb949c3f1b6
+    import CodeOfFlowBeta3 from 0x9e447fb949c3f1b6
 
     transaction(player_id: UInt) {
       prepare(signer: AuthAccount) {
-        let admin = signer.borrow<&CodeOfFlowAlpha15.Admin>(from: CodeOfFlowAlpha15.AdminStoragePath)
+        let admin = signer.borrow<&CodeOfFlowBeta3.Admin>(from: CodeOfFlowBeta3.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
         admin.claimWin(player_id: player_id)
       }
@@ -179,7 +193,7 @@ exports.handler = async function (event) {
     const PRIVATE_KEY = JSON.parse(response.SecretString)?.SmartContractPK;
     const ADDRESS = "0x9e447fb949c3f1b6";
     const KEY_ID = 0;
-    const CONTRACT_NAME = "CodeOfFlowAlpha15";
+    const CONTRACT_NAME = "CodeOfFlowBeta3";
 
     const sign = (message) => {
       const key = ec.keyFromPrivate(Buffer.from(PRIVATE_KEY, "hex"))
@@ -225,7 +239,26 @@ exports.handler = async function (event) {
         }
       }
     }
-    if (input.type === "player_matching") {
+    // Save the player's card deck.
+    if (input.type === "save_deck") {
+      transactionId = await fcl.mutate({
+        cadence: FlowTransactions.saveDeck,
+        args: (arg, t) => [
+          arg(player_id, t.UInt),
+          arg(message, t.Array(t.UInt16))
+        ],
+        proposer: authorizationFunctionProposer,
+        payer: authorizationFunction,
+        authorizations: [authorizationFunction],
+        limit: 999
+      })
+      console.log(`TransactionId: ${transactionId}`)
+      message = `Transaction[game_start] is On Going. TransactionId: ${transactionId}`
+      fcl.tx(transactionId).subscribe(res => {
+        console.log(res);
+      })
+    // player matching.
+    } else if (input.type === "player_matching") {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.matchingStart,
         args: (arg, t) => [
@@ -241,6 +274,7 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // start the game.
     } else if (input.type === "game_start") {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.gameStart,
@@ -258,6 +292,7 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // put card on field.
     } else if (input.type === "put_card_on_the_field") {
       const arg1 = [];
       if (message.arg1['1']) {
@@ -300,6 +335,7 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // change the turn
     } else if (input.type === "turn_change") {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.turnChange,
@@ -317,6 +353,7 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // Attack
     } else if (input.type === "attack") {
       const arg3 = [
         {key: 1, value: message.arg3['1'] || 0},
@@ -343,6 +380,7 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // Attack Result transaction
     } else if (input.type === "defence_action") {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.defenceAction,
@@ -362,9 +400,10 @@ exports.handler = async function (event) {
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
-    } else if (input.type === "surrendar") {
+    // Surrender
+    } else if (input.type === "surrender") {
       transactionId = await fcl.mutate({
-        cadence: FlowTransactions.surrendar,
+        cadence: FlowTransactions.surrender,
         args: (arg, t) => [
           arg(player_id, t.UInt),
         ],
@@ -374,10 +413,11 @@ exports.handler = async function (event) {
         limit: 999
       })
       console.log(`TransactionId: ${transactionId}`)
-      message = `Transaction[surrendar] is On Going. TransactionId: ${transactionId}`
+      message = `Transaction[surrender] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })
+    // Not Used.
     } else if (input.type === "claim_win") {
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.claimWin,

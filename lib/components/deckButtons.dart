@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:js/js.dart';
+import 'package:quickalert/quickalert.dart';
 
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
@@ -58,17 +59,23 @@ external String? getPlayerName(dynamic player);
 @JS('getCardInfo')
 external dynamic getCardInfo();
 
+@JS('getPlayerDeck')
+external dynamic getPlayerDeck(String? address, int playerId);
+
+@JS('getStarterDeck')
+external dynamic getStarterDeck();
+
 @JS('jsonToString')
 external String jsonToString(dynamic obj);
 
-typedef void StringCallback(String val, GameObject? data,
-    List<List<int>>? mariganCards, dynamic cardInfo);
+typedef void StringCallback(String val, dynamic userDeck, dynamic cardInfo);
 
 class DeckButtons extends StatefulWidget {
   int gameProgressStatus;
+  final List<dynamic> savedDeck;
   final StringCallback callback;
 
-  DeckButtons(this.gameProgressStatus, this.callback);
+  DeckButtons(this.gameProgressStatus, this.savedDeck, this.callback);
 
   @override
   DeckButtonsState createState() => DeckButtonsState();
@@ -119,8 +126,6 @@ class DeckButtonsState extends State<DeckButtons> {
       timerObj = timer;
       if (walletUser.addr == '') {
         print('Not Login.');
-        widget.callback(
-            'other-game-info', GameObject.getOtherGameInfo(), null, null);
       }
     });
 
@@ -133,7 +138,7 @@ class DeckButtonsState extends State<DeckButtons> {
     dynamic cardInfo = await promiseToFuture(getCardInfo());
     var objStr = jsonToString(cardInfo);
     var objJs = jsonDecode(objStr);
-    widget.callback('card-info', null, null, objJs);
+    widget.callback('card-info', null, objJs);
   }
 
   @override
@@ -153,7 +158,6 @@ class DeckButtonsState extends State<DeckButtons> {
         setState(() => walletUser = WalletUser(addr));
         if (player.uuid == '') {
           getPlayerInfo();
-          widget.callback('game-is-ready', null, null, null);
         }
       }
     }
@@ -168,6 +172,9 @@ class DeckButtonsState extends State<DeckButtons> {
       debugPrint('PlayerId: $playerId');
       setState(
           () => player = PlayerResource(playerUUId!, playerId!, playerName!));
+      var userDeck = await promiseToFuture(
+          getPlayerDeck(walletUser.addr, int.parse(playerId!)));
+      widget.callback('player-deck', userDeck, null);
     } else {
       print('Not Imporing.');
     }
@@ -198,15 +205,48 @@ class DeckButtonsState extends State<DeckButtons> {
     }
   }
 
-  Future<void> gameStart() async {
+  Future<void> saveUserDeck() async {
+    if (widget.savedDeck.length == 30) {
+      showGameLoading();
+      // Call GraphQL method.
+      var ret = await apiService.saveGameServerProcess(
+          'save_deck', jsonEncode(widget.savedDeck), player.playerId);
+      debugPrint('transaction published');
+      if (ret != null) {
+        debugPrint(ret.message);
+      }
+      Future.delayed(const Duration(seconds: 4), () async {
+        closeGameLoading();
+        showAlertWindow('success');
+      });
+    } else {
+      showAlertWindow('error');
+    }
+  }
+
+  Future<void> resetUserDeck() async {
     showGameLoading();
-    // Call GraphQL method.
-    var ret = await apiService.saveGameServerProcess(
-        'player_matching', '', player.playerId);
+    var userDeck = await promiseToFuture(
+        getPlayerDeck(walletUser.addr, int.parse(player.playerId!)));
+    widget.callback('player-deck', userDeck, null);
     closeGameLoading();
-    debugPrint('transaction published');
-    if (ret != null) {
-      debugPrint(ret.message);
+  }
+
+  void showAlertWindow(String type) {
+    if (type == 'success') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.info,
+        title: 'Your deck is successfully saved!',
+        text: '',
+      );
+    } else if (type == 'error') {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.error,
+        title: 'Your Deck is not 30 cards',
+        text: '',
+      );
     }
   }
 
@@ -247,132 +287,6 @@ class DeckButtonsState extends State<DeckButtons> {
                     )));
               });
         });
-  }
-
-  void battleStartAnimation() {
-    _wait.add(true);
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (builderContext) {
-          dcontext2 = builderContext;
-          return StreamBuilder<bool>(
-              stream: _wait.stream,
-              builder:
-                  (BuildContext builderContext, AsyncSnapshot<bool> snapshot) {
-                return AnimatedContainer(
-                    margin: EdgeInsetsDirectional.only(top: imagePosition),
-                    duration: const Duration(milliseconds: 700),
-                    curve: Curves.easeInQuart,
-                    child: Container(
-                      width: 200.0,
-                      height: 60.0,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage(
-                                snapshot.data != null && snapshot.data == true
-                                    ? '${imagePath}unit/battleStart.png'
-                                    : '${imagePath}unit/battleStart2.png'),
-                            fit: BoxFit.cover),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0xFFFFFFFF),
-                            spreadRadius: 5,
-                            blurRadius: 7,
-                            offset: Offset(2, 5), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                    ));
-              });
-        });
-    imagePosition = 80.0;
-    Future.delayed(const Duration(milliseconds: 1800), () {
-      imagePosition = 0.0;
-      _wait.add(false);
-    });
-    Future.delayed(const Duration(milliseconds: 3000), () {
-      if (dcontext2 != null) {
-        Navigator.pop(dcontext2!);
-      }
-    });
-  }
-
-  // EN購入
-  void buyCyberEnergy() {
-    if (showBottomSheet2 == false) {
-      setState(() {
-        showBottomSheet2 = true;
-      });
-      // EN購入
-      showModalBottomSheet(
-          context: context,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10.0),
-              topRight: Radius.circular(10.0),
-            ),
-          ),
-          backgroundColor: Color.fromARGB(205, 248, 129, 2),
-          barrierColor: Colors.transparent,
-          builder: (context) {
-            return SizedBox(
-                child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
-                    child: Column(children: <Widget>[
-                      const Text('EN is insufficient.\n(ENが不足しています)',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 20.0)),
-                      const SizedBox(height: 35.0),
-                      Center(
-                          child: ElevatedButton(
-                        style: ButtonStyle(
-                          shape:
-                              MaterialStateProperty.all<RoundedRectangleBorder>(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10), //丸み具合
-                            ),
-                          ),
-                        ),
-                        onPressed: () {
-                          // showGameLoading();
-                          buyCyberEN();
-                          Future.delayed(const Duration(seconds: 3000), () {
-                            Navigator.of(context).pop();
-                          });
-                        },
-                        child: const Text('Insert 1FLOW coin.'),
-                      )),
-                      const SizedBox(height: 10.0),
-                      Text(L10n.of(context)!.insufficientEN(balance.toString()),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
-                      const SizedBox(height: 8.0),
-                      Text(L10n.of(context)!.insufficientEN2,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
-                      const SizedBox(height: 4.0),
-                      Text(L10n.of(context)!.insufficientEN3,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
-                    ])));
-          });
-    }
-  }
-
-  List<List<int>> setMariganCards(arr) {
-    final List<List<int>> retArr = [];
-    for (int i = 0; i < 5; i++) {
-      retArr.add([]);
-      for (int j = 0; j < 4; j++) {
-        retArr[i].add(int.parse(arr[i][j]));
-      }
-    }
-    return retArr;
   }
 
   void signout() {
@@ -451,16 +365,7 @@ class DeckButtonsState extends State<DeckButtons> {
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
                         onPressed: () async {
-                          if (gameStarted == true || cyberEnergy == null) {
-                          } else {
-                            if (cyberEnergy! < 30) {
-                              buyCyberEnergy();
-                            } else {
-                              //GraphQL:player_matching
-                              await gameStart();
-                              countdown();
-                            }
-                          }
+                          await saveUserDeck();
                         },
                         tooltip: 'SAVE',
                         child: ClipRRect(
@@ -474,7 +379,9 @@ class DeckButtonsState extends State<DeckButtons> {
                 visible: walletUser.addr != '',
                 child: FloatingActionButton(
                     backgroundColor: Colors.transparent,
-                    onPressed: () {},
+                    onPressed: () async {
+                      await resetUserDeck();
+                    },
                     tooltip: 'Reset',
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(40.0),

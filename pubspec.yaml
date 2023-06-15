@@ -34,6 +34,8 @@ dependencies:
   fluttertoast: ^8.2.2
   smooth_page_indicator: ^1.1.0
   flash: ^3.0.5+1
+  quickalert: ^1.0.1
+  video_player: ^2.6.1
 
 dev_dependencies:
   flutter_test:
@@ -48,3 +50,4 @@ flutter:
     - assets/image/unit/
     - assets/image/trigger/
     - assets/image/button/
+    - assets/video/

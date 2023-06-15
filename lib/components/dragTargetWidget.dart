@@ -1,5 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+
+import 'package:quickalert/quickalert.dart';
+
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_bloc.dart';
 import 'package:CodeOfFlow/bloc/bg_color/bg_color_event.dart';
 import 'package:CodeOfFlow/components/deckButtons.dart';
@@ -22,6 +25,7 @@ class DragTargetWidget extends StatefulWidget {
   int? actedCardPosition;
   final bool canOperate;
   final Stream<int> attack_stream;
+  final List<dynamic> defaultDropedList;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -33,6 +37,7 @@ class DragTargetWidget extends StatefulWidget {
       this.actedCardPosition,
       this.canOperate,
       this.attack_stream,
+      this.defaultDropedList,
       this.r);
 
   @override
@@ -135,8 +140,45 @@ class DragTargetState extends State<DragTargetWidget> {
       });
     }
 
-    // print(
-    //     '除去orアタック(remove or attack card position): ${widget.actedCardPosition}');
+    if (widget.defaultDropedList.isNotEmpty) {
+      dropedList.clear();
+      dropedListSecond.clear();
+      if (widget.label == 'deck') {
+        for (int i = 0; i < widget.defaultDropedList.length; i++) {
+          String cardIdStr = widget.defaultDropedList[i];
+          var imageUrl = '';
+          if (int.parse(cardIdStr) >= 17) {
+            imageUrl = '${imagePath}trigger/card_${cardIdStr}.jpeg';
+          } else {
+            imageUrl = '${imagePath}unit/card_${cardIdStr}.jpeg';
+          }
+          if (i < 15) {
+            dropedList.add(DroppedCardWidget(
+                widget.r(86.0 * dropedList.length - 1 + 10),
+                imageUrl,
+                widget.label,
+                widget.cardInfos[cardIdStr],
+                false,
+                widget.tapCardCallback,
+                dropedList.length,
+                widget.attack_stream,
+                widget.r));
+          } else {
+            dropedListSecond.add(DroppedCardWidget(
+                widget.r(86.0 * dropedListSecond.length - 1 + 10),
+                imageUrl,
+                widget.label,
+                widget.cardInfos[cardIdStr],
+                true,
+                widget.tapCardCallback,
+                dropedList.length + dropedListSecond.length,
+                widget.attack_stream,
+                widget.r));
+          }
+        }
+      }
+    }
+
     if (widget.info != null && widget.label == 'unit') {
       for (int i = 1; i <= 5; i++) {
         if (yourFieldUnit[i.toString()] != null && i > dropedList.length) {
@@ -198,10 +240,10 @@ class DragTargetState extends State<DragTargetWidget> {
 
     if (widget.label == 'deck') {
       // Remove a deck card.
-      if (widget.actedCardPosition != null) {
-        dropedList.removeAt(widget.actedCardPosition!);
-        setState(() => widget.actedCardPosition = null);
-      }
+      // if (widget.actedCardPosition != null) {
+      //   dropedList.removeAt(widget.actedCardPosition!);
+      //   setState(() => widget.actedCardPosition = null);
+      // }
     } else if (widget.label == 'unit') {
       // Attack card.
       if (widget.actedCardPosition != null && attackSignalPosition == null) {
@@ -224,14 +266,16 @@ class DragTargetState extends State<DragTargetWidget> {
             });
           }
 
-          return DragTarget<String>(onAccept: (String cardIdStr) {
+          return DragTarget<String>(
+              // onAccept
+              onAccept: (String cardIdStr) {
             var cardId = int.parse(cardIdStr);
             var imageUrl = cardId > 16
                 ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
                 : '${imagePath}unit/card_${cardId.toString()}.jpeg';
             if (widget.label == 'deck' && dropedList.length >= 15) {
               dropedListSecond.add(DroppedCardWidget(
-                  widget.r(90.0 * dropedListSecond.length - 1 + 10),
+                  widget.r(86.0 * dropedListSecond.length - 1 + 10),
                   imageUrl,
                   widget.label,
                   widget.cardInfos[cardIdStr],
@@ -259,11 +303,30 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.r));
             }
             _dropBloc.counterEventSink.add(DropLeaveEvent());
-          }, onWillAccept: (String? cardIdStr) {
+          },
+              // onWillAccept
+              onWillAccept: (String? cardIdStr) {
             if (widget.label == 'deck') {
               if (dropedListSecond.length >= 15) {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
                 return false;
+              }
+              int cardCount = 0;
+              for (int i = 0; i < widget.defaultDropedList.length; i++) {
+                if (cardIdStr == widget.defaultDropedList[i]) {
+                  cardCount++;
+                }
+                if (cardCount >= 3) {
+                  _dropBloc.counterEventSink.add(DropDeniedEvent());
+                  QuickAlert.show(
+                    context: context,
+                    type: QuickAlertType.info,
+                    title: 'Up to 3 identical cards can be inserted.',
+                    text: '',
+                  );
+
+                  return false;
+                }
               }
               _dropBloc.counterEventSink.add(DropAllowedEvent());
               return true;

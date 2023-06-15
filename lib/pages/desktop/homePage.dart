@@ -8,6 +8,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flash/flash.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:video_player/video_player.dart';
 
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
@@ -37,6 +38,7 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
   final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   GameObject? gameObject;
@@ -57,12 +59,26 @@ class HomePageState extends State<HomePage> {
   int? opponentDefendPosition;
   List<int>? yourUsedInterceptCard;
   List<int>? opponentUsedInterceptCard;
+  VideoPlayerController? vController;
+  bool showVideo = true;
 
   @override
   void initState() {
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
+    Future.delayed(const Duration(seconds: 1), () async {
+      vController = VideoPlayerController.asset('${videoPath}sample-5s.mp4')
+        ..initialize().then((_) {
+          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
+          setState(() {});
+          vController!.setVolume(0);
+          vController!.play();
+          Future.delayed(const Duration(seconds: 5), () async {
+            setState(() => showVideo = false);
+          });
+        });
+    });
   }
 
   void listenBCGGameServerProcess() async {
@@ -298,6 +314,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void putCard(cardId) async {
+    if (gameObject == null) return;
     // Unit case
     if (cardId > 16) {
       return;
@@ -613,6 +630,7 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition,
                             canOperate,
                             attackStatusBloc.attack_stream,
+                            const [],
                             r),
                       ),
                       Padding(
@@ -627,6 +645,7 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition,
                             canOperate,
                             attackStatusBloc.attack_stream,
+                            const [],
                             r),
                       ),
                     ])),
@@ -665,7 +684,7 @@ class HomePageState extends State<HomePage> {
                                     mariganCardList[mariganClickCount]);
                               }
                             },
-                            tooltip: 'Play',
+                            tooltip: 'Redraw',
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(20.0),
                               child: Image.asset(
@@ -1260,6 +1279,18 @@ class HomePageState extends State<HomePage> {
                     child: const Text('Block'),
                   ),
                 ])),
+            Visibility(
+                visible: showVideo == true,
+                child: Center(
+                  child: vController != null && vController!.value.isInitialized
+                      ? Padding(
+                          padding: EdgeInsets.all(r(60.0)),
+                          child: AspectRatio(
+                            aspectRatio: vController!.value.aspectRatio,
+                            child: VideoPlayer(vController!),
+                          ))
+                      : Container(),
+                )),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

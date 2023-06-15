@@ -63,7 +63,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
               style: const TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: 16.0,
+                fontSize: 15.0,
               ))),
       Positioned(
         left: 280.0,

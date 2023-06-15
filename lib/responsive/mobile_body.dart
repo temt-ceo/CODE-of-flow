@@ -46,11 +46,11 @@ class MobileBodyState extends State<MobileBody> {
           ? AppBar(
               backgroundColor: Colors.transparent,
               title: Text(widget.title,
-                  style: const TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
                     top: r(4.0),
-                    right: r(300.0),
+                    right: r(40.0),
                     child: Switch(
                       value: activeLocale,
                       activeColor: Colors.black,
@@ -60,8 +60,8 @@ class MobileBodyState extends State<MobileBody> {
                       onChanged: changeSwitch,
                     )),
                 Positioned(
-                  right: r(270.0),
                   top: r(10.0),
+                  right: r(100.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
                       style: TextStyle(
                         color: Colors.white,
@@ -77,11 +77,11 @@ class MobileBodyState extends State<MobileBody> {
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Text(widget.title,
-                  style: const TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
                     top: r(4.0),
-                    right: r(300.0),
+                    right: r(40.0),
                     child: Switch(
                       value: activeLocale,
                       activeColor: Colors.black,
@@ -91,8 +91,8 @@ class MobileBodyState extends State<MobileBody> {
                       onChanged: changeSwitch,
                     )),
                 Positioned(
-                  right: r(270.0),
                   top: r(10.0),
+                  right: r(100.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
                       style: TextStyle(
                         color: Colors.white,

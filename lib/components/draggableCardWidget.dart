@@ -41,14 +41,6 @@ class DragBoxState extends State<DragBox> {
           image:
               DecorationImage(image: AssetImage(imageUrl), fit: BoxFit.contain),
         ),
-        child: Center(
-          child: Text(widget.cardId.toString(),
-              style: const TextStyle(
-                color: Colors.white,
-                decoration: TextDecoration.none,
-                fontSize: 18.0,
-              )),
-        ),
       ),
       onDragCompleted: () {
         setState(() {

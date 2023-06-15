@@ -48,7 +48,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
           return Positioned(
               left: widget.left,
               bottom: widget.label == 'deck'
-                  ? (widget.isSecondRow ? widget.r(40.0) : widget.r(220.0))
+                  ? (widget.isSecondRow ? widget.r(20.0) : widget.r(170.0))
                   : (widget.isSecondRow ? widget.r(227.0) : widget.r(7.0)),
               child: Stack(children: [
                 GestureDetector(

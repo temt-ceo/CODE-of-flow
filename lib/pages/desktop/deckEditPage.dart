@@ -87,18 +87,6 @@ class DeckEditPageState extends State<DeckEditPage> {
     await apiService.subscribeBCGGameServerProcess();
   }
 
-  String getCardInfo(int? cardId) {
-    if (cardInfos != null) {
-      if (cardInfos[cardId.toString()] != null) {
-        String ret = L10n.of(context)!.cardDescription;
-        return ret.split('|')[cardId! - 1];
-      }
-      return '';
-    } else {
-      return '';
-    }
-  }
-
   void setCardInfo(cardInfo) {
     setState(() => cardInfos = cardInfo);
   }
@@ -120,20 +108,9 @@ class DeckEditPageState extends State<DeckEditPage> {
           body: Stack(children: <Widget>[
             Stack(fit: StackFit.expand, children: <Widget>[
               Positioned(
-                  left: r(10.0),
+                  left: r(320.0),
                   top: r(430.0),
                   child: Row(children: <Widget>[
-                    Padding(
-                        padding: EdgeInsets.only(left: r(15.0)),
-                        child: Container(
-                          width: r(280.0),
-                          height: r(160.0),
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage('${imagePath}unit/bg-2.jpg'),
-                                fit: BoxFit.cover),
-                          ),
-                        )),
                     SizedBox(
                         width: r(1040.0),
                         child: SingleChildScrollView(
@@ -183,7 +160,8 @@ class DeckEditPageState extends State<DeckEditPage> {
                         ),
                       ])),
             ]),
-            DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'deckEditor'),
+            DeckCardInfo(gameObject, cardInfos, tappedCardId, 'deckEditor',
+                widget.enLocale, r),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
           floatingActionButton: DeckButtons(gameProgressStatus, playerDeck,

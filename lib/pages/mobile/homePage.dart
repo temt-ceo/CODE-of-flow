@@ -60,19 +60,14 @@ class HomePageState extends State<HomePage> {
   List<int>? yourUsedInterceptCard;
   List<int>? opponentUsedInterceptCard;
   VideoPlayerController? vController;
+  bool showVideo = true;
 
   @override
   void initState() {
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
-    Future.delayed(const Duration(seconds: 1), () async {
-      vController = VideoPlayerController.asset('${videoPath}sample-5s.mp4')
-        ..initialize().then((_) {
-          // Ensure the first frame is shown after the video is initialized, even before the play button has been pressed.
-          setState(() {});
-        });
-    });
+    _initVideoPlayer();
   }
 
   void listenBCGGameServerProcess() async {
@@ -212,6 +207,20 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  void _initVideoPlayer() async {
+    vController = VideoPlayerController.asset('${videoPath}sample-5s.mp4');
+    Future.delayed(const Duration(seconds: 1), () async {
+      // await vController!.initialize();
+      // // Ensuring the first frame is shown after the video is initialized.
+      // setState(() {});
+      // vController!.setVolume(0);
+      // vController!.play();
+      Future.delayed(const Duration(seconds: 5), () async {
+        setState(() => showVideo = false);
+      });
+    });
+  }
+
   void block(int activeIndex) async {
     setState(() {
       showDefenceUnitsCarousel = false;
@@ -308,6 +317,7 @@ class HomePageState extends State<HomePage> {
   }
 
   void putCard(cardId) async {
+    if (gameObject == null) return;
     // Unit case
     if (cardId > 16) {
       return;
@@ -511,20 +521,9 @@ class HomePageState extends State<HomePage> {
           backgroundColor: Colors.transparent,
           body: Stack(fit: StackFit.expand, children: <Widget>[
             Positioned(
-                left: r(10.0),
+                left: r(320.0),
                 top: r(445.0),
                 child: Row(children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.only(left: r(10.0), top: r(20.0)),
-                      child: Container(
-                        width: r(300.0),
-                        height: r(155.0),
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('${imagePath}unit/bg-2.jpg'),
-                              fit: BoxFit.cover),
-                        ),
-                      )),
                   gameProgressStatus >= 1
                       ? AnimatedContainer(
                           margin: EdgeInsetsDirectional.only(top: cardPosition),
@@ -697,7 +696,8 @@ class HomePageState extends State<HomePage> {
                     actedCardPosition,
                     cardInfos,
                     r)
-                : DeckCardInfo(gameObject, getCardInfo(tappedCardId), 'home'),
+                : DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
+                    widget.enLocale, r),
             Visibility(
                 visible: attackSignalPosition != null,
                 child: Positioned(
@@ -1272,16 +1272,18 @@ class HomePageState extends State<HomePage> {
                     child: const Text('Block'),
                   ),
                 ])),
-            Center(
-              child: vController != null && vController!.value.isInitialized
-                  ? Padding(
-                      padding: EdgeInsets.all(r(60.0)),
-                      child: AspectRatio(
-                        aspectRatio: vController!.value.aspectRatio,
-                        child: VideoPlayer(vController!),
-                      ))
-                  : Container(),
-            ),
+            Visibility(
+                visible: showVideo == true,
+                child: Center(
+                  child: vController != null && vController!.value.isInitialized
+                      ? Padding(
+                          padding: EdgeInsets.all(r(60.0)),
+                          child: AspectRatio(
+                            aspectRatio: vController!.value.aspectRatio,
+                            child: VideoPlayer(vController!),
+                          ))
+                      : Container(),
+                )),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

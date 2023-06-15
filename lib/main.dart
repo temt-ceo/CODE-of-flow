@@ -59,6 +59,7 @@ class AppState extends State<App> {
       locale: _locale,
       title: 'Code Of Flow',
       theme: ThemeData(
+        fontFamily: 'Hiragino Maru',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         textTheme: GoogleFonts.robotoTextTheme(),
         scaffoldBackgroundColor: Colors.transparent,

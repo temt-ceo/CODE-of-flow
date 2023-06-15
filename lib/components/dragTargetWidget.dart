@@ -397,7 +397,7 @@ class DragTargetState extends State<DragTargetWidget> {
                             ? widget.r(690.0)
                             : widget.r(380.0)),
                     height: widget.label == 'deck'
-                        ? widget.r(350.0)
+                        ? widget.r(310.0)
                         : (widget.label == 'unit'
                             ? widget.r(380.0)
                             : widget.r(112.0)),

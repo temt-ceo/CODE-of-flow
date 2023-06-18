@@ -109,7 +109,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
     void turnEnd(fromOpponent) async {
       showGameLoading();
       var message = TurnEndModel(fromOpponent);
-      print(jsonEncode(message));
       var ret = await apiService.saveGameServerProcess(
           'turn_change', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
@@ -161,7 +160,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           now.difference(battleReactionUpdateTime!).inSeconds > 0) {
         setState(() {
           reactionLimitTime =
-              7 - now.difference(battleReactionUpdateTime!).inSeconds;
+              700 - now.difference(battleReactionUpdateTime!).inSeconds;
         });
         if (reactionLimitTime != null && reactionLimitTime! < 0) {
           String flashMsg = '';
@@ -203,7 +202,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               });
         }
         // 10秒経過時も判定処理へ
-      } else if (now.difference(battleStartTime).inSeconds > 10) {
+      } else if (now.difference(battleStartTime).inSeconds > 1000) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           actionDecided(now.difference(battleStartTime).inSeconds);
         });
@@ -283,13 +282,13 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               : turnEndTime.difference(now).inSeconds.toString();
         });
         if (widget.info!.isFirst == widget.info!.isFirstTurn) {
-          // 誤動作を防ぐために5秒経過後に押せるようにする
-          if (percentIndicatorValue < 0.55 &&
-              widget.info!.yourAttackingCard == null) {
-            setState(() {
-              canTurnEnd = true;
-            });
-          }
+          // // 誤動作を防ぐために5秒経過後に押せるようにする
+          // if (percentIndicatorValue < 0.55 &&
+          //     widget.info!.yourAttackingCard == null) {
+          setState(() {
+            canTurnEnd = true;
+          });
+          // }
         } else {
           setState(() {
             canTurnEnd = true;

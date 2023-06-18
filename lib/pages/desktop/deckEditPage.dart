@@ -66,6 +66,11 @@ class DeckEditPageState extends State<DeckEditPage> {
     setState(() => playerDeck = playerDeck);
   }
 
+  void sort() async {
+    playerDeck.sort((a, b) => int.parse(a).compareTo(int.parse(b)));
+    setState(() => playerDeck = playerDeck);
+  }
+
   void tapCard(message, cardId, index) {
     if (message == 'tapped') {
       setState(() {
@@ -172,6 +177,10 @@ class DeckEditPageState extends State<DeckEditPage> {
                 break;
               case 'card-info':
                 setCardInfo(cardInfo);
+                break;
+              case 'sort':
+                print(11);
+                sort();
                 break;
             }
           }));

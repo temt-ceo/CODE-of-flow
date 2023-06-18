@@ -213,7 +213,7 @@ class DeckButtonsState extends State<DeckButtons> {
           'save_deck', jsonEncode(widget.savedDeck), player.playerId);
       debugPrint('transaction published');
       if (ret != null) {
-        debugPrint(ret.message);
+        // debugPrint(ret.message);
       }
       Future.delayed(const Duration(seconds: 4), () async {
         closeGameLoading();
@@ -358,6 +358,23 @@ class DeckButtonsState extends State<DeckButtons> {
                   tooltip: 'Authenticate',
                   child: Icon(Icons.key_outlined),
                 )),
+            SizedBox(
+                width: 65.0,
+                child: Visibility(
+                    visible: walletUser.addr != '',
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        onPressed: () {
+                          widget.callback('sort', List.empty(), null);
+                        },
+                        tooltip: 'SAVE',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Image.asset(
+                            '${imagePath}button/sort.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )))),
             SizedBox(
                 width: 65.0,
                 child: Visibility(

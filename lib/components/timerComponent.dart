@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 
 class TimerComponent {
-  final events = StreamController<int>();
+  final events = BehaviorSubject<int>();
   int _counter = 0;
 
   late Timer _timer;

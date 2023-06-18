@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:js_util';
 import 'dart:html' as html;
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -109,10 +110,11 @@ class StartButtonsState extends State<StartButtons> {
   bool showBottomSheet2 = false;
   bool onTyping = false;
   bool onClickButton = false;
-  bool gameStarted = false;
   bool getBalanceFlg = true;
   double imagePosition = 0.0;
   double? balance;
+  bool gameStarted = false;
+  bool wonFlow = false;
   int? cyberEnergy;
   String yourName = '';
   String yourScore = '';
@@ -121,8 +123,6 @@ class StartButtonsState extends State<StartButtons> {
   BuildContext? dcontext1;
   BuildContext? dcontext2;
   BuildContext? loadingContext;
-  BuildContext? loadingContext2;
-  BuildContext? loadingContext3;
   bool showCarousel = false;
   bool showCarousel2 = false;
   int activeIndex = 0;
@@ -130,20 +130,22 @@ class StartButtonsState extends State<StartButtons> {
   dynamic cardList;
   List<dynamic> userDeck = [];
 
-  late StreamController<bool> _wait;
+  late BehaviorSubject<bool> _wait;
 
   dynamic timerObj = null;
   @override
   void initState() {
     super.initState();
-    _wait = StreamController<bool>();
+    subscribe(allowInterop(setupWallet));
+
+    _wait = BehaviorSubject<bool>();
     // setInterval by every 2 second
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       timerObj = timer;
       if (walletUser.addr == '') {
         print('Not Login.');
-        widget.callback('other-game-info', player.playerId,
-            GameObject.getOtherGameInfo(), null, null);
+        // widget.callback('other-game-info', player.playerId,
+        //     GameObject.getOtherGameInfo(), null, null);
       } else {
         if (player.playerId == '_') {
           return;
@@ -165,8 +167,6 @@ class StartButtonsState extends State<StartButtons> {
                 backgroundColor: const Color.fromARGB(195, 54, 219, 244),
                 barrierColor: Colors.transparent,
                 builder: (buildContext) {
-                  loadingContext2 = buildContext;
-
                   // プレイヤー名を入力させるダイアログを表示
                   return SizedBox(
                       child: Padding(
@@ -223,15 +223,12 @@ class StartButtonsState extends State<StartButtons> {
                               ),
                               onPressed: onTyping
                                   ? () {
+                                      Navigator.pop(buildContext);
                                       setState(() => onClickButton = true);
                                       // showGameLoading();
                                       createPlayer(nameController.text);
                                       Future.delayed(
-                                          const Duration(seconds: 4000), () {
-                                        if (loadingContext2 != null) {
-                                          Navigator.pop(loadingContext2!);
-                                        }
-                                      });
+                                          const Duration(seconds: 4000), () {});
                                       // setInterval by every 2 second
                                       Timer.periodic(const Duration(seconds: 2),
                                           (timer) {
@@ -264,9 +261,6 @@ class StartButtonsState extends State<StartButtons> {
             setState(() {
               showBottomSheet = false;
             });
-            if (loadingContext2 != null) {
-              Navigator.pop(loadingContext2!);
-            }
           }
           // ゲーム状況(Current Status)取得
           dynamic ret =
@@ -274,9 +268,9 @@ class StartButtonsState extends State<StartButtons> {
           var objStr = jsonToString(ret);
           var objJs = jsonDecode(objStr);
           if (ret == null) {
-            widget.callback('other-game-info', player.playerId,
-                GameObject.getOtherGameInfo(), null, null);
-            gameStarted = false;
+            widget.callback(
+                'not-game-starting', player.playerId, null, null, null);
+            setState(() => gameStarted = false);
             getBalanceFlg = true;
           } else if (ret.toString().startsWith('1')) {
             double num = double.parse(ret);
@@ -284,7 +278,10 @@ class StartButtonsState extends State<StartButtons> {
               // debugPrint(
               //     'matching.. ${(timer.tick * 2).toString()}s');
             }
-            gameStarted = false;
+
+            widget.callback(
+                'not-game-starting', player.playerId, null, null, null);
+            setState(() => gameStarted = false);
             getBalanceFlg = true;
           } else if (objJs['game_started'] == true ||
               objJs['game_started'] == false) {
@@ -301,7 +298,7 @@ class StartButtonsState extends State<StartButtons> {
               widget.callback('started-game-info', player.playerId,
                   setGameInfo(objJs), null, null);
             }
-            gameStarted = true;
+            setState(() => gameStarted = true);
           }
           if (getBalanceFlg == true) {
             // 残高を取得
@@ -338,15 +335,28 @@ class StartButtonsState extends State<StartButtons> {
       var objJs = jsonDecode(objStr);
       var yourInfo = objJs[0];
       if (mounted) {
-        setState(() {
-          balance = double.parse(yourInfo['balance']);
-        });
+        if (balance != null &&
+            balance != double.parse(yourInfo['balance']) &&
+            balance! + 0.499 <= double.parse(yourInfo['balance']) &&
+            balance! + 0.501 >= double.parse(yourInfo['balance'])) {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.success,
+            title: 'Congrats!',
+            text: 'You won 0.5FLOW!',
+          );
+          setState(() {
+            wonFlow = true;
+            balance = double.parse(yourInfo['balance']);
+          });
+        } else {
+          setState(() {
+            balance = double.parse(yourInfo['balance']);
+          });
+        }
         if (cyberEnergy != null &&
             cyberEnergy! < int.parse(yourInfo['cyber_energy'])) {
-          showToast('EN is successfull charged.');
-          if (loadingContext3 != null) {
-            Navigator.pop(loadingContext3!);
-          }
+          showToast('EN is successfully charged.');
         }
         setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
         int win = 0;
@@ -361,7 +371,7 @@ class StartButtonsState extends State<StartButtons> {
         setState(
             () => yourScore = '${yourInfo['score'].length} games ${win} win');
         setState(() => yourName = yourInfo['player_name']);
-        if (gameStarted && objJs.length > 1) {
+        if (gameStarted == true && objJs.length > 1) {
           var opponentInfo = objJs[1];
           int win2 = 0;
           for (int i = 0; i < opponentInfo['score'].length; i++) {
@@ -554,10 +564,12 @@ class StartButtonsState extends State<StartButtons> {
     imagePosition = 80.0;
     Future.delayed(const Duration(milliseconds: 1800), () {
       imagePosition = 0.0;
-      _wait.add(false);
+      if (mounted) {
+        _wait.add(false);
+      }
     });
     Future.delayed(const Duration(milliseconds: 3000), () {
-      if (dcontext2 != null) {
+      if (dcontext2 != null && mounted) {
         Navigator.pop(dcontext2!);
       }
     });
@@ -581,7 +593,6 @@ class StartButtonsState extends State<StartButtons> {
           backgroundColor: const Color.fromARGB(205, 248, 129, 2),
           barrierColor: Colors.transparent,
           builder: (buildContext) {
-            loadingContext3 = buildContext;
             return SizedBox(
                 child: Padding(
                     padding: const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
@@ -602,7 +613,7 @@ class StartButtonsState extends State<StartButtons> {
                           ),
                         ),
                         onPressed: () {
-                          // showGameLoading();
+                          Navigator.pop(buildContext);
                           buyCyberEN();
                         },
                         child: const Text('Insert 1FLOW coin.'),
@@ -674,15 +685,17 @@ class StartButtonsState extends State<StartButtons> {
     );
   }
 
-  List<List<int>> setMariganCards(arr) {
+  List<List<int>> setMariganCards(marignaCardIds) {
     final List<List<int>> retArr = [];
+    print(marignaCardIds);
+    print(userDeck);
     for (int i = 0; i < 5; i++) {
       retArr.add([]);
       for (int j = 0; j < 4; j++) {
-        var card_id = userDeck[int.parse(arr[i][j])];
-        retArr[i].add(card_id);
+        retArr[i].add(int.parse(marignaCardIds[i][j]));
       }
     }
+    print(retArr);
     return retArr;
   }
 
@@ -695,7 +708,9 @@ class StartButtonsState extends State<StartButtons> {
           confirmBtnText: 'Yes',
           cancelBtnText: 'No',
           confirmBtnColor: Colors.blue,
+          // autoCloseDuration: const Duration(seconds: 5),
           onConfirmBtnTap: () async {
+            Navigator.pop(context);
             showGameLoading();
             var ret = await apiService.saveGameServerProcess(
                 'surrender', '', player.playerId);
@@ -720,8 +735,6 @@ class StartButtonsState extends State<StartButtons> {
 
   @override
   Widget build(BuildContext context) {
-    subscribe(allowInterop(setupWallet));
-
     return Stack(children: <Widget>[
       Visibility(
           visible: balance != null && walletUser.addr != '',
@@ -733,12 +746,14 @@ class StartButtonsState extends State<StartButtons> {
                   children: <Widget>[
                     SizedBox(
                         width: widget.isEnglish
-                            ? widget.r(213.0)
-                            : widget.r(172.0),
+                            ? (wonFlow ? widget.r(281.0) : widget.r(213.0))
+                            : (wonFlow ? widget.r(240.0) : widget.r(172.0)),
                         child: Text(
-                          '${L10n.of(context)!.balance} ${balance.toString()}',
+                          '${L10n.of(context)!.balance} ${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
                           style: TextStyle(
-                              color: Colors.lightGreen,
+                              color: wonFlow
+                                  ? Color.fromARGB(255, 32, 34, 161)
+                                  : Colors.lightGreen,
                               fontSize: widget.r(26.0)),
                         )),
                     Container(
@@ -911,9 +926,10 @@ class StartButtonsState extends State<StartButtons> {
                     height: widget.r(40.0),
                     child: FloatingActionButton(
                       onPressed: signout,
-                      tooltip: gameStarted ? 'Surrender' : 'Sign Out',
+                      tooltip: gameStarted == true ? 'Surrender' : 'Sign Out',
                       child: Icon(Icons.logout,
-                          color: gameStarted ? Colors.amber : Colors.grey),
+                          color:
+                              gameStarted == true ? Colors.amber : Colors.grey),
                     ))),
             SizedBox(width: widget.r(70)),
           ])),
@@ -1195,7 +1211,7 @@ class StartButtonsState extends State<StartButtons> {
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 1,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.white,
         textColor: Colors.white,
         fontSize: widget.r(16.0));
   }

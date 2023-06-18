@@ -92,7 +92,6 @@ class DeckCardInfoState extends State<DeckCardInfo> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.isEnglish);
     return Stack(children: <Widget>[
       Visibility(
           visible: widget.tappedCardId != null,
@@ -100,8 +99,8 @@ class DeckCardInfoState extends State<DeckCardInfo> {
               left: widget.r(20.0),
               top: widget.r(386.0),
               child: Container(
-                  width: 180.0,
-                  height: 80.0,
+                  width: widget.r(180.0),
+                  height: widget.r(80.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage(widget.tappedCardId == null
@@ -115,17 +114,17 @@ class DeckCardInfoState extends State<DeckCardInfo> {
                     Align(
                         alignment: Alignment.topLeft,
                         child: Text(getCardInfo(widget.tappedCardId, 'name'),
-                            style: const TextStyle(
+                            style: TextStyle(
                                 backgroundColor: Colors.black,
                                 color: Colors.white,
-                                fontSize: (20.0)))),
+                                fontSize: widget.r(20.0)))),
                     Align(
                         alignment: Alignment.centerLeft,
                         child: Text(getCardInfo(widget.tappedCardId, 'cost'),
-                            style: const TextStyle(
+                            style: TextStyle(
                                 backgroundColor: Colors.red,
                                 color: Colors.white,
-                                fontSize: (22.0)))),
+                                fontSize: widget.r(22.0)))),
                   ])))),
       Positioned(
           left: widget.r(20.0),
@@ -140,39 +139,15 @@ class DeckCardInfoState extends State<DeckCardInfo> {
             ),
           )),
       Positioned(
-          left: 30.0,
-          top: 462.0,
-          width: 270.0,
+          left: widget.r(30.0),
+          top: widget.r(462.0),
+          width: widget.r(270.0),
           child: Text(getCardInfo(widget.tappedCardId, 'text'),
               style: TextStyle(
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: widget.isEnglish ? 16.0 : 14.0,
+                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(14.0),
               ))),
-      Positioned(
-        left: 280.0,
-        top: 0.0,
-        child: Visibility(
-            visible: widget.info != null
-                ? widget.info!.isFirst != widget.info!.isFirstTurn
-                : false,
-            child: CircularPercentIndicator(
-              radius: 23.0,
-              lineWidth: 4.0,
-              percent: 0.5,
-              backgroundWidth: 0.0,
-              center: const Column(children: <Widget>[
-                SizedBox(height: 12.0),
-                Text("50%",
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: 16.0,
-                    )),
-              ]),
-              progressColor: const Color.fromARGB(255, 1, 247, 42),
-            )),
-      ),
     ]);
   }
 }

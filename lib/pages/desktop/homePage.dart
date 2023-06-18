@@ -41,8 +41,9 @@ class HomePageState extends State<HomePage> {
   String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
   final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
+  bool gameStarted = false;
   GameObject? gameObject;
-  List<List<int>> mariganCardList = [];
+  List<List<int>> mariganCardIdList = [];
   int mariganClickCount = 0;
   List<int> handCards = [];
   int gameProgressStatus = 0;
@@ -120,8 +121,8 @@ class HomePageState extends State<HomePage> {
                       position: FlashPosition.bottom,
                       child: FlashBar(
                         controller: controller,
-                        title: const Text('Turn Change!'),
-                        content: const Text(''),
+                        content: const Text('Turn Change!',
+                            style: TextStyle(fontSize: 24.0)),
                         indicatorColor: Colors.blue,
                         icon: const Icon(
                           Icons.info_outline_rounded,
@@ -386,8 +387,8 @@ class HomePageState extends State<HomePage> {
                 position: FlashPosition.bottom,
                 child: FlashBar(
                   controller: controller,
-                  title: const Text('Game Start.'),
-                  content: const Text(''),
+                  content: const Text('Game Start.',
+                      style: TextStyle(fontSize: 24.0)),
                   indicatorColor: Colors.blue,
                   icon: const Icon(
                     Icons.info_outline_rounded,
@@ -404,37 +405,8 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  void gameEnd(bool isWin) {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (builderContext) {
-          return Container(
-            width: 200.0,
-            height: 60.0,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('${imagePath}unit/battleStart2.png'),
-                  fit: BoxFit.cover),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0xFFFFFFFF),
-                  spreadRadius: 5,
-                  blurRadius: 7,
-                  offset: Offset(2, 5), // changes position of shadow
-                ),
-              ],
-            ),
-            child: Center(
-                child: Text(isWin ? 'You Win' : 'You Lose',
-                    style: const TextStyle(
-                        color: Colors.white, fontSize: (42.0)))),
-          );
-        });
-  }
-
   final _timer = TimerComponent();
-  void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCards) {
+  void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
     if (gameProgressStatus < 2) {
       setState(() => gameProgressStatus = 2); // リロードなどの対応
     }
@@ -445,28 +417,13 @@ class HomePageState extends State<HomePage> {
         }
       }
       setState(() => gameObject = data);
-    } else if (gameObject != null) {
-      // ゲーム終了
-      if (gameObject!.yourLife > gameObject!.opponentLife) {
-        // Win
-        gameEnd(true);
-      } else if (gameObject!.yourLife < gameObject!.opponentLife) {
-        // Lose
-        gameEnd(false);
-      } else if (gameObject!.isFirst == gameObject!.isFirstTurn) {
-        // Lose
-        gameEnd(false);
-      } else {
-        // Win
-        gameEnd(true);
-      }
     }
 
     // マリガン時のみこちらへ
-    if (mariganCards != null) {
-      setState(() => mariganCardList = mariganCards!);
+    if (mariganCardIds != null) {
+      setState(() => mariganCardIdList = mariganCardIds);
       setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCardList[mariganClickCount]);
+      setState(() => handCards = mariganCardIdList[mariganClickCount]);
       setState(() => gameProgressStatus = 1);
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
@@ -524,7 +481,7 @@ class HomePageState extends State<HomePage> {
                 left: r(320.0),
                 top: r(445.0),
                 child: Row(children: <Widget>[
-                  gameProgressStatus >= 1
+                  gameProgressStatus >= 1 && gameStarted
                       ? AnimatedContainer(
                           margin: EdgeInsetsDirectional.only(top: cardPosition),
                           duration: const Duration(milliseconds: 900),
@@ -603,7 +560,7 @@ class HomePageState extends State<HomePage> {
                           ),
                         ),
                 ])),
-            gameObject != null
+            gameObject != null && gameStarted == true
                 ? OnGoingGameInfo(
                     gameObject,
                     getCardInfo(tappedCardId),
@@ -687,7 +644,7 @@ class HomePageState extends State<HomePage> {
                                 setState(() =>
                                     mariganClickCount = mariganClickCount + 1);
                                 setState(() => handCards =
-                                    mariganCardList[mariganClickCount]);
+                                    mariganCardIdList[mariganClickCount]);
                               }
                             },
                             tooltip: 'Redraw',
@@ -1289,7 +1246,7 @@ class HomePageState extends State<HomePage> {
           floatingActionButton: SizedBox(
               height: r(1000),
               child: StartButtons(gameProgressStatus,
-                  (status, _playerId, data, mariganCards, cardInfo) {
+                  (status, _playerId, data, mariganCardIds, cardInfo) {
                 if (playerId != _playerId) {
                   setState(() {
                     playerId = _playerId;
@@ -1300,13 +1257,16 @@ class HomePageState extends State<HomePage> {
                     doAnimation();
                     break;
                   case 'matching-success':
+                    setState(() => gameStarted = true);
                     debugPrint('playerId: $playerId $status');
-                    setDataAndMarigan(data, mariganCards);
+                    setDataAndMarigan(data, mariganCardIds);
                     break;
                   case 'started-game-info':
+                    setState(() => gameStarted = true);
                     setDataAndMarigan(data, null);
                     break;
-                  case 'other-game-info':
+                  case 'not-game-starting':
+                    setState(() => gameStarted = false);
                     // setDataAndMarigan(data, null);
                     break;
                   case 'card-info':
@@ -1329,7 +1289,7 @@ class HomePageState extends State<HomePage> {
         gravity: ToastGravity.TOP,
         timeInSecForIosWeb: 1,
         backgroundColor: Colors.black,
-        textColor: Colors.blue,
+        textColor: Colors.white,
         fontSize: 22.0,
         webPosition: 'left');
   }

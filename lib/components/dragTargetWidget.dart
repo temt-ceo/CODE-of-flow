@@ -166,7 +166,6 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.attack_stream,
                 widget.r));
           } else {
-            dropedList.clear();
             dropedListSecond.add(DroppedCardWidget(
                 widget.r(86.0 * dropedListSecond.length - 1 + 10),
                 imageUrl,
@@ -180,6 +179,7 @@ class DragTargetState extends State<DragTargetWidget> {
           }
         }
       } else if (widget.label == 'unit') {
+        dropedList.clear();
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
           String cardIdStr = widget.defaultDropedList[i];
           var imageUrl = '${imagePath}unit/card_${cardIdStr}.jpeg';
@@ -190,7 +190,7 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.cardInfos[cardIdStr],
               false,
               widget.tapCardCallback,
-              i - 1,
+              i,
               widget.attack_stream,
               widget.r));
         }
@@ -217,7 +217,11 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.r));
         }
       }
+    } else if (widget.info == null && widget.label == 'unit') {
+      dropedListEnemy.clear();
+      dropedList.clear();
     }
+
     if (widget.info != null && widget.label == 'trigger') {
       var objStr = jsonToString(widget.info!.yourTriggerCards);
       var objJs = jsonDecode(objStr);
@@ -238,6 +242,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.r));
         }
       }
+    } else if (widget.info == null && widget.label == 'trigger') {
+      dropedList.clear();
     }
 
     // Attack card.

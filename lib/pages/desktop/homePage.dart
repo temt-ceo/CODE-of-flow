@@ -40,6 +40,7 @@ class HomePageState extends State<HomePage> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
+  List<int> savedGraphQLIds = [];
   final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   bool gameStarted = false;
   GameObject? gameObject;
@@ -51,6 +52,7 @@ class HomePageState extends State<HomePage> {
   List<dynamic> onChainYourFieldUnit = [];
   List<dynamic> defaultDropedList = [];
   List<int> handCards = [];
+  List<int> yourTriggerCards = [];
   dynamic onChainHandCards;
   BuildContext? loadingContext;
   int? actedCardPosition;
@@ -87,126 +89,128 @@ class HomePageState extends State<HomePage> {
         if (ret != null) {
           print('No. ${ret.playerId} : ${ret.type}');
           print(ret.message);
-          if (ret.type == 'player_matching' && playerId == ret.playerId) {
-            String transactionId = ret.message.split(',TransactionID:')[1];
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
+          if (!savedGraphQLIds.any((element) => element == int.parse(ret.id))) {
+            savedGraphQLIds.add(int.parse(ret.id));
+            if (ret.type == 'player_matching' && playerId == ret.playerId) {
+              String transactionId = ret.message.split(',TransactionID:')[1];
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
                         controller: controller,
-                        title: const Text('Player Matching is in progress.'),
-                        content: Text('Transaction ID: $transactionId'),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          title: const Text('Player Matching is in progress.'),
+                          content: Text('Transaction ID: $transactionId'),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    );
-                  });
-            });
-          } else if (ret.type == 'player_matching') {
-            showToast(
-                "No. ${ret.playerId} has entered in Alcana. Let's battle!");
-          } else if (ret.type == 'turn_change' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
+                      );
+                    });
+              });
+            } else if (ret.type == 'player_matching' && gameObject == null) {
+              showToast("No. ${ret.playerId} has entered in Alcana.");
+            } else if (ret.type == 'turn_change' &&
+                gameObject != null &&
+                (gameObject!.you.toString() == ret.playerId ||
+                    gameObject!.opponent.toString() == ret.playerId)) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
                         controller: controller,
-                        content: const Text('Turn Change!',
-                            style: TextStyle(fontSize: 24.0)),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          content: const Text('Turn Change!',
+                              style: TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    );
-                  });
-            });
-          } else if (ret.type == 'attack' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId)) {
-            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-          } else if (ret.type == 'attack' &&
-              gameObject != null &&
-              (gameObject!.opponent.toString() == ret.playerId)) {
-            showDefenceUnitsCarousel = true;
-            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
+                      );
+                    });
+              });
+            } else if (ret.type == 'attack' &&
+                gameObject != null &&
+                (gameObject!.you.toString() == ret.playerId)) {
+              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            } else if (ret.type == 'attack' &&
+                gameObject != null &&
+                (gameObject!.opponent.toString() == ret.playerId)) {
+              showDefenceUnitsCarousel = true;
+              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
                         controller: controller,
-                        title: Text(L10n.of(context)!.opponentAttack),
-                        content: const Text(''),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          title: Text(L10n.of(context)!.opponentAttack),
+                          content: const Text(''),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    );
-                  });
-            });
-          } else if (ret.type == 'battle_reaction' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
-            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
+                      );
+                    });
+              });
+            } else if (ret.type == 'battle_reaction' &&
+                gameObject != null &&
+                (gameObject!.you.toString() == ret.playerId ||
+                    gameObject!.opponent.toString() == ret.playerId)) {
+              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
                         controller: controller,
-                        title: Text(L10n.of(context)!.opponentBlocking),
-                        content: const Text(''),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          title: Text(L10n.of(context)!.opponentBlocking),
+                          content: const Text(''),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    });
+              });
+            } else if (ret.type == 'defence_action' &&
+                gameObject != null &&
+                (gameObject!.you.toString() == ret.playerId ||
+                    gameObject!.opponent.toString() == ret.playerId)) {
+              attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() {
+                    attackSignalPosition = null;
+                    actedCardPosition = null;
                   });
-            });
-          } else if (ret.type == 'defence_action' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
-            attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                setState(() {
-                  attackSignalPosition = null;
-                  actedCardPosition = null;
-                });
-              }
-            });
+                }
+              });
+            }
           }
         }
       },
@@ -303,11 +307,21 @@ class HomePageState extends State<HomePage> {
             _units.add(cardId);
           }
         }
+        // トリガーのブロックチェーンデータとの調整
+        List<int> _triggerCards = [];
+        for (int i = 1; i <= 4; i++) {
+          var cardId = gameObject!.yourTriggerCards[i.toString()];
+          if (cardId != null) {
+            _triggerCards.add(int.parse(cardId));
+          }
+        }
+
         setState(() {
           handCards = _hand;
           onChainHandCards = gameObject!.yourHand;
           onChainYourFieldUnit = _units;
           defaultDropedList = _units;
+          yourTriggerCards = _triggerCards;
         });
       } else {
         setState(() {
@@ -341,7 +355,12 @@ class HomePageState extends State<HomePage> {
     if (gameObject == null) return;
     // Unit case
     if (cardId > 16) {
+      if (yourTriggerCards.length <= 4) {
+        yourTriggerCards.add(cardId);
+      }
       return;
+    } else if (onChainYourFieldUnit.length <= 5) {
+      onChainYourFieldUnit.add(cardId);
     }
     if (mounted) {
       setState(() {
@@ -351,22 +370,16 @@ class HomePageState extends State<HomePage> {
     }
 
     List<int?> unitPositions = [null, null, null, null, null];
-    unitPositions[onChainYourFieldUnit.length] = cardId;
-
-    var objStr2 = jsonToString(gameObject!.yourTriggerCards);
-    var objJs2 = jsonDecode(objStr2);
-    List<int?> triggerPositions = [null, null, null, null];
-    for (int i = 1; i <= 4; i++) {
-      if (objJs2[i.toString()] != null) {
-        triggerPositions[i - 1] = objJs2[i.toString()];
-      }
-    }
+    unitPositions[onChainYourFieldUnit.length - 1] = cardId;
 
     FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
         unitPositions[2], unitPositions[3], unitPositions[4]);
     int enemySkillTarget = 0;
-    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
-        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
+    TriggerCards triggerCards = TriggerCards(
+        yourTriggerCards.isNotEmpty ? yourTriggerCards[0] : null,
+        yourTriggerCards.length > 1 ? yourTriggerCards[1] : null,
+        yourTriggerCards.length > 2 ? yourTriggerCards[2] : null,
+        yourTriggerCards.length == 4 ? yourTriggerCards[3] : null);
     List<int> usedInterceptCard = [];
     showGameLoading();
     // Call GraphQL method.
@@ -741,7 +754,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(650.0),
                 top: r(157.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['1'] != null
@@ -759,7 +772,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(650.0),
                 top: r(179.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['1'] != null
@@ -794,7 +807,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(785.0),
                 top: r(157.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['2'] != null
@@ -812,7 +825,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(785.0),
                 top: r(179.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['2'] != null
@@ -847,7 +860,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(920.0),
                 top: r(157.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['3'] != null
@@ -865,7 +878,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(920.0),
                 top: r(179.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['3'] != null
@@ -900,7 +913,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1055.0),
                 top: r(157.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['4'] != null
@@ -918,7 +931,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1055.0),
                 top: r(179.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['4'] != null
@@ -953,7 +966,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1190.0),
                 top: r(157.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['5'] != null
@@ -971,7 +984,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1190.0),
                 top: r(179.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['5'] != null
@@ -1006,7 +1019,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(650.0),
                 top: r(383.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
                         ? (gameObject!.yourFieldUnitAction['1'] == '2'
@@ -1023,7 +1036,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(650.0),
                 top: r(405.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
                         ? (gameObject!.yourFieldUnitAction['1'] == '1' ||
@@ -1056,7 +1069,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(785.0),
                 top: r(383.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
                         ? (gameObject!.yourFieldUnitAction['2'] == '2'
@@ -1073,7 +1086,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(785.0),
                 top: r(405.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
                         ? (gameObject!.yourFieldUnitAction['2'] == '1' ||
@@ -1106,7 +1119,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(920.0),
                 top: r(383.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
                         ? (gameObject!.yourFieldUnitAction['3'] == '2'
@@ -1123,7 +1136,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(920.0),
                 top: r(405.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
                         ? (gameObject!.yourFieldUnitAction['3'] == '1' ||
@@ -1156,7 +1169,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1055.0),
                 top: r(383.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['4'] == '2'
@@ -1173,7 +1186,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1055.0),
                 top: r(405.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['4'] == '1' ||
@@ -1206,7 +1219,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1190.0),
                 top: r(383.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['5'] == '2'
@@ -1223,7 +1236,7 @@ class HomePageState extends State<HomePage> {
             Positioned(
                 left: r(1190.0),
                 top: r(405.0),
-                width: r(80.0),
+                width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['5'] == '1' ||

@@ -565,7 +565,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 child: Visibility(
                   visible: widget.info != null
                       ? widget.info!.isFirst == widget.info!.isFirstTurn
-                      : true,
+                      : widget.info!.gameStarted == true,
                   child: CircularPercentIndicator(
                     radius: widget.r(60.0),
                     lineWidth: widget.r(10.0),

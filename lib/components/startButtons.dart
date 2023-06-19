@@ -131,8 +131,11 @@ class StartButtonsState extends State<StartButtons> {
   List<dynamic> userDeck = [];
 
   late BehaviorSubject<bool> _wait;
-
   dynamic timerObj = null;
+
+  ////////////////////////////
+  ///////  initState   ///////
+  ////////////////////////////
   @override
   void initState() {
     super.initState();
@@ -733,6 +736,9 @@ class StartButtonsState extends State<StartButtons> {
     }
   }
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[

@@ -52,7 +52,6 @@ class DragTargetState extends State<DragTargetWidget> {
   List<Widget> dropedListEnemy = [];
   List<Widget> dropedListSecond = [];
   final DropAllowBloc _dropBloc = DropAllowBloc();
-  dynamic yourFieldUnit;
   dynamic opponentFieldUnit;
   bool canAttack = false;
   int? attackSignalPosition;
@@ -124,26 +123,29 @@ class DragTargetState extends State<DragTargetWidget> {
     }
   }
 
+  ////////////////////////////
+  ///////  initState   ///////
+  ////////////////////////////
   @override
   void initState() {
     super.initState();
   }
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     if (widget.info != null) {
-      setState(() {
-        yourFieldUnit = widget.info!.yourFieldUnit;
-      });
       setState(() {
         opponentFieldUnit = widget.info!.opponentFieldUnit;
       });
     }
 
     if (widget.defaultDropedList.isNotEmpty) {
-      dropedList.clear();
-      dropedListSecond.clear();
       if (widget.label == 'deck') {
+        dropedList.clear();
+        dropedListSecond.clear();
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
           String cardIdStr = widget.defaultDropedList[i];
           var imageUrl = '';
@@ -164,6 +166,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.attack_stream,
                 widget.r));
           } else {
+            dropedList.clear();
             dropedListSecond.add(DroppedCardWidget(
                 widget.r(86.0 * dropedListSecond.length - 1 + 10),
                 imageUrl,
@@ -176,15 +179,10 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.r));
           }
         }
-      }
-    }
-
-    if (widget.info != null && widget.label == 'unit') {
-      for (int i = 1; i <= 5; i++) {
-        if (yourFieldUnit[i.toString()] != null && i > dropedList.length) {
-          var cardIdStr = yourFieldUnit[i.toString()];
-          var cardId = int.parse(cardIdStr);
-          var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
+      } else if (widget.label == 'unit') {
+        for (int i = 0; i < widget.defaultDropedList.length; i++) {
+          String cardIdStr = widget.defaultDropedList[i];
+          var imageUrl = '${imagePath}unit/card_${cardIdStr}.jpeg';
           dropedList.add(DroppedCardWidget(
               widget.r(135.0 * dropedList.length + 20), // TODO 690 / 700
               imageUrl,
@@ -197,6 +195,10 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.r));
         }
       }
+    }
+
+    if (widget.info != null && widget.label == 'unit') {
+      // 敵フィールドユニットを最新にする
       for (int i = 1; i <= 5; i++) {
         if (opponentFieldUnit[i.toString()] != null &&
             i > dropedListEnemy.length) {
@@ -238,21 +240,16 @@ class DragTargetState extends State<DragTargetWidget> {
       }
     }
 
-    if (widget.label == 'deck') {
-      // Remove a deck card.
-      // if (widget.actedCardPosition != null) {
-      //   dropedList.removeAt(widget.actedCardPosition!);
-      //   setState(() => widget.actedCardPosition = null);
-      // }
-    } else if (widget.label == 'unit') {
-      // Attack card.
-      if (widget.actedCardPosition != null && attackSignalPosition == null) {
-        attackSignalPosition = widget.actedCardPosition;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          attack();
-        });
-      }
+    // Attack card.
+    if (widget.label == 'unit' &&
+        widget.actedCardPosition != null &&
+        attackSignalPosition == null) {
+      attackSignalPosition = widget.actedCardPosition;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        attack();
+      });
     }
+
     return StreamBuilder(
         stream: widget.attack_stream,
         initialData: 0,
@@ -416,7 +413,9 @@ class DragTargetState extends State<DragTargetWidget> {
                       ],
                     ),
                     child: widget.label == 'unit'
+                        // フィールド
                         ? Stack(children: <Widget>[
+                            // 攻撃シグナル画像
                             Visibility(
                                 visible: attackSignalPosition != null,
                                 child: Positioned(
@@ -450,9 +449,12 @@ class DragTargetState extends State<DragTargetWidget> {
                                   ),
                                 )),
                             const SizedBox(height: 30.0),
+                            // 敵ユニット
                             Stack(children: dropedListEnemy),
+                            // 味方ユニット
                             Stack(children: dropedList),
                           ])
+                        // デッキ編集画面
                         : (widget.label == 'deck'
                             ? Stack(children: <Widget>[
                                 Stack(children: dropedList),

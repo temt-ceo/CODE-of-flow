@@ -24,6 +24,9 @@ class DragBoxForDeckEditorState extends State<DragBoxForDeckEditor> {
   bool isDroped = false;
   int maxCount = 3;
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     maxCount = 3;

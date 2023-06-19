@@ -21,6 +21,9 @@ class DragBoxState extends State<DragBox> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool isDroped = false;
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     var imageUrl = widget.cardId > 16

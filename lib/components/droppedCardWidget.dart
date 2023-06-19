@@ -39,6 +39,9 @@ class DroppedCardState extends State<DroppedCardWidget> {
   bool isTapped = false;
   bool canAttack = false;
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
@@ -60,6 +63,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                           int.parse(widget.cardInfo['card_id']), widget.index);
                     },
                     child: widget.label == 'deck'
+                        // デッキ編集画面
                         ? Container(
                             width: widget.r(81.0),
                             height: widget.r(115.0),
@@ -69,6 +73,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                   fit: BoxFit.contain),
                             ),
                             child: Stack(children: <Widget>[
+                              // デッキ編集のコストの表示
                               Positioned(
                                   left: 0.0,
                                   top: 0.0,
@@ -101,6 +106,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                                   )))))),
                               widget.cardInfo?['bp'] == '0'
                                   ? Container()
+                                  // デッキ編集のBPの表示
                                   : Positioned(
                                       right: 0.0,
                                       bottom: 0.0,
@@ -128,6 +134,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                                         fontSize: 16.0,
                                                       )))))),
                             ]))
+                        // デッキ編集以外の画面
                         : Container(
                             width: widget.label == 'unit'
                                 ? widget.r(105)
@@ -136,7 +143,9 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                 ? widget.r(150)
                                 : widget.r(108), // TODO 380 / 440
                             child: widget.label == 'unit'
+                                // フィールド
                                 ? Stack(children: <Widget>[
+                                    // ユニットの画像
                                     Container(
                                       decoration: BoxDecoration(
                                           image: DecorationImage(
@@ -146,11 +155,13 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                               fit: BoxFit.cover)),
                                     )
                                   ])
+                                // トリガーゾーン
                                 : Center(
                                     child: Padding(
                                     padding:
                                         EdgeInsets.only(bottom: widget.r(19.0)),
                                     child: Container(
+                                      // トリガーカードの画像
                                       decoration: BoxDecoration(
                                           image: DecorationImage(
                                               alignment:
@@ -160,6 +171,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                               fit: BoxFit.fitWidth)),
                                     ),
                                   )))),
+                // タップ時のみ表示
                 isTapped
                     ? (widget.label == 'deck'
                         ? Positioned(

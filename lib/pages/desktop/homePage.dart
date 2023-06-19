@@ -45,10 +45,13 @@ class HomePageState extends State<HomePage> {
   GameObject? gameObject;
   List<List<int>> mariganCardIdList = [];
   int mariganClickCount = 0;
-  List<int> handCards = [];
   int gameProgressStatus = 0;
   int? tappedCardId;
   dynamic cardInfos;
+  List<dynamic> onChainYourFieldUnit = [];
+  List<dynamic> defaultDropedList = [];
+  List<int> handCards = [];
+  dynamic onChainHandCards;
   BuildContext? loadingContext;
   int? actedCardPosition;
   int? attackSignalPosition;
@@ -68,9 +71,12 @@ class HomePageState extends State<HomePage> {
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
-    _initVideoPlayer();
+    // _initVideoPlayer();
   }
 
+  /*
+  **  GraphQL Subscription
+  */
   void listenBCGGameServerProcess() async {
     Stream<GraphQLResponse<GameServerProcess>> operation =
         apiService.subscribeBCGGameServerProcess();
@@ -208,20 +214,24 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void _initVideoPlayer() async {
-    vController = VideoPlayerController.asset('${videoPath}sample-5s.mp4');
-    Future.delayed(const Duration(seconds: 1), () async {
-      // await vController!.initialize();
-      // // Ensuring the first frame is shown after the video is initialized.
-      // setState(() {});
-      // vController!.setVolume(0);
-      // vController!.play();
-      Future.delayed(const Duration(seconds: 5), () async {
-        setState(() => showVideo = false);
-      });
-    });
-  }
+  // 動画AutoPlay(但し、ブラウザ制約がありOmit)
+  // void _initVideoPlayer() async {
+  //   vController = VideoPlayerController.asset('${videoPath}sample-5s.mp4');
+  //   Future.delayed(const Duration(seconds: 1), () async {
+  //     // await vController!.initialize();
+  //     // // Ensuring the first frame is shown after the video is initialized.
+  //     // setState(() {});
+  //     // vController!.setVolume(0);
+  //     // vController!.play();
+  //     Future.delayed(const Duration(seconds: 5), () async {
+  //       setState(() => showVideo = false);
+  //     });
+  //   });
+  // }
 
+  /*
+  **  ブロック処理
+  */
   void block(int activeIndex) async {
     setState(() {
       showDefenceUnitsCarousel = false;
@@ -241,6 +251,160 @@ class HomePageState extends State<HomePage> {
     if (ret != null) {
       debugPrint(ret.message);
     }
+  }
+
+  /*
+  **  1秒おきにデータ取得した後の処理
+  */
+  final _timer = TimerComponent();
+  void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
+    bool turnChanged = false;
+    if (gameProgressStatus < 2) {
+      setState(() => gameProgressStatus = 2); // リロードなどの対応
+    }
+    if (data != null) {
+      if (gameObject != null) {
+        // CP使用済みなら、使用済みの方を使用する
+        if (data.yourCp > gameObject!.yourCp) {
+          data.yourCp = gameObject!.yourCp;
+        }
+        // ターンの変わり目を察知
+        if (gameObject!.isFirst != data.isFirst ||
+            gameObject!.isFirstTurn != data.isFirstTurn) {
+          turnChanged = true;
+        }
+      }
+    }
+    setState(() => gameObject = data);
+
+    // マリガン時のみこちらへ
+    if (mariganCardIds != null) {
+      setState(() => mariganCardIdList = mariganCardIds);
+      setState(() => mariganClickCount = 0);
+      setState(() => handCards = mariganCardIdList[mariganClickCount]);
+      setState(() => gameProgressStatus = 1);
+      // Start Marigan.
+      _timer.countdownStart(8, battleStart);
+    } else {
+      if (turnChanged || onChainHandCards == null) {
+        // ハンドのブロックチェーンデータとの調整
+        List<int> _hand = [];
+        for (int i = 1; i <= 7; i++) {
+          var cardId = gameObject!.yourHand[i.toString()];
+          if (cardId != null) {
+            _hand.add(int.parse(cardId));
+          }
+        }
+        // フイールドユニットのブロックチェーンデータとの調整
+        List<dynamic> _units = [];
+        for (int i = 1; i <= 5; i++) {
+          var cardId = gameObject!.yourFieldUnit[i.toString()];
+          if (cardId != null) {
+            _units.add(cardId);
+          }
+        }
+        setState(() {
+          handCards = _hand;
+          onChainHandCards = gameObject!.yourHand;
+          onChainYourFieldUnit = _units;
+          defaultDropedList = _units;
+        });
+      } else {
+        setState(() {
+          // フイールドユニットのブロックチェーンデータとの調整
+          defaultDropedList = [];
+        });
+      }
+
+      // 攻撃可能かどうかをコンポーネントに通知
+      if (gameObject!.isFirst == gameObject!.isFirstTurn) {
+        if (gameObject!.lastTimeTurnend != null) {
+          DateTime lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
+              double.parse(gameObject!.lastTimeTurnend!).toInt() * 1000);
+          final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
+          final now = DateTime.now();
+
+          if (turnEndTime.difference(now).inSeconds > 0) {
+            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+          } else {
+            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+          }
+        }
+      } else {
+        attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+      }
+    }
+  }
+
+  // ドラッグ&ドロップ後の処理
+  void putCard(cardId) async {
+    if (gameObject == null) return;
+    // Unit case
+    if (cardId > 16) {
+      return;
+    }
+    if (mounted) {
+      setState(() {
+        gameObject!.yourCp = gameObject!.yourCp -
+            int.parse(cardInfos[cardId.toString()]['cost']);
+      });
+    }
+
+    List<int?> unitPositions = [null, null, null, null, null];
+    unitPositions[onChainYourFieldUnit.length] = cardId;
+
+    var objStr2 = jsonToString(gameObject!.yourTriggerCards);
+    var objJs2 = jsonDecode(objStr2);
+    List<int?> triggerPositions = [null, null, null, null];
+    for (int i = 1; i <= 4; i++) {
+      if (objJs2[i.toString()] != null) {
+        triggerPositions[i - 1] = objJs2[i.toString()];
+      }
+    }
+
+    FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
+        unitPositions[2], unitPositions[3], unitPositions[4]);
+    int enemySkillTarget = 0;
+    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
+        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
+    List<int> usedInterceptCard = [];
+    showGameLoading();
+    // Call GraphQL method.
+    var message = PutCardModel(
+        fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
+    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+        jsonEncode(message), gameObject!.you.toString());
+    closeGameLoading();
+    debugPrint('transaction published');
+    if (ret != null) {
+      debugPrint(ret.message);
+    }
+  }
+
+  // カードのタップ時処理
+  void tapCard(message, cardId, index) {
+    if (message == 'tapped') {
+      setState(() {
+        tappedCardId = cardId;
+      });
+    } else if (message == 'attack') {
+      setState(() {
+        attackSignalPosition = index;
+        actedCardPosition = index;
+      });
+    }
+  }
+
+  // setState カードリスト
+  void setCardInfo(cardInfo) {
+    setState(() => cardInfos = cardInfo);
+  }
+
+  // setState 時間切れによる操作可否
+  void setCanOperate(flg) {
+    setState(() {
+      canOperate = flg;
+    });
   }
 
   void doAnimation() {
@@ -274,6 +438,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  // カード情報
   String getCardInfo(int? cardId) {
     if (cardInfos != null) {
       if (cardInfos[cardId.toString()] != null) {
@@ -286,6 +451,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  // カード名
   String getCardName(String cardId) {
     if (cardInfos != null) {
       var cardInfo = cardInfos[cardId];
@@ -295,6 +461,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  // カードBP
   String getCardBP(String cardId) {
     if (cardInfos != null) {
       var cardInfo = cardInfos[cardId];
@@ -304,71 +471,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  void tapCard(message, cardId, index) {
-    if (message == 'tapped') {
-      setState(() {
-        tappedCardId = cardId;
-      });
-    } else if (message == 'attack') {
-      setState(() {
-        attackSignalPosition = index;
-        actedCardPosition = index;
-      });
-    }
-  }
-
-  void putCard(cardId) async {
-    if (gameObject == null) return;
-    // Unit case
-    if (cardId > 16) {
-      return;
-    }
-    if (mounted) {
-      setState(() {
-        gameObject!.yourCp = gameObject!.yourCp -
-            int.parse(cardInfos[cardId.toString()]['cost']);
-      });
-    }
-
-    List<int?> unitPositions = [null, null, null, null, null];
-    for (int i = 1; i <= 5; i++) {
-      if (gameObject!.yourFieldUnit[i.toString()] == null) {
-        unitPositions[i - 1] = cardId;
-        // print('フィールド$iにカードを置きました!');
-        break;
-        // } else {
-        //   unitPositions[i - 1] =
-        //       int.parse(gameObject!.yourFieldUnit[i.toString()]);
-      }
-    }
-    var objStr2 = jsonToString(gameObject!.yourTriggerCards);
-    var objJs2 = jsonDecode(objStr2);
-    List<int?> triggerPositions = [null, null, null, null];
-    for (int i = 1; i <= 4; i++) {
-      if (objJs2[i.toString()] != null) {
-        triggerPositions[i - 1] = objJs2[i.toString()];
-      }
-    }
-
-    FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
-        unitPositions[2], unitPositions[3], unitPositions[4]);
-    int enemySkillTarget = 0;
-    TriggerCards triggerCards = TriggerCards(triggerPositions[0],
-        triggerPositions[1], triggerPositions[2], triggerPositions[3]);
-    List<int> usedInterceptCard = [];
-    showGameLoading();
-    // Call GraphQL method.
-    var message = PutCardModel(
-        fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
-    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
-        jsonEncode(message), gameObject!.you.toString());
-    closeGameLoading();
-    debugPrint('transaction published');
-    if (ret != null) {
-      debugPrint(ret.message);
-    }
-  }
-
+  // Game Startのトランザクション処理
   void battleStart() async {
     gameProgressStatus = 2;
     // Call GraphQL method.
@@ -405,67 +508,9 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  final _timer = TimerComponent();
-  void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
-    if (gameProgressStatus < 2) {
-      setState(() => gameProgressStatus = 2); // リロードなどの対応
-    }
-    if (data != null) {
-      if (gameObject != null) {
-        if (data.yourCp > gameObject!.yourCp) {
-          data.yourCp = gameObject!.yourCp;
-        }
-      }
-      setState(() => gameObject = data);
-    }
-
-    // マリガン時のみこちらへ
-    if (mariganCardIds != null) {
-      setState(() => mariganCardIdList = mariganCardIds);
-      setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCardIdList[mariganClickCount]);
-      setState(() => gameProgressStatus = 1);
-      // Start Marigan.
-      _timer.countdownStart(8, battleStart);
-    } else {
-      // ハンドのブロックチェーンデータとの調整
-      List<int> _hand = [];
-      for (int i = 1; i <= 7; i++) {
-        var cardId = gameObject!.yourHand[i.toString()];
-        if (cardId != null) {
-          _hand.add(int.parse(cardId));
-        }
-      }
-      setState(() => handCards = _hand);
-      if (gameObject!.isFirst == gameObject!.isFirstTurn) {
-        if (gameObject!.lastTimeTurnend != null) {
-          DateTime lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
-              double.parse(gameObject!.lastTimeTurnend!).toInt() * 1000);
-          final turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
-          final now = DateTime.now();
-
-          if (turnEndTime.difference(now).inSeconds > 0) {
-            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
-          } else {
-            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
-          }
-        }
-      } else {
-        attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
-      }
-    }
-  }
-
-  void setCardInfo(cardInfo) {
-    setState(() => cardInfos = cardInfo);
-  }
-
-  void setCanOperate(flg) {
-    setState(() {
-      canOperate = flg;
-    });
-  }
-
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (layoutContext, constraints) {
@@ -608,7 +653,7 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition,
                             canOperate,
                             attackStatusBloc.attack_stream,
-                            const [],
+                            defaultDropedList,
                             r),
                       ),
                     ])),
@@ -1266,7 +1311,11 @@ class HomePageState extends State<HomePage> {
                     setDataAndMarigan(data, null);
                     break;
                   case 'not-game-starting':
-                    setState(() => gameStarted = false);
+                    print('not-game-starting');
+                    setState(() {
+                      gameStarted = false;
+                      gameObject = null;
+                    });
                     // setDataAndMarigan(data, null);
                     break;
                   case 'card-info':

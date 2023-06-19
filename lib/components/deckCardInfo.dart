@@ -30,6 +30,9 @@ class DeckCardInfoState extends State<DeckCardInfo> {
   APIService apiService = APIService();
   BuildContext? loadingContext;
 
+  ////////////////////////////
+  ///////  initState   ///////
+  ////////////////////////////
   @override
   void initState() {
     super.initState();
@@ -90,6 +93,9 @@ class DeckCardInfoState extends State<DeckCardInfo> {
     }
   }
 
+  ////////////////////////////
+  ///////    build     ///////
+  ////////////////////////////
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[

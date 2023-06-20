@@ -82,8 +82,41 @@ class DeckCardInfoState extends State<DeckCardInfo> {
             return "[Intercept] * ${L10n.of(context)!.interceptDesc}\n\n$ability";
           }
         }
+      } else if (type == 'rarity') {
+        if (cardId == 1 ||
+            cardId == 2 ||
+            cardId == 10 ||
+            cardId == 15 ||
+            cardId == 17 ||
+            cardId == 18 ||
+            cardId == 20 ||
+            cardId == 21 ||
+            cardId == 23) {
+          return ' C ';
+        } else if (cardId == 3 ||
+            cardId == 9 ||
+            cardId == 11 ||
+            cardId == 19 ||
+            cardId == 22 ||
+            cardId == 24) {
+          return 'UC';
+        } else if (cardId == 4 ||
+            cardId == 5 ||
+            cardId == 6 ||
+            cardId == 13 ||
+            cardId == 14 ||
+            cardId == 16) {
+          return ' R ';
+        } else if (cardId == 7 || cardId == 25 || cardId == 26) {
+          return 'VR';
+        } else if (cardId == 8) {
+          return 'SR';
+        }
       } else {
         if (widget.cardInfos[cardId.toString()] != null) {
+          if (type == 'cost') {
+            return ' ${widget.cardInfos[cardId.toString()][type]}';
+          }
           return widget.cardInfos[cardId.toString()][type];
         }
       }
@@ -126,11 +159,45 @@ class DeckCardInfoState extends State<DeckCardInfo> {
                                 fontSize: widget.r(20.0)))),
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(getCardInfo(widget.tappedCardId, 'cost'),
-                            style: TextStyle(
-                                backgroundColor: Colors.red,
-                                color: Colors.white,
-                                fontSize: widget.r(22.0)))),
+                        child: Row(children: [
+                          Text(getCardInfo(widget.tappedCardId, 'cost'),
+                              style: TextStyle(
+                                  backgroundColor: getCardInfo(
+                                              widget.tappedCardId, 'type') ==
+                                          '0'
+                                      ? Colors.red
+                                      : (getCardInfo(widget.tappedCardId,
+                                                  'type') ==
+                                              '1'
+                                          ? const Color.fromARGB(
+                                              255, 170, 153, 1)
+                                          : Colors.grey),
+                                  color: Colors.white,
+                                  fontSize: widget.r(22.0))),
+                          Text(getCardInfo(widget.tappedCardId, 'rarity'),
+                              style: TextStyle(
+                                  backgroundColor: getCardInfo(
+                                              widget.tappedCardId, 'rarity') ==
+                                          'VR'
+                                      ? const Color.fromARGB(255, 218, 209, 209)
+                                      : (getCardInfo(widget.tappedCardId, 'rarity') ==
+                                              'SR'
+                                          ? const Color.fromARGB(
+                                              255, 248, 224, 9)
+                                          : (getCardInfo(widget.tappedCardId, 'rarity') == 'R'
+                                              ? const Color.fromARGB(
+                                                  255, 174, 8, 8)
+                                              : (getCardInfo(
+                                                          widget.tappedCardId,
+                                                          'rarity') ==
+                                                      'UC'
+                                                  ? const Color.fromARGB(
+                                                      255, 85, 174, 97)
+                                                  : const Color.fromARGB(
+                                                      255, 251, 249, 249)))),
+                                  color: Colors.black,
+                                  fontSize: widget.r(22.0)))
+                        ])),
                   ])))),
       Positioned(
           left: widget.r(20.0),

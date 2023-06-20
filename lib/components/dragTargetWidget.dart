@@ -454,6 +454,7 @@ class DragTargetState extends State<DragTargetWidget> {
                             : widget.r(112.0)),
                     decoration: BoxDecoration(
                       image: DecorationImage(
+                          opacity: 0.9,
                           image: AssetImage(widget.imageUrl),
                           fit: BoxFit.cover),
                       boxShadow: [

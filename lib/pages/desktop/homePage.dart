@@ -596,54 +596,20 @@ class HomePageState extends State<HomePage> {
                           curve: Curves.linear,
                           child: Row(
                             children: [
-                              GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      tappedCardId = 16;
-                                    });
-                                  },
-                                  child: DragBox(
-                                      16,
-                                      putCard,
-                                      cardInfos != null
-                                          ? cardInfos['16']
-                                          : null,
-                                      r)),
-                              GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      tappedCardId = 17;
-                                    });
-                                  },
-                                  child: DragBox(
-                                      17,
-                                      putCard,
-                                      cardInfos != null
-                                          ? cardInfos['17']
-                                          : null,
-                                      r)),
-                              GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      tappedCardId = 1;
-                                    });
-                                  },
-                                  child: DragBox(
-                                      1,
-                                      putCard,
-                                      cardInfos != null ? cardInfos['1'] : null,
-                                      r)),
-                              GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      tappedCardId = 3;
-                                    });
-                                  },
-                                  child: DragBox(
-                                      3,
-                                      putCard,
-                                      cardInfos != null ? cardInfos['3'] : null,
-                                      r)),
+                              for (var cardId in [16, 13, 1, 3, 25, 20, 26])
+                                GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        tappedCardId = cardId;
+                                      });
+                                    },
+                                    child: DragBox(
+                                        cardId,
+                                        putCard,
+                                        cardInfos != null
+                                            ? cardInfos[cardId.toString()]
+                                            : null,
+                                        r)),
                               SizedBox(width: r(5)),
                             ],
                           ),
@@ -665,8 +631,8 @@ class HomePageState extends State<HomePage> {
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
                 widget.enLocale, r),
             Positioned(
-                left: r(30.0),
-                top: r(30.0),
+                left: r(35.0),
+                top: r(40.0),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,

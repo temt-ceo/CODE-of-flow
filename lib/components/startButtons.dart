@@ -1176,7 +1176,9 @@ class StartButtonsState extends State<StartButtons> {
                           ], false),
                           buildTableRow([
                             'Ability',
-                            L10n.of(context)!.cardDescription.split('|')[index]
+                            L10n.of(context)!
+                                .cardDescription
+                                .split('|')[index >= 11 ? index + 1 : index]
                           ], true),
                         ]))
         ]),

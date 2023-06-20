@@ -26,7 +26,7 @@ class DragTargetWidget extends StatefulWidget {
   final bool canOperate;
   final Stream<int> attack_stream;
   final List<dynamic> defaultDropedList;
-  final bool btnShowFlg;
+  final List<int> canUseInterceptList;
   final List<int?> currentTriggerCards;
   final ResponsiveSizeChangeFunction r;
 
@@ -40,7 +40,7 @@ class DragTargetWidget extends StatefulWidget {
       this.canOperate,
       this.attack_stream,
       this.defaultDropedList,
-      this.btnShowFlg,
+      this.canUseInterceptList,
       this.currentTriggerCards,
       this.r);
 
@@ -167,7 +167,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length,
                 widget.attack_stream,
-                widget.btnShowFlg,
+                false,
                 widget.r));
           } else {
             dropedListSecond.add(DroppedCardWidget(
@@ -179,7 +179,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length + dropedListSecond.length,
                 widget.attack_stream,
-                widget.btnShowFlg,
+                false,
                 widget.r));
           }
         }
@@ -204,7 +204,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
-                widget.btnShowFlg,
+                false,
                 widget.r);
           }
         }
@@ -220,6 +220,12 @@ class DragTargetState extends State<DragTargetWidget> {
           if (widget.defaultDropedList[i] != null) {
             int cardId = widget.defaultDropedList[i];
             var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
+            bool showBtn = false;
+            for (int intercepId in widget.canUseInterceptList) {
+              if (intercepId == cardId) {
+                showBtn = true;
+              }
+            }
             dropedList[i] = DroppedCardWidget(
                 widget.r(93.0 * i + 17), // TODO 380 / 440
                 imageUrl,
@@ -229,7 +235,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
-                widget.btnShowFlg,
+                showBtn,
                 widget.r);
           }
         }
@@ -253,7 +259,7 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.tapCardCallback,
               i - 1,
               widget.attack_stream,
-              widget.btnShowFlg,
+              false,
               widget.r));
         } else {
           dropedListEnemy.add(Container());
@@ -306,7 +312,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length + dropedListSecond.length,
                   widget.attack_stream,
-                  widget.btnShowFlg,
+                  false,
                   widget.r));
             } else if (widget.label == 'deck') {
               dropedList.add(DroppedCardWidget(
@@ -318,7 +324,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length,
                   widget.attack_stream,
-                  widget.btnShowFlg,
+                  false,
                   widget.r));
             } else if (widget.label == 'unit') {
               for (int i = 0; i < 5; i++) {
@@ -332,13 +338,19 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
-                      widget.btnShowFlg,
+                      false,
                       widget.r);
                   break;
                 }
               }
             } else if (widget.label == 'trigger') {
               for (int i = 0; i < 4; i++) {
+                bool showBtn = false;
+                for (int intercepId in widget.canUseInterceptList) {
+                  if (intercepId == cardId) {
+                    showBtn = true;
+                  }
+                }
                 if (dropedList[i].runtimeType.toString() == 'Container') {
                   dropedList[i] = DroppedCardWidget(
                       widget.r(93.0 * i + 17), // TODO 380 / 440
@@ -349,7 +361,7 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
-                      widget.btnShowFlg,
+                      showBtn,
                       widget.r);
                   break;
                 }

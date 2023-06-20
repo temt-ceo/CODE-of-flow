@@ -161,7 +161,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                               true,
                               attackStatusBloc.attack_stream,
                               playerDeck,
-                              false,
+                              const [],
                               const [],
                               r),
                         ),

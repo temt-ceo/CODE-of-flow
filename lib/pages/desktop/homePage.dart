@@ -73,6 +73,7 @@ class HomePageState extends State<HomePage> {
   bool showVideo = true;
   int? onBattlePosition;
   bool? isEnemyAttack;
+  List<int> canUseIntercept = [];
 
   @override
   void initState() {
@@ -247,6 +248,33 @@ class HomePageState extends State<HomePage> {
                 _defenderUsedCardIds.add(int.parse(i));
               }
               setState(() => defenderUsedCardIds = _defenderUsedCardIds);
+              List<int> _canUseIntercept = [];
+              // トリガーゾーン１はバトル時に発動可能なインターセプトか?
+              if (onChainYourTriggerCards.isNotEmpty &&
+                  onChainYourTriggerCards[0] == 26) {
+                // 無色か同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(1);
+              }
+              // トリガーゾーン2はバトル時に発動可能なインターセプトか?
+              if (onChainYourTriggerCards.isNotEmpty &&
+                  onChainYourTriggerCards[1] == 26) {
+                // 無色か同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(2);
+              }
+              // トリガーゾーン3はバトル時に発動可能なインターセプトか?
+              if (onChainYourTriggerCards.isNotEmpty &&
+                  onChainYourTriggerCards[2] == 26) {
+                // 無色か同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(3);
+              }
+              // トリガーゾーン4はバトル時に発動可能なインターセプトか?
+              if (onChainYourTriggerCards.isNotEmpty &&
+                  onChainYourTriggerCards[3] == 26) {
+                // 無色か同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(4);
+              }
+              setState(() => canUseIntercept = _canUseIntercept);
+
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
@@ -283,6 +311,7 @@ class HomePageState extends State<HomePage> {
                 attackerUsedCardIds = [];
                 defenderUsedCardIds = [];
                 actedCardPosition = null;
+                canUseIntercept = [];
               });
 
               attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
@@ -324,6 +353,7 @@ class HomePageState extends State<HomePage> {
       showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
       opponentUsedInterceptCard = [];
+      canUseIntercept = [];
       attackerUsedCardIds =
           []; // これはブロックチェーンから取ってくるしかない。相手のトリガーゾーンに何が入っているかは相手の攻撃アクション時にはわからない。
       defenderUsedCardIds = [];
@@ -479,7 +509,7 @@ class HomePageState extends State<HomePage> {
   void putCard(cardId) async {
     if (gameObject == null) return;
     int position = 0;
-    // Unit case
+    // Trigger case
     if (cardId > 16) {
       for (int i = 0; i < 4; i++) {
         if (onChainYourTriggerCards[i] == null) {
@@ -488,6 +518,7 @@ class HomePageState extends State<HomePage> {
         }
       }
       return;
+      // Unit case
     } else {
       for (int i = 0; i < 5; i++) {
         if (onChainYourFieldUnit[i] == null) {
@@ -516,16 +547,140 @@ class HomePageState extends State<HomePage> {
         onChainYourTriggerCards[2],
         onChainYourTriggerCards[3]);
     List<int> usedInterceptCard = [];
-    showGameLoading();
-    // Call GraphQL method.
-    var message = PutCardModel(
-        fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
-    var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
-        jsonEncode(message), gameObject!.you.toString());
-    closeGameLoading();
-    debugPrint('transaction published');
-    if (ret != null) {
-      debugPrint(ret.message);
+    // 使用可能なインターセプトを初期化
+    setState(() => canUseIntercept = []);
+    List<int> _canUseIntercept = [];
+    // トリガーゾーン１はカードを置いたとき発動可能なインターセプトか?
+    if (onChainYourTriggerCards.isNotEmpty &&
+        onChainYourTriggerCards[0] != null) {
+      int cardId = onChainYourTriggerCards[0]!;
+      var skill = getCardSkill(cardId.toString());
+      if (skill != null) {
+        print(skill);
+        print(skill['triggers']);
+        if (skill['triggers'][0] == '1') {
+          if (getCardCategory(cardId.toString()) == '2') {
+            // インターセプト
+            for (String position in ['1', '2', '3', '4']) {
+              if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                  getCardType(cardId.toString())) {
+                // 同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(1);
+              }
+            }
+          } else if (getCardCategory(cardId.toString()) == '1') {
+            // トリガー
+            usedInterceptCard.add(1);
+          }
+        }
+      }
+    }
+    // トリガーゾーン2はカードを置いたとき発動可能なインターセプトか?
+    if (onChainYourTriggerCards.isNotEmpty &&
+        onChainYourTriggerCards[1] != null) {
+      int cardId = onChainYourTriggerCards[1]!;
+      var skill = getCardSkill(cardId.toString());
+      if (skill != null) {
+        print(skill);
+        print(skill['triggers']);
+        if (skill['triggers'][0] == '1') {
+          if (getCardCategory(cardId.toString()) == '2') {
+            // インターセプト
+            for (String position in ['1', '2', '3', '4']) {
+              if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                  getCardType(cardId.toString())) {
+                // 同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(2);
+              }
+            }
+          } else if (getCardCategory(cardId.toString()) == '1') {
+            // トリガー
+            usedInterceptCard.add(2);
+          }
+        }
+      }
+    }
+    // トリガーゾーン3はカードを置いたとき発動可能なインターセプトか?
+    if (onChainYourTriggerCards.isNotEmpty &&
+        onChainYourTriggerCards[2] != null) {
+      int cardId = onChainYourTriggerCards[2]!;
+      var skill = getCardSkill(cardId.toString());
+      if (skill != null) {
+        print(skill);
+        print(skill['triggers']);
+        if (skill['triggers'][0] == '1') {
+          if (getCardCategory(cardId.toString()) == '2') {
+            // インターセプト
+            for (String position in ['1', '2', '3', '4']) {
+              if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                  getCardType(cardId.toString())) {
+                // 同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(3);
+              }
+            }
+          } else if (getCardCategory(cardId.toString()) == '1') {
+            // トリガー
+            usedInterceptCard.add(3);
+          }
+        }
+      }
+    }
+    // トリガーゾーン4はカードを置いたとき発動可能なインターセプトか?
+    if (onChainYourTriggerCards.isNotEmpty &&
+        onChainYourTriggerCards[3] != null) {
+      int cardId = onChainYourTriggerCards[3]!;
+      var skill = getCardSkill(cardId.toString());
+      if (skill != null) {
+        print(skill);
+        print(skill['triggers']);
+        if (skill['triggers'][0] == '1') {
+          if (getCardCategory(cardId.toString()) == '2') {
+            // インターセプト
+            for (String position in ['1', '2', '3', '4']) {
+              if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                  getCardType(cardId.toString())) {
+                // 同色のカードがフィールドにあるので選択可能
+                _canUseIntercept.add(4);
+              }
+            }
+          } else if (getCardCategory(cardId.toString()) == '1') {
+            // トリガー
+            usedInterceptCard.add(4);
+          }
+        }
+      }
+    }
+    setState(() => canUseIntercept = _canUseIntercept);
+    if (canUseIntercept.isNotEmpty) {
+      Future.delayed(const Duration(milliseconds: 4000), () async {
+        showGameLoading();
+        // 使用可能なインターセプトを初期化
+        setState(() => canUseIntercept = []);
+        // Call GraphQL method.
+        var message = PutCardModel(
+            fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
+        var ret = await apiService.saveGameServerProcess(
+            'put_card_on_the_field',
+            jsonEncode(message),
+            gameObject!.you.toString());
+        closeGameLoading();
+        debugPrint('transaction published');
+        if (ret != null) {
+          debugPrint(ret.message);
+        }
+      });
+    } else {
+      showGameLoading();
+      // Call GraphQL method.
+      var message = PutCardModel(
+          fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
+      var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+          jsonEncode(message), gameObject!.you.toString());
+      closeGameLoading();
+      debugPrint('transaction published');
+      if (ret != null) {
+        debugPrint(ret.message);
+      }
     }
   }
 
@@ -626,6 +781,36 @@ class HomePageState extends State<HomePage> {
       return cardInfo['bp'];
     } else {
       return '';
+    }
+  }
+
+  // カードタイプ
+  String getCardType(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return cardInfo['type'];
+    } else {
+      return '';
+    }
+  }
+
+  // カードカテゴリ
+  String getCardCategory(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return cardInfo['category'];
+    } else {
+      return '';
+    }
+  }
+
+  // カード能力
+  dynamic getCardSkill(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return jsonDecode(cardInfo['skill']);
+    } else {
+      return null;
     }
   }
 
@@ -764,7 +949,7 @@ class HomePageState extends State<HomePage> {
                             canOperate,
                             attackStatusBloc.attack_stream,
                             yourTriggerCards,
-                            onBattlePosition != null,
+                            canUseIntercept,
                             const [],
                             r),
                       ),
@@ -781,7 +966,7 @@ class HomePageState extends State<HomePage> {
                             canOperate,
                             attackStatusBloc.attack_stream,
                             defaultDropedList,
-                            false,
+                            const [],
                             yourTriggerCards,
                             r),
                       ),

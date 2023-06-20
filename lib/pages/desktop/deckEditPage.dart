@@ -169,7 +169,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                 widget.enLocale, r),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-          floatingActionButton: DeckButtons(gameProgressStatus, playerDeck,
+          floatingActionButton: DeckButtons(gameProgressStatus, playerDeck, r,
               (status, userDeck, cardInfo) {
             switch (status) {
               case 'player-deck':

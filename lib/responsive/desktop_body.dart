@@ -49,16 +49,21 @@ class DesktopBodyState extends State<DesktopBody> {
                   style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: r(4.0),
-                    right: r(40.0),
-                    child: Switch(
-                      value: activeLocale,
-                      activeColor: Colors.black,
-                      activeTrackColor: Colors.blueGrey,
-                      inactiveThumbColor: Colors.black,
-                      inactiveTrackColor: Colors.blueGrey,
-                      onChanged: changeSwitch,
-                    )),
+                    top: r(7.0),
+                    right: r(50.0),
+                    child: SizedBox(
+                        width: r(50),
+                        height: r(35),
+                        child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Switch(
+                              value: activeLocale,
+                              activeColor: Colors.black,
+                              activeTrackColor: Colors.blueGrey,
+                              inactiveThumbColor: Colors.black,
+                              inactiveTrackColor: Colors.blueGrey,
+                              onChanged: changeSwitch,
+                            )))),
                 Positioned(
                   top: r(10.0),
                   right: r(100.0),

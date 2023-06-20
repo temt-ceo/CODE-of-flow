@@ -69,13 +69,15 @@ external dynamic getStarterDeck();
 external String jsonToString(dynamic obj);
 
 typedef void StringCallback(String val, dynamic userDeck, dynamic cardInfo);
+typedef double ResponsiveSizeChangeFunction(double data);
 
 class DeckButtons extends StatefulWidget {
   int gameProgressStatus;
   final List<dynamic> savedDeck;
+  final ResponsiveSizeChangeFunction r;
   final StringCallback callback;
 
-  DeckButtons(this.gameProgressStatus, this.savedDeck, this.callback);
+  DeckButtons(this.gameProgressStatus, this.savedDeck, this.r, this.callback);
 
   @override
   DeckButtonsState createState() => DeckButtonsState();
@@ -301,46 +303,46 @@ class DeckButtonsState extends State<DeckButtons> {
     subscribe(allowInterop(setupWallet));
 
     return Stack(children: <Widget>[
-      const Positioned(
-          left: 75,
+      Positioned(
+          left: widget.r(75),
           top: 0,
           child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
                 SizedBox(
-                    width: 220.0,
+                    width: widget.r(220.0),
                     child: Text(
                       'Deck Editor',
-                      style:
-                          TextStyle(color: Colors.lightGreen, fontSize: 36.0),
+                      style: TextStyle(
+                          color: Colors.lightGreen, fontSize: widget.r(36.0)),
                     )),
               ])),
       Visibility(
           visible: cyberEnergy != null,
           child: Positioned(
-            left: 75,
-            top: 32,
+            left: widget.r(75),
+            top: widget.r(32),
             child: SizedBox(
-                width: 300.0,
+                width: widget.r(300.0),
                 child: Row(children: <Widget>[
-                  const Text(
+                  Text(
                     'EN:  ',
                     style: TextStyle(
-                        color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: 16.0),
+                        color: const Color.fromARGB(255, 32, 243, 102),
+                        fontSize: widget.r(16.0)),
                   ),
                   Text(
                     '${cyberEnergy.toString()} / 200',
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: 18.0),
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 32, 243, 102),
+                        fontSize: widget.r(18.0)),
                   ),
                   const SizedBox(width: 20.0),
                   Text(
                     yourScore,
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 247, 245, 245),
-                        fontSize: 18.0),
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 247, 245, 245),
+                        fontSize: widget.r(18.0)),
                   ),
                 ])),
           )),
@@ -350,7 +352,7 @@ class DeckButtonsState extends State<DeckButtons> {
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Visibility(
                 visible: walletUser.addr == '',
-                child: const SizedBox(width: 20)),
+                child: SizedBox(width: widget.r(20))),
             Visibility(
                 visible: walletUser.addr == '',
                 child: const FloatingActionButton(
@@ -359,7 +361,7 @@ class DeckButtonsState extends State<DeckButtons> {
                   child: Icon(Icons.key_outlined),
                 )),
             SizedBox(
-                width: 65.0,
+                width: widget.r(65.0),
                 child: Visibility(
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
@@ -369,14 +371,14 @@ class DeckButtonsState extends State<DeckButtons> {
                         },
                         tooltip: 'SAVE',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
+                          borderRadius: BorderRadius.circular(widget.r(20.0)),
                           child: Image.asset(
                             '${imagePath}button/sort.png',
                             fit: BoxFit.cover,
                           ),
                         )))),
             SizedBox(
-                width: 65.0,
+                width: widget.r(65.0),
                 child: Visibility(
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
@@ -386,7 +388,7 @@ class DeckButtonsState extends State<DeckButtons> {
                         },
                         tooltip: 'SAVE',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
+                          borderRadius: BorderRadius.circular(widget.r(20.0)),
                           child: Image.asset(
                             '${imagePath}button/save.png',
                             fit: BoxFit.cover,
@@ -401,13 +403,13 @@ class DeckButtonsState extends State<DeckButtons> {
                     },
                     tooltip: 'Reset',
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(40.0),
+                      borderRadius: BorderRadius.circular(widget.r(40.0)),
                       child: Image.asset(
                         '${imagePath}button/reset.png',
                         fit: BoxFit.cover,
                       ),
                     ))),
-            const SizedBox(width: 25),
+            SizedBox(width: widget.r(25)),
           ]))
     ]);
   }

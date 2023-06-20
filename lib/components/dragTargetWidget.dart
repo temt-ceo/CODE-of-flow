@@ -52,7 +52,6 @@ class DragTargetState extends State<DragTargetWidget> {
   List<Widget> dropedListEnemy = [];
   List<Widget> dropedListSecond = [];
   final DropAllowBloc _dropBloc = DropAllowBloc();
-  dynamic opponentFieldUnit;
   bool canAttack = false;
   int? attackSignalPosition;
 
@@ -136,12 +135,6 @@ class DragTargetState extends State<DragTargetWidget> {
   ////////////////////////////
   @override
   Widget build(BuildContext context) {
-    if (widget.info != null) {
-      setState(() {
-        opponentFieldUnit = widget.info!.opponentFieldUnit;
-      });
-    }
-
     if (widget.defaultDropedList.isNotEmpty) {
       if (widget.label == 'deck') {
         dropedList.clear();
@@ -179,30 +172,62 @@ class DragTargetState extends State<DragTargetWidget> {
           }
         }
       } else if (widget.label == 'unit') {
-        dropedList.clear();
+        dropedList = [
+          Container(),
+          Container(),
+          Container(),
+          Container(),
+          Container()
+        ];
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
-          String cardIdStr = widget.defaultDropedList[i];
-          var imageUrl = '${imagePath}unit/card_${cardIdStr}.jpeg';
-          dropedList.add(DroppedCardWidget(
-              widget.r(135.0 * dropedList.length + 20), // TODO 690 / 700
-              imageUrl,
-              widget.label,
-              widget.cardInfos[cardIdStr],
-              false,
-              widget.tapCardCallback,
-              i,
-              widget.attack_stream,
-              widget.r));
+          if (widget.defaultDropedList[i] != null) {
+            String cardIdStr = widget.defaultDropedList[i];
+            var imageUrl = '${imagePath}unit/card_$cardIdStr.jpeg';
+            dropedList[i] = DroppedCardWidget(
+                widget.r(132.0 * i + 20), // TODO 690 / 700
+                imageUrl,
+                widget.label,
+                widget.cardInfos[cardIdStr],
+                false,
+                widget.tapCardCallback,
+                i,
+                widget.attack_stream,
+                widget.r);
+          }
+        }
+      } else if (widget.label == 'trigger') {
+        dropedList = [
+          Container(),
+          Container(),
+          Container(),
+          Container(),
+          Container()
+        ];
+        for (int i = 0; i < widget.defaultDropedList.length; i++) {
+          if (widget.defaultDropedList[i] != null) {
+            int cardId = widget.defaultDropedList[i];
+            var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
+            dropedList[i] = DroppedCardWidget(
+                widget.r(93.0 * i + 17), // TODO 380 / 440
+                imageUrl,
+                widget.label,
+                widget.cardInfos[cardId.toString()],
+                false,
+                widget.tapCardCallback,
+                i,
+                widget.attack_stream,
+                widget.r);
+          }
         }
       }
     }
 
     if (widget.info != null && widget.label == 'unit') {
+      dropedListEnemy.clear();
       // 敵フィールドユニットを最新にする
       for (int i = 1; i <= 5; i++) {
-        if (opponentFieldUnit[i.toString()] != null &&
-            i > dropedListEnemy.length) {
-          var cardIdStr = opponentFieldUnit[i.toString()];
+        if (widget.info!.opponentFieldUnit[i.toString()] != null) {
+          var cardIdStr = widget.info!.opponentFieldUnit[i.toString()];
           var cardId = int.parse(cardIdStr);
           var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
           dropedListEnemy.add(DroppedCardWidget(
@@ -215,34 +240,14 @@ class DragTargetState extends State<DragTargetWidget> {
               i - 1,
               widget.attack_stream,
               widget.r));
+        } else {
+          dropedListEnemy.add(Container());
         }
       }
-    } else if (widget.info == null && widget.label == 'unit') {
-      dropedListEnemy.clear();
-      dropedList.clear();
     }
 
-    if (widget.info != null && widget.label == 'trigger') {
-      var objStr = jsonToString(widget.info!.yourTriggerCards);
-      var objJs = jsonDecode(objStr);
-      for (int i = 1; i <= 4; i++) {
-        if (objJs[i.toString()] != null && i >= dropedList.length) {
-          var cardIdStr = objJs[i.toString()];
-          var cardId = int.parse(cardIdStr);
-          var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
-          dropedList.add(DroppedCardWidget(
-              widget.r(108.0 * dropedList.length + 20), // TODO 380 / 440
-              imageUrl,
-              widget.label,
-              widget.cardInfos[cardIdStr],
-              false,
-              widget.tapCardCallback,
-              i - 1,
-              widget.attack_stream,
-              widget.r));
-        }
-      }
-    } else if (widget.info == null && widget.label == 'trigger') {
+    if (widget.info == null && widget.label != 'deck') {
+      dropedListEnemy.clear();
       dropedList.clear();
     }
 
@@ -287,15 +292,9 @@ class DragTargetState extends State<DragTargetWidget> {
                   dropedList.length + dropedListSecond.length,
                   widget.attack_stream,
                   widget.r));
-            } else {
+            } else if (widget.label == 'deck') {
               dropedList.add(DroppedCardWidget(
-                  widget.label == 'deck'
-                      ? widget.r(86.0 * dropedList.length - 1 + 10)
-                      : (widget.label == 'unit'
-                          ? widget.r(132.0 * dropedList.length - 1 + 20)
-                          : widget.r(93.0 * dropedList.length -
-                              1 +
-                              17)), // TODO 380 / 440
+                  widget.r(86.0 * dropedList.length - 1 + 10), // TODO 380 / 440
                   imageUrl,
                   widget.label,
                   widget.cardInfos[cardIdStr],
@@ -304,6 +303,38 @@ class DragTargetState extends State<DragTargetWidget> {
                   dropedList.length,
                   widget.attack_stream,
                   widget.r));
+            } else if (widget.label == 'unit') {
+              for (int i = 0; i < 5; i++) {
+                if (dropedList[i].runtimeType.toString() == 'Container') {
+                  dropedList[i] = DroppedCardWidget(
+                      widget.r(132.0 * i + 20), // TODO 380 / 440
+                      imageUrl,
+                      widget.label,
+                      widget.cardInfos[cardIdStr],
+                      false,
+                      widget.tapCardCallback,
+                      i,
+                      widget.attack_stream,
+                      widget.r);
+                  break;
+                }
+              }
+            } else if (widget.label == 'trigger') {
+              for (int i = 0; i < 4; i++) {
+                if (dropedList[i].runtimeType.toString() == 'Container') {
+                  dropedList[i] = DroppedCardWidget(
+                      widget.r(93.0 * i + 17), // TODO 380 / 440
+                      imageUrl,
+                      widget.label,
+                      widget.cardInfos[cardIdStr],
+                      false,
+                      widget.tapCardCallback,
+                      i,
+                      widget.attack_stream,
+                      widget.r);
+                  break;
+                }
+              }
             }
             _dropBloc.counterEventSink.add(DropLeaveEvent());
           },
@@ -333,6 +364,7 @@ class DragTargetState extends State<DragTargetWidget> {
               }
               _dropBloc.counterEventSink.add(DropAllowedEvent());
               return true;
+              // フィールド, Triggerゾーン
             } else {
               if (widget.canOperate == false) {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
@@ -340,6 +372,10 @@ class DragTargetState extends State<DragTargetWidget> {
               }
               if (widget.info != null &&
                   widget.info!.isFirst != widget.info!.isFirstTurn) {
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
+              if (dropedList.isEmpty) {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
                 return false;
               }
@@ -363,21 +399,33 @@ class DragTargetState extends State<DragTargetWidget> {
                     return false;
                   }
                 }
-                if (dropedList.length >= 5) {
+                bool noSpace = true;
+                for (int i = 0; i < 5; i++) {
+                  if (dropedList[i].runtimeType.toString() == 'Container') {
+                    noSpace = false;
+                  }
+                }
+                if (noSpace) {
                   _dropBloc.counterEventSink.add(DropDeniedEvent());
                   return false;
                 }
                 _dropBloc.counterEventSink.add(DropAllowedEvent());
                 return true;
               } else if (widget.label == 'trigger' &&
-                  imageUrl!.startsWith('${imagePath}trigger')) {
-                _dropBloc.counterEventSink.add(DropAllowedEvent());
-                return true;
-              } else {
-                if (dropedList.length >= 4) {
+                  imageUrl.startsWith('${imagePath}trigger')) {
+                bool noSpace = true;
+                for (int i = 0; i < 4; i++) {
+                  if (dropedList[i].runtimeType.toString() == 'Container') {
+                    noSpace = false;
+                  }
+                }
+                if (noSpace) {
                   _dropBloc.counterEventSink.add(DropDeniedEvent());
                   return false;
                 }
+                _dropBloc.counterEventSink.add(DropAllowedEvent());
+                return true;
+              } else {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
                 return false;
               }
@@ -411,8 +459,8 @@ class DragTargetState extends State<DragTargetWidget> {
                       boxShadow: [
                         BoxShadow(
                           color: Color(snapshot.data ?? 0xFFFFFFFF),
-                          spreadRadius: 5,
-                          blurRadius: 7,
+                          spreadRadius: widget.r(5),
+                          blurRadius: widget.r(7),
                           offset: Offset(widget.r(2),
                               widget.r(5)), // changes position of shadow
                         ),
@@ -425,21 +473,22 @@ class DragTargetState extends State<DragTargetWidget> {
                             Visibility(
                                 visible: attackSignalPosition != null,
                                 child: Positioned(
-                                  left: widget.r(
-                                      (attackSignalPosition != null &&
-                                                  attackSignalPosition! >= 2
-                                              ? -150.0
-                                              : 20.0) +
-                                          (attackSignalPosition != null
-                                              ? attackSignalPosition! * 120.0
-                                              : 0)),
+                                  left: widget.r((attackSignalPosition !=
+                                                  null &&
+                                              attackSignalPosition! >= 2
+                                          ? widget.r(-150.0)
+                                          : widget.r(40.0)) +
+                                      (attackSignalPosition != null
+                                          ? widget
+                                              .r(attackSignalPosition! * 120.0)
+                                          : 0)),
                                   top: widget.r(-5.0),
                                   child: Container(
                                     width: widget.r(
                                         attackSignalPosition != null &&
                                                 attackSignalPosition! >= 2
-                                            ? 350.0
-                                            : 186.0),
+                                            ? widget.r(350.0)
+                                            : widget.r(186.0)),
                                     height: widget.r(240.0),
                                     decoration: BoxDecoration(
                                       color: Colors.transparent,
@@ -450,11 +499,11 @@ class DragTargetState extends State<DragTargetWidget> {
                                                   attackSignalPosition! >= 2
                                               ? '${imagePath}unit/attackSignal2.png'
                                               : '${imagePath}unit/attackSignal.png'),
-                                          fit: BoxFit.cover),
+                                          fit: BoxFit.contain),
                                     ),
                                   ),
                                 )),
-                            const SizedBox(height: 30.0),
+                            SizedBox(height: widget.r(30.0)),
                             // 敵ユニット
                             Stack(children: dropedListEnemy),
                             // 味方ユニット

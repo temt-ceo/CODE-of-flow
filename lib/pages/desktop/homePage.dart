@@ -52,7 +52,8 @@ class HomePageState extends State<HomePage> {
   List<dynamic> onChainYourFieldUnit = [];
   List<dynamic> defaultDropedList = [];
   List<int> handCards = [];
-  List<int> yourTriggerCards = [];
+  List<int?> onChainYourTriggerCards = [];
+  List<int?> yourTriggerCards = [];
   dynamic onChainHandCards;
   BuildContext? loadingContext;
   int? actedCardPosition;
@@ -67,6 +68,8 @@ class HomePageState extends State<HomePage> {
   List<int>? opponentUsedInterceptCard;
   VideoPlayerController? vController;
   bool showVideo = true;
+  int? onBattlePosition;
+  bool? isEnemyAttack;
 
   @override
   void initState() {
@@ -123,7 +126,7 @@ class HomePageState extends State<HomePage> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
-                    duration: const Duration(seconds: 4),
+                    duration: const Duration(seconds: 7),
                     builder: (context, controller) {
                       return Flash(
                         controller: controller,
@@ -149,6 +152,9 @@ class HomePageState extends State<HomePage> {
                 gameObject != null &&
                 (gameObject!.opponent.toString() == ret.playerId)) {
               showDefenceUnitsCarousel = true;
+              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+              onBattlePosition = msg['arg1'];
+              isEnemyAttack = true;
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
@@ -160,8 +166,8 @@ class HomePageState extends State<HomePage> {
                         position: FlashPosition.bottom,
                         child: FlashBar(
                           controller: controller,
-                          title: Text(L10n.of(context)!.opponentAttack),
-                          content: const Text(''),
+                          content: Text(L10n.of(context)!.opponentAttack,
+                              style: const TextStyle(fontSize: 24.0)),
                           indicatorColor: Colors.blue,
                           icon: const Icon(
                             Icons.info_outline_rounded,
@@ -173,9 +179,15 @@ class HomePageState extends State<HomePage> {
               });
             } else if (ret.type == 'battle_reaction' &&
                 gameObject != null &&
-                (gameObject!.you.toString() == ret.playerId ||
-                    gameObject!.opponent.toString() == ret.playerId)) {
+                gameObject!.opponent.toString() == ret.playerId) {
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+              onBattlePosition = msg['arg1'];
+              print(gameObject!.opponentFieldUnit);
+              print(onBattlePosition);
+              print(gameObject!.yourFieldUnit);
+              print(opponentDefendPosition);
+              isEnemyAttack = false;
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
@@ -186,8 +198,8 @@ class HomePageState extends State<HomePage> {
                         position: FlashPosition.bottom,
                         child: FlashBar(
                           controller: controller,
-                          title: Text(L10n.of(context)!.opponentBlocking),
-                          content: const Text(''),
+                          content: Text(L10n.of(context)!.opponentBlocking,
+                              style: const TextStyle(fontSize: 24.0)),
                           indicatorColor: Colors.blue,
                           icon: const Icon(
                             Icons.info_outline_rounded,
@@ -302,17 +314,16 @@ class HomePageState extends State<HomePage> {
         // フイールドユニットのブロックチェーンデータとの調整
         List<dynamic> _units = [];
         for (int i = 1; i <= 5; i++) {
-          var cardId = gameObject!.yourFieldUnit[i.toString()];
-          if (cardId != null) {
-            _units.add(cardId);
-          }
+          _units.add(gameObject!.yourFieldUnit[i.toString()]);
         }
         // トリガーのブロックチェーンデータとの調整
-        List<int> _triggerCards = [];
+        List<int?> _triggerCards = [];
         for (int i = 1; i <= 4; i++) {
           var cardId = gameObject!.yourTriggerCards[i.toString()];
           if (cardId != null) {
             _triggerCards.add(int.parse(cardId));
+          } else {
+            _triggerCards.add(null);
           }
         }
 
@@ -320,6 +331,7 @@ class HomePageState extends State<HomePage> {
           handCards = _hand;
           onChainHandCards = gameObject!.yourHand;
           onChainYourFieldUnit = _units;
+          onChainYourTriggerCards = _triggerCards;
           defaultDropedList = _units;
           yourTriggerCards = _triggerCards;
         });
@@ -327,6 +339,7 @@ class HomePageState extends State<HomePage> {
         setState(() {
           // フイールドユニットのブロックチェーンデータとの調整
           defaultDropedList = [];
+          yourTriggerCards = [];
         });
       }
 
@@ -353,14 +366,24 @@ class HomePageState extends State<HomePage> {
   // ドラッグ&ドロップ後の処理
   void putCard(cardId) async {
     if (gameObject == null) return;
+    int position = 0;
     // Unit case
     if (cardId > 16) {
-      if (yourTriggerCards.length <= 4) {
-        yourTriggerCards.add(cardId);
+      for (int i = 0; i < 4; i++) {
+        if (onChainYourTriggerCards[i] == null) {
+          onChainYourTriggerCards[i] = cardId;
+          break;
+        }
       }
       return;
-    } else if (onChainYourFieldUnit.length <= 5) {
-      onChainYourFieldUnit.add(cardId);
+    } else {
+      for (int i = 0; i < 5; i++) {
+        if (onChainYourFieldUnit[i] == null) {
+          onChainYourFieldUnit[i] = cardId;
+          position = i;
+          break;
+        }
+      }
     }
     if (mounted) {
       setState(() {
@@ -370,16 +393,16 @@ class HomePageState extends State<HomePage> {
     }
 
     List<int?> unitPositions = [null, null, null, null, null];
-    unitPositions[onChainYourFieldUnit.length - 1] = cardId;
+    unitPositions[position] = cardId;
 
     FieldUnits fieldUnit = FieldUnits(unitPositions[0], unitPositions[1],
         unitPositions[2], unitPositions[3], unitPositions[4]);
     int enemySkillTarget = 0;
     TriggerCards triggerCards = TriggerCards(
-        yourTriggerCards.isNotEmpty ? yourTriggerCards[0] : null,
-        yourTriggerCards.length > 1 ? yourTriggerCards[1] : null,
-        yourTriggerCards.length > 2 ? yourTriggerCards[2] : null,
-        yourTriggerCards.length == 4 ? yourTriggerCards[3] : null);
+        onChainYourTriggerCards[0],
+        onChainYourTriggerCards[1],
+        onChainYourTriggerCards[2],
+        onChainYourTriggerCards[3]);
     List<int> usedInterceptCard = [];
     showGameLoading();
     // Call GraphQL method.
@@ -397,9 +420,17 @@ class HomePageState extends State<HomePage> {
   // カードのタップ時処理
   void tapCard(message, cardId, index) {
     if (message == 'tapped') {
-      setState(() {
-        tappedCardId = cardId;
-      });
+      if (gameObject != null) {
+        if (gameObject!.yourAttackingCard == null) {
+          setState(() {
+            tappedCardId = cardId;
+          });
+        }
+      } else {
+        setState(() {
+          tappedCardId = cardId;
+        });
+      }
     } else if (message == 'attack') {
       setState(() {
         attackSignalPosition = index;
@@ -496,7 +527,7 @@ class HomePageState extends State<HomePage> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showFlash(
             context: context,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 7),
             builder: (context, controller) {
               return Flash(
                 controller: controller,
@@ -630,8 +661,9 @@ class HomePageState extends State<HomePage> {
                     actedCardPosition,
                     cardInfos,
                     r)
-                : DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
-                    widget.enLocale, r),
+                : Container(),
+            DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
+                widget.enLocale, r),
             Positioned(
                 left: r(30.0),
                 top: r(30.0),
@@ -651,7 +683,7 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition,
                             canOperate,
                             attackStatusBloc.attack_stream,
-                            const [],
+                            yourTriggerCards,
                             r),
                       ),
                       Padding(
@@ -744,7 +776,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -797,7 +829,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -850,7 +882,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -903,7 +935,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -956,7 +988,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1009,7 +1041,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1059,7 +1091,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1109,7 +1141,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1159,7 +1191,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1209,7 +1241,7 @@ class HomePageState extends State<HomePage> {
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.8,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}unit/status.png'),
                       fit: BoxFit.cover),
                 ),
@@ -1287,18 +1319,62 @@ class HomePageState extends State<HomePage> {
                     child: const Text('Block'),
                   ),
                 ])),
+            // Visibility(
+            //     visible: showVideo == true,
+            //     child: Center(
+            //       child: vController != null && vController!.value.isInitialized
+            //           ? Padding(
+            //               padding: EdgeInsets.all(r(60.0)),
+            //               child: AspectRatio(
+            //                 aspectRatio: vController!.value.aspectRatio,
+            //                 child: VideoPlayer(vController!),
+            //               ))
+            //           : Container(),
+            //     )),
             Visibility(
-                visible: showVideo == true,
-                child: Center(
-                  child: vController != null && vController!.value.isInitialized
-                      ? Padding(
-                          padding: EdgeInsets.all(r(60.0)),
-                          child: AspectRatio(
-                            aspectRatio: vController!.value.aspectRatio,
-                            child: VideoPlayer(vController!),
-                          ))
-                      : Container(),
-                )),
+              visible: gameObject != null &&
+                  (isEnemyAttack == true || opponentDefendPosition != null),
+              child: Positioned(
+                  right: r(20.0),
+                  top: r(120.0),
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 15.0),
+                    width: r(200.0),
+                    height: r(300.0),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(gameObject == null
+                              ? ''
+                              : isEnemyAttack == true
+                                  ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition]}.jpeg'
+                                  : '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition]}.jpeg'),
+                          fit: BoxFit.contain),
+                    ),
+                  )),
+            ),
+            Visibility(
+              visible: gameObject != null &&
+                  ((isEnemyAttack == true && opponentDefendPosition != null) ||
+                      (isEnemyAttack == false && onBattlePosition != null)),
+              child: Positioned(
+                  right: r(300.0),
+                  top: r(120.0),
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 15.0),
+                    width: r(200.0),
+                    height: r(300.0),
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: AssetImage(gameObject == null
+                              ? ''
+                              : isEnemyAttack == true
+                                  ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition]}.jpeg'
+                                  : '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition]}.jpeg'),
+                          fit: BoxFit
+                              .contain), // gameObject!.yourAttackingCard['position']
+                    ),
+                  )),
+            ),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

@@ -294,7 +294,11 @@ class StartButtonsState extends State<StartButtons> {
               widget.callback('matching-success', player.playerId,
                   setGameInfo(objJs), setMariganCards(data), null);
               if (dcontext1 != null) {
-                Navigator.pop(dcontext1!);
+                try {
+                  Navigator.pop(dcontext1!);
+                } catch (e) {
+                  print(e);
+                }
               }
               battleStartAnimation();
             } else if (objJs['game_started'] == true) {

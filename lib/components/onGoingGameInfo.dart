@@ -94,7 +94,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
     showGameLoading();
     var message = TurnEndModel(fromOpponent);
     var ret = await apiService.saveGameServerProcess(
-        'turn_change', jsonEncode(message), widget.info!.you.toString());
+        'turn_change',
+        jsonEncode(message),
+        fromOpponent
+            ? widget.info!.opponent.toString()
+            : widget.info!.you.toString());
     closeGameLoading();
     debugPrint('transaction published');
     debugPrint(ret.toString());
@@ -287,9 +291,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               : turnEndTime.difference(now).inSeconds.toString();
         });
         if (widget.info!.isFirst == widget.info!.isFirstTurn) {
-          // // 誤動作を防ぐために5秒経過後に押せるようにする
-          // if (percentIndicatorValue < 0.55 &&
-          //     widget.info!.yourAttackingCard == null) {
           setState(() {
             canTurnEnd = true;
           });
@@ -564,8 +565,9 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 top: widget.r(480.0),
                 child: Visibility(
                   visible: widget.info != null
-                      ? widget.info!.isFirst == widget.info!.isFirstTurn
-                      : widget.info!.gameStarted == true,
+                      ? widget.info!.isFirst == widget.info!.isFirstTurn &&
+                          widget.info!.gameStarted == true
+                      : false,
                   child: CircularPercentIndicator(
                     radius: widget.r(60.0),
                     lineWidth: widget.r(10.0),
@@ -580,7 +582,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                             fontSize: widget.r(22.0),
                           )),
                       Visibility(
-                          visible: canTurnEnd == true,
+                          visible: canTurnEnd == true &&
+                              widget.info!.yourAttackingCard == null,
                           child: SizedBox(
                               width: widget.r(90.0),
                               child: FloatingActionButton(

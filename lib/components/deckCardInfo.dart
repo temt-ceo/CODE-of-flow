@@ -146,7 +146,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
           )),
       Positioned(
           left: widget.r(30.0),
-          top: widget.r(462.0),
+          top: widget.r(452.0),
           width: widget.r(270.0),
           child: Text(getCardInfo(widget.tappedCardId, 'text'),
               style: TextStyle(

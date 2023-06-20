@@ -203,7 +203,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
           left: widget.r(20.0),
           top: widget.r(442.0),
           child: Container(
-            width: widget.r(300.0),
+            width: widget.r(320.0),
             height: widget.r(165.0),
             decoration: BoxDecoration(
               image: DecorationImage(
@@ -212,14 +212,15 @@ class DeckCardInfoState extends State<DeckCardInfo> {
             ),
           )),
       Positioned(
-          left: widget.r(30.0),
-          top: widget.r(452.0),
-          width: widget.r(270.0),
+          left: widget.r(26.0),
+          top: widget.r(450.0),
+          width: widget.r(315.0),
           child: Text(getCardInfo(widget.tappedCardId, 'text'),
               style: TextStyle(
+                height: 1.2,
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(14.0),
+                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(13.0),
               ))),
     ]);
   }

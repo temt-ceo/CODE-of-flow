@@ -567,8 +567,8 @@ class HomePageState extends State<HomePage> {
           backgroundColor: Colors.transparent,
           body: Stack(fit: StackFit.expand, children: <Widget>[
             Positioned(
-                left: r(320.0),
-                top: r(445.0),
+                left: r(340.0),
+                top: r(450.0),
                 child: Row(children: <Widget>[
                   gameProgressStatus >= 1 && gameStarted
                       ? AnimatedContainer(

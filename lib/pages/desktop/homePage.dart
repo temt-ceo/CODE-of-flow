@@ -9,6 +9,7 @@ import 'package:flash/flash.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:video_player/video_player.dart';
+import 'package:getwidget/getwidget.dart';
 
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
@@ -66,6 +67,8 @@ class HomePageState extends State<HomePage> {
   int? opponentDefendPosition;
   List<int>? yourUsedInterceptCard;
   List<int>? opponentUsedInterceptCard;
+  List<int> attackerUsedCardIds = [];
+  List<int> defenderUsedCardIds = [];
   VideoPlayerController? vController;
   bool showVideo = true;
   int? onBattlePosition;
@@ -144,18 +147,64 @@ class HomePageState extends State<HomePage> {
                       );
                     });
               });
+              // あなたの攻撃
             } else if (ret.type == 'attack' &&
                 gameObject != null &&
                 (gameObject!.you.toString() == ret.playerId)) {
+              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+              var usedInterceptPositions = msg['arg4'];
+              // 攻撃時に使用したトリガーカード
+              List<int> _yourUsedInterceptCard = [];
+              for (var i in usedInterceptPositions) {
+                _yourUsedInterceptCard.add(int.parse(i));
+              }
+              setState(() => yourUsedInterceptCard = _yourUsedInterceptCard);
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+              // トリガーカードが発動したことを攻撃者に伝える
+              if (yourUsedInterceptCard!.isNotEmpty) {
+                String toastMsg = L10n.of(context)!
+                    .yourAttackTrigger(yourUsedInterceptCard!.length);
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
+                        controller: controller,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          content: Text(toastMsg,
+                              style: const TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      );
+                    });
+              }
+              // 敵の攻撃
             } else if (ret.type == 'attack' &&
                 gameObject != null &&
                 (gameObject!.opponent.toString() == ret.playerId)) {
               showDefenceUnitsCarousel = true;
               var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
               onBattlePosition = msg['arg1'];
+              var usedInterceptPositions = msg['arg4'];
+              // 攻撃時に使用したトリガーカード
+              List<int> _yourUsedInterceptCard = [];
+              for (var i in usedInterceptPositions) {
+                _yourUsedInterceptCard.add(int.parse(i));
+              }
+              setState(() => yourUsedInterceptCard = _yourUsedInterceptCard);
               isEnemyAttack = true;
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+              String toastMsg = L10n.of(context)!.opponentAttack;
+              if (yourUsedInterceptCard!.isNotEmpty) {
+                toastMsg =
+                    '$toastMsg ${L10n.of(context)!.opponentAttackTrigger(yourUsedInterceptCard!.length)}';
+              }
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
@@ -166,7 +215,7 @@ class HomePageState extends State<HomePage> {
                         position: FlashPosition.bottom,
                         child: FlashBar(
                           controller: controller,
-                          content: Text(L10n.of(context)!.opponentAttack,
+                          content: Text(toastMsg,
                               style: const TextStyle(fontSize: 24.0)),
                           indicatorColor: Colors.blue,
                           icon: const Icon(
@@ -177,17 +226,27 @@ class HomePageState extends State<HomePage> {
                       );
                     });
               });
+              // バトルの相手側の対応
             } else if (ret.type == 'battle_reaction' &&
                 gameObject != null &&
                 gameObject!.opponent.toString() == ret.playerId) {
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
               var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
               onBattlePosition = msg['arg1'];
-              print(gameObject!.opponentFieldUnit);
-              print(onBattlePosition);
-              print(gameObject!.yourFieldUnit);
-              print(opponentDefendPosition);
-              isEnemyAttack = false;
+              // isEnemyAttackがnullの場合はfalseをセットする。
+              isEnemyAttack ??= false;
+              // 攻撃側が使用中のトリガー/インターセプトカードをセット
+              List<int> _attackerUsedCardIds = [];
+              for (var i in msg['attackerUsedCardIds']) {
+                _attackerUsedCardIds.add(int.parse(i));
+              }
+              setState(() => attackerUsedCardIds = _attackerUsedCardIds);
+              // 防御側が使用中のトリガー/インターセプトカードをセット
+              List<int> _defenderUsedCardIds = [];
+              for (var i in msg['defenderUsedCardIds']) {
+                _defenderUsedCardIds.add(int.parse(i));
+              }
+              setState(() => defenderUsedCardIds = _defenderUsedCardIds);
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
@@ -213,12 +272,24 @@ class HomePageState extends State<HomePage> {
                 gameObject != null &&
                 (gameObject!.you.toString() == ret.playerId ||
                     gameObject!.opponent.toString() == ret.playerId)) {
+              // バトルパラメータをnullにする
+              setState(() {
+                onBattlePosition = null;
+                isEnemyAttack = null;
+                showDefenceUnitsCarousel = false;
+                opponentDefendPosition = null;
+                yourUsedInterceptCard = null;
+                opponentUsedInterceptCard = null;
+                attackerUsedCardIds = [];
+                defenderUsedCardIds = [];
+                actedCardPosition = null;
+              });
+
               attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 if (mounted) {
                   setState(() {
                     attackSignalPosition = null;
-                    actedCardPosition = null;
                   });
                 }
               });
@@ -252,13 +323,19 @@ class HomePageState extends State<HomePage> {
     setState(() {
       showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
-      yourUsedInterceptCard = [];
       opponentUsedInterceptCard = [];
+      attackerUsedCardIds =
+          []; // これはブロックチェーンから取ってくるしかない。相手のトリガーゾーンに何が入っているかは相手の攻撃アクション時にはわからない。
+      defenderUsedCardIds = [];
     });
     // Battle Reaction
     showGameLoading();
-    var message = DefenceActionModel(opponentDefendPosition!,
-        yourUsedInterceptCard!, opponentUsedInterceptCard!);
+    var message = DefenceActionModel(
+        opponentDefendPosition!,
+        yourUsedInterceptCard!,
+        opponentUsedInterceptCard!,
+        attackerUsedCardIds,
+        defenderUsedCardIds);
     var ret = await apiService.saveGameServerProcess(
         'battle_reaction', jsonEncode(message), gameObject!.you.toString());
     closeGameLoading();
@@ -270,7 +347,42 @@ class HomePageState extends State<HomePage> {
   }
 
   /*
-  **  1秒おきにデータ取得した後の処理
+  **  インターセプトカード使用処理
+  */
+  void useInterceptCard(int cardId, int activeIndex) async {
+    if (isEnemyAttack != null) {
+      if (isEnemyAttack == true) {
+        setState(() {
+          opponentUsedInterceptCard!.add(activeIndex);
+          defenderUsedCardIds.add(cardId);
+        });
+      } else {
+        setState(() {
+          yourUsedInterceptCard!.add(activeIndex);
+          attackerUsedCardIds.add(cardId);
+        });
+      }
+      // Battle Reaction
+      showGameLoading();
+      var message = DefenceActionModel(
+          opponentDefendPosition!,
+          yourUsedInterceptCard!,
+          opponentUsedInterceptCard!,
+          attackerUsedCardIds,
+          defenderUsedCardIds);
+      var ret = await apiService.saveGameServerProcess(
+          'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+      closeGameLoading();
+      debugPrint('== transaction published ==');
+      debugPrint('== ${ret.toString()} ==');
+      if (ret != null) {
+        debugPrint(ret.message);
+      }
+    }
+  }
+
+  /*
+  **  startButtonsで1秒おきにデータ取得した後の処理
   */
   final _timer = TimerComponent();
   void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
@@ -436,6 +548,8 @@ class HomePageState extends State<HomePage> {
         attackSignalPosition = index;
         actedCardPosition = index;
       });
+    } else if (message == 'use') {
+      useInterceptCard(cardId, index);
     }
   }
 
@@ -650,6 +764,8 @@ class HomePageState extends State<HomePage> {
                             canOperate,
                             attackStatusBloc.attack_stream,
                             yourTriggerCards,
+                            onBattlePosition != null,
+                            const [],
                             r),
                       ),
                       Padding(
@@ -665,6 +781,8 @@ class HomePageState extends State<HomePage> {
                             canOperate,
                             attackStatusBloc.attack_stream,
                             defaultDropedList,
+                            false,
+                            yourTriggerCards,
                             r),
                       ),
                     ])),
@@ -1297,50 +1415,102 @@ class HomePageState extends State<HomePage> {
             //               ))
             //           : Container(),
             //     )),
+            // 敵のバトルカード
             Visibility(
-              visible: gameObject != null &&
-                  (isEnemyAttack == true || opponentDefendPosition != null),
+              visible: gameObject != null && opponentDefendPosition != null,
               child: Positioned(
-                  right: r(20.0),
-                  top: r(120.0),
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 15.0),
-                    width: r(200.0),
-                    height: r(300.0),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(gameObject == null
-                              ? ''
-                              : isEnemyAttack == true
-                                  ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition]}.jpeg'
-                                  : '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition]}.jpeg'),
-                          fit: BoxFit.contain),
-                    ),
-                  )),
+                right: r(80.0),
+                top: r(90.0),
+                child: GFImageOverlay(
+                  width: r(200.0),
+                  height: r(300.0),
+                  image: AssetImage(gameObject == null
+                      ? ''
+                      : isEnemyAttack == true
+                          ? gameObject!.opponentFieldUnit[
+                                      onBattlePosition.toString()] !=
+                                  null
+                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
+                              : '${imagePath}unit/bg-2.jpg'
+                          : gameObject!.opponentFieldUnit[
+                                      onBattlePosition.toString()] !=
+                                  null
+                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
+                              : '${imagePath}unit/bg-2.jpg'),
+                ),
+              ),
             ),
+            // あなたのバトルカード
             Visibility(
               visible: gameObject != null &&
                   ((isEnemyAttack == true && opponentDefendPosition != null) ||
-                      (isEnemyAttack == false && onBattlePosition != null)),
+                      (isEnemyAttack == false && actedCardPosition != null)),
               child: Positioned(
-                  right: r(300.0),
-                  top: r(120.0),
-                  child: Container(
-                    margin: const EdgeInsets.only(left: 15.0),
+                  right: r(400.0),
+                  top: r(90.0),
+                  child: GFImageOverlay(
                     width: r(200.0),
                     height: r(300.0),
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                          image: AssetImage(gameObject == null
-                              ? ''
-                              : isEnemyAttack == true
-                                  ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition]}.jpeg'
-                                  : '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition]}.jpeg'),
-                          fit: BoxFit
-                              .contain), // gameObject!.yourAttackingCard['position']
-                    ),
+                    shape: BoxShape.rectangle,
+                    image: AssetImage(gameObject == null
+                        ? ''
+                        : isEnemyAttack == true
+                            ? gameObject!.yourFieldUnit[
+                                        opponentDefendPosition.toString()] !=
+                                    null
+                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                                : '${imagePath}unit/bg-2.jpg'
+                            : actedCardPosition != null &&
+                                    gameObject!.yourFieldUnit[
+                                            (actedCardPosition! + 1)
+                                                .toString()] !=
+                                        null
+                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
+                                : '${imagePath}unit/bg-2.jpg'),
                   )),
             ),
+            // 攻撃側の使用したトリガー・インターセプトカード
+            Visibility(
+                visible: gameObject != null &&
+                    attackerUsedCardIds.isNotEmpty &&
+                    isEnemyAttack == true,
+                child: Positioned(
+                    right: isEnemyAttack == true ? r(80.0) : r(400.0),
+                    top: r(350.0),
+                    child: Row(
+                      children: [
+                        for (var cardId in attackerUsedCardIds)
+                          GFImageOverlay(
+                            width: r(67.0),
+                            height: r(100.0),
+                            image: AssetImage(gameObject == null
+                                ? ''
+                                : '${imagePath}unit/card_${cardId.toString()}.jpeg'),
+                          ),
+                        SizedBox(width: r(2)),
+                      ],
+                    ))),
+            // 防御側の使用したトリガー・インターセプトカード
+            Visibility(
+                visible: gameObject != null &&
+                    defenderUsedCardIds.isNotEmpty &&
+                    isEnemyAttack == true,
+                child: Positioned(
+                    right: isEnemyAttack == true ? r(400.0) : r(80.0),
+                    top: r(350.0),
+                    child: Row(
+                      children: [
+                        for (var cardId in defenderUsedCardIds)
+                          GFImageOverlay(
+                            width: r(67.0),
+                            height: r(100.0),
+                            image: AssetImage(gameObject == null
+                                ? ''
+                                : '${imagePath}unit/card_${cardId.toString()}.jpeg'),
+                          ),
+                        SizedBox(width: r(2)),
+                      ],
+                    ))),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

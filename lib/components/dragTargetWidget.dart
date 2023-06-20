@@ -26,6 +26,8 @@ class DragTargetWidget extends StatefulWidget {
   final bool canOperate;
   final Stream<int> attack_stream;
   final List<dynamic> defaultDropedList;
+  final bool btnShowFlg;
+  final List<int?> currentTriggerCards;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -38,6 +40,8 @@ class DragTargetWidget extends StatefulWidget {
       this.canOperate,
       this.attack_stream,
       this.defaultDropedList,
+      this.btnShowFlg,
+      this.currentTriggerCards,
       this.r);
 
   @override
@@ -82,7 +86,7 @@ class DragTargetState extends State<DragTargetWidget> {
   void attack() async {
     if (widget.actedCardPosition != null) {
       showGameLoading();
-      var objStr2 = jsonToString(widget.info!.yourTriggerCards);
+      var objStr2 = jsonToString(widget.currentTriggerCards);
       var objJs2 = jsonDecode(objStr2);
       List<int?> triggerPositions = [null, null, null, null];
       for (int i = 1; i <= 4; i++) {
@@ -108,8 +112,14 @@ class DragTargetState extends State<DragTargetWidget> {
         showGameLoading();
         List<int> yourUsedInterceptCard = [];
         List<int> opponentUsedInterceptCard = [];
+        List<int> attackerUsedCardIds = [];
+        List<int> defenderUsedCardIds = [];
         var message2 = DefenceActionModel(
-            null, yourUsedInterceptCard, opponentUsedInterceptCard);
+            null,
+            yourUsedInterceptCard,
+            opponentUsedInterceptCard,
+            attackerUsedCardIds,
+            defenderUsedCardIds);
         var ret2 = await apiService.saveGameServerProcess('defence_action',
             jsonEncode(message2), widget.info!.you.toString());
         closeGameLoading();
@@ -157,6 +167,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length,
                 widget.attack_stream,
+                widget.btnShowFlg,
                 widget.r));
           } else {
             dropedListSecond.add(DroppedCardWidget(
@@ -168,6 +179,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length + dropedListSecond.length,
                 widget.attack_stream,
+                widget.btnShowFlg,
                 widget.r));
           }
         }
@@ -192,6 +204,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
+                widget.btnShowFlg,
                 widget.r);
           }
         }
@@ -216,6 +229,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
+                widget.btnShowFlg,
                 widget.r);
           }
         }
@@ -239,6 +253,7 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.tapCardCallback,
               i - 1,
               widget.attack_stream,
+              widget.btnShowFlg,
               widget.r));
         } else {
           dropedListEnemy.add(Container());
@@ -291,6 +306,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length + dropedListSecond.length,
                   widget.attack_stream,
+                  widget.btnShowFlg,
                   widget.r));
             } else if (widget.label == 'deck') {
               dropedList.add(DroppedCardWidget(
@@ -302,6 +318,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length,
                   widget.attack_stream,
+                  widget.btnShowFlg,
                   widget.r));
             } else if (widget.label == 'unit') {
               for (int i = 0; i < 5; i++) {
@@ -315,6 +332,7 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
+                      widget.btnShowFlg,
                       widget.r);
                   break;
                 }
@@ -331,6 +349,7 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
+                      widget.btnShowFlg,
                       widget.r);
                   break;
                 }
@@ -376,6 +395,10 @@ class DragTargetState extends State<DragTargetWidget> {
                 return false;
               }
               if (dropedList.isEmpty) {
+                _dropBloc.counterEventSink.add(DropDeniedEvent());
+                return false;
+              }
+              if (widget.info!.yourAttackingCard != null) {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
                 return false;
               }
@@ -478,18 +501,18 @@ class DragTargetState extends State<DragTargetWidget> {
                                                   null &&
                                               attackSignalPosition! >= 2
                                           ? widget.r(-150.0)
-                                          : widget.r(40.0)) +
+                                          : widget.r(30.0)) +
                                       (attackSignalPosition != null
                                           ? widget
-                                              .r(attackSignalPosition! * 120.0)
+                                              .r(attackSignalPosition! * 100.0)
                                           : 0)),
                                   top: widget.r(-5.0),
                                   child: Container(
                                     width: widget.r(
                                         attackSignalPosition != null &&
                                                 attackSignalPosition! >= 2
-                                            ? widget.r(350.0)
-                                            : widget.r(186.0)),
+                                            ? widget.r(340.0)
+                                            : widget.r(170.0)),
                                     height: widget.r(240.0),
                                     decoration: BoxDecoration(
                                       color: Colors.transparent,

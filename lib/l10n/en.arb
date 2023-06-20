@@ -33,6 +33,8 @@
   "isFirst": "First attack",
   "isNotFirst": "First attack",
   "opponentAttack": "The opponent is attacking!",
+  "opponentAttackTrigger": "{count} opponent's trigger cards are activated!",
+  "yourAttackTrigger": "{count} your trigger cards are activated!",
   "opponentBlocking": "Blocked by enemy unit!",
   "triggerDesc": "This card is automatically activated when the conditions match.",
   "interceptDesc": "You can choose when to activate (but colored requires a unit of the same color to be on the field)"

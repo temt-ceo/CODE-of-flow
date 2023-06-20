@@ -33,6 +33,8 @@
   "isFirst": "先攻",
   "isNotFirst": "後攻",
   "opponentAttack": "相手が攻撃を仕掛けてきた!",
+  "opponentAttackTrigger": "相手のトリガーカードが{count}枚発動!",
+  "yourAttackTrigger": "トリガーカードが{count}枚発動!",
   "opponentBlocking": "敵ユニットによるブロック!",
   "triggerDesc": "このカードは条件が一致した時に自動で発動する",
   "interceptDesc": "あなたが発動タイミングを選べる（しかし色付きは同色のユニットがフィールド上にいることが条件となる）"

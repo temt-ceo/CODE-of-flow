@@ -84,9 +84,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   void closeGameLoading() {
-    if (loadingContext != null) {
-      Navigator.of(loadingContext!, rootNavigator: true).pop();
-    }
+    try {
+      if (loadingContext != null) {
+        Navigator.of(loadingContext!, rootNavigator: true).pop();
+      }
+    } catch (e) {}
   }
 
   // Turn End
@@ -119,7 +121,9 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 : widget.yourUsedInterceptCard!,
             widget.opponentUsedInterceptCard == null
                 ? []
-                : widget.opponentUsedInterceptCard!);
+                : widget.opponentUsedInterceptCard!,
+            [],
+            []);
         setState(() {
           widget.actedCardPosition = null;
           widget.opponentDefendPosition = null;

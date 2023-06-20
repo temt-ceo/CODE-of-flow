@@ -17,6 +17,7 @@ class DroppedCardWidget extends StatefulWidget {
   final StringCallback tapCardCallback;
   final int index;
   final Stream<int> attack_stream;
+  final bool btnShowFlg;
   final ResponsiveSizeChangeFunction r;
 
   const DroppedCardWidget(
@@ -28,6 +29,7 @@ class DroppedCardWidget extends StatefulWidget {
       this.tapCardCallback,
       this.index,
       this.attack_stream,
+      this.btnShowFlg,
       this.r);
 
   @override
@@ -219,6 +221,31 @@ class DroppedCardState extends State<DroppedCardWidget> {
                               )
                             : Container())
                     : Container(),
+                widget.btnShowFlg
+                    ? (widget.label == 'trigger'
+                        ? Positioned(
+                            left: widget.r(16.0),
+                            top: widget.r(35.0),
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  widget.tapCardCallback(
+                                      'use',
+                                      int.parse(widget.cardInfo['card_id']),
+                                      widget.index);
+                                  isTapped = false;
+                                },
+                                tooltip: 'Use',
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(40.0),
+                                  child: Image.asset(
+                                    '${imagePath}button/use.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )),
+                          )
+                        : Container())
+                    : Container()
               ]));
         });
   }

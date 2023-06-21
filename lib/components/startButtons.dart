@@ -107,9 +107,9 @@ class StartButtonsState extends State<StartButtons> {
   PlayerResource player = PlayerResource('', '_', '');
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool showBottomSheet = false;
+  bool registerDoing = false;
   bool showBottomSheet2 = false;
   bool onTyping = false;
-  bool onClickButton = false;
   bool getBalanceFlg = true;
   double imagePosition = 0.0;
   double? balance;
@@ -154,10 +154,8 @@ class StartButtonsState extends State<StartButtons> {
           return;
         } else if (player.playerId == '') {
           // Playerリソース未インポート
-          if (showBottomSheet == false && mounted) {
-            setState(() {
-              showBottomSheet = true;
-            });
+          if (showBottomSheet == false && registerDoing == false && mounted) {
+            showBottomSheet = true;
             // Playerリソースをインポート
             showModalBottomSheet(
                 context: context,
@@ -198,7 +196,7 @@ class StartButtonsState extends State<StartButtons> {
                             ),
                             const SizedBox(height: 60.0),
                             Visibility(
-                              visible: onClickButton == true,
+                              visible: registerDoing == true,
                               child: const CircularProgressIndicator(),
                             ),
                             const SizedBox(height: 10.0),
@@ -226,19 +224,16 @@ class StartButtonsState extends State<StartButtons> {
                               ),
                               onPressed: onTyping
                                   ? () {
+                                      registerDoing = true;
                                       Navigator.pop(buildContext);
-                                      setState(() => onClickButton = true);
                                       // showGameLoading();
                                       createPlayer(nameController.text);
-                                      Future.delayed(
-                                          const Duration(seconds: 4000), () {});
                                       // setInterval by every 2 second
                                       Timer.periodic(const Duration(seconds: 2),
                                           (timer) {
                                         getPlayerInfo();
                                         if (player.uuid != '') {
                                           timer.cancel();
-                                          setState(() => onClickButton = false);
                                           widget.callback(
                                               'game-is-ready',
                                               player.playerId,
@@ -256,14 +251,14 @@ class StartButtonsState extends State<StartButtons> {
                             )),
                             const SizedBox(height: 10.0),
                           ])));
-                });
-          }
-        } else {
-          if (showBottomSheet == true) {
-            showToast('Your Player Name is successfully registered.');
-            setState(() {
+                }).whenComplete(() {
               showBottomSheet = false;
             });
+          }
+        } else {
+          if (registerDoing == true) {
+            showToast('Your Player Name is successfully registered.');
+            registerDoing = false;
           }
           // ゲーム状況(Current Status)取得
           dynamic ret =
@@ -430,19 +425,21 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   void getPlayerInfo() async {
-    var ret = await promiseToFuture(isRegistered(walletUser.addr));
-    if (ret != null) {
-      String? playerId = getPlayerId(ret);
-      String? playerName = getPlayerName(ret);
-      String? playerUUId = getPlayerUUId(ret);
-      debugPrint('PlayerId: $playerId');
-      setState(
-          () => player = PlayerResource(playerUUId!, playerId!, playerName!));
-      userDeck = await promiseToFuture(
-          getPlayerDeck(walletUser.addr, int.parse(playerId!)));
-    } else {
-      print('Not Imporing.');
-      setState(() => player = PlayerResource('', '', ''));
+    if (walletUser.addr != '') {
+      var ret = await promiseToFuture(isRegistered(walletUser.addr));
+      if (ret != null) {
+        String? playerId = getPlayerId(ret);
+        String? playerName = getPlayerName(ret);
+        String? playerUUId = getPlayerUUId(ret);
+        debugPrint('PlayerId: $playerId');
+        setState(
+            () => player = PlayerResource(playerUUId!, playerId!, playerName!));
+        userDeck = await promiseToFuture(
+            getPlayerDeck(walletUser.addr, int.parse(playerId!)));
+      } else {
+        print('Not Imporing.');
+        setState(() => player = PlayerResource('', '', ''));
+      }
     }
   }
 
@@ -585,9 +582,7 @@ class StartButtonsState extends State<StartButtons> {
   // EN購入
   void buyCyberEnergy() {
     if (showBottomSheet2 == false) {
-      setState(() {
-        showBottomSheet2 = true;
-      });
+      showBottomSheet2 = true;
       // EN購入
       showModalBottomSheet(
           context: context,
@@ -620,6 +615,7 @@ class StartButtonsState extends State<StartButtons> {
                           ),
                         ),
                         onPressed: () {
+                          showBottomSheet2 = false;
                           Navigator.pop(buildContext);
                           buyCyberEN();
                         },
@@ -641,7 +637,9 @@ class StartButtonsState extends State<StartButtons> {
                           style: const TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 16.0)),
                     ])));
-          });
+          }).whenComplete(() {
+        showBottomSheet2 = false;
+      });
     }
   }
 
@@ -736,7 +734,8 @@ class StartButtonsState extends State<StartButtons> {
       unauthenticate();
       setState(() => walletUser = WalletUser(''));
       setState(() => player = PlayerResource('', '', ''));
-      setState(() => showBottomSheet = false);
+      showBottomSheet = false;
+      registerDoing = false;
     }
   }
 
@@ -751,22 +750,21 @@ class StartButtonsState extends State<StartButtons> {
           child: Positioned(
               left: widget.r(75.0),
               top: 0,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    SizedBox(
-                        width: widget.isEnglish
-                            ? (wonFlow ? widget.r(281.0) : widget.r(213.0))
-                            : (wonFlow ? widget.r(240.0) : widget.r(172.0)),
-                        child: Text(
-                          '${L10n.of(context)!.balance} ${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
-                          style: TextStyle(
-                              color: wonFlow
-                                  ? Color.fromARGB(255, 32, 34, 161)
-                                  : Colors.lightGreen,
-                              fontSize: widget.r(26.0)),
-                        )),
-                    Container(
+              child: Stack(children: <Widget>[
+                SizedBox(
+                    width: widget.r(340.0),
+                    child: Text(
+                      '${L10n.of(context)!.balance} ${widget.isEnglish ? "　" : "　"}${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
+                      style: TextStyle(
+                          color: wonFlow
+                              ? Color.fromARGB(255, 32, 34, 161)
+                              : Colors.lightGreen,
+                          fontSize: widget.r(26.0)),
+                    )),
+                Positioned(
+                    left: widget.isEnglish ? widget.r(115.0) : widget.r(75.0),
+                    top: widget.isEnglish ? widget.r(8.0) : widget.r(10.0),
+                    child: Container(
                         width: widget.r(22.0),
                         height: widget.r(22.0),
                         decoration: BoxDecoration(
@@ -774,8 +772,8 @@ class StartButtonsState extends State<StartButtons> {
                               image:
                                   AssetImage('${imagePath}button/flowLogo.png'),
                               fit: BoxFit.contain),
-                        )),
-                  ]))),
+                        ))),
+              ]))),
       Visibility(
           visible: cyberEnergy != null && walletUser.addr != '',
           child: Positioned(

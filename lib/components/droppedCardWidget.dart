@@ -129,11 +129,12 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                                           ? ''
                                                           : widget
                                                               .cardInfo?['bp'],
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         color: Colors.white,
                                                         decoration:
                                                             TextDecoration.none,
-                                                        fontSize: 16.0,
+                                                        fontSize:
+                                                            widget.r(16.0),
                                                       )))))),
                             ]))
                         // デッキ編集以外の画面

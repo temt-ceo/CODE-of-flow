@@ -113,8 +113,8 @@ class DeckEditPageState extends State<DeckEditPage> {
           body: Stack(children: <Widget>[
             Stack(fit: StackFit.expand, children: <Widget>[
               Positioned(
-                  left: r(320.0),
-                  top: r(430.0),
+                  left: r(330.0),
+                  top: r(450.0),
                   child: Row(children: <Widget>[
                     SizedBox(
                         width: r(1040.0),

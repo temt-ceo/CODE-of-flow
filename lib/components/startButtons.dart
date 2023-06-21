@@ -736,6 +736,7 @@ class StartButtonsState extends State<StartButtons> {
       setState(() => player = PlayerResource('', '', ''));
       showBottomSheet = false;
       registerDoing = false;
+      cyberEnergy = null;
     }
   }
 

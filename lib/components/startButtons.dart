@@ -758,7 +758,7 @@ class StartButtonsState extends State<StartButtons> {
                       '${L10n.of(context)!.balance} ${widget.isEnglish ? "　" : "　"}${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
                       style: TextStyle(
                           color: wonFlow
-                              ? Color.fromARGB(255, 32, 34, 161)
+                              ? const Color.fromARGB(255, 248, 224, 9)
                               : Colors.lightGreen,
                           fontSize: widget.r(26.0)),
                     )),

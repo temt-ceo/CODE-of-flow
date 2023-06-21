@@ -17,7 +17,6 @@ class DroppedCardWidget extends StatefulWidget {
   final StringCallback tapCardCallback;
   final int index;
   final Stream<int> attack_stream;
-  final bool btnShowFlg;
   final ResponsiveSizeChangeFunction r;
 
   const DroppedCardWidget(
@@ -29,7 +28,6 @@ class DroppedCardWidget extends StatefulWidget {
       this.tapCardCallback,
       this.index,
       this.attack_stream,
-      this.btnShowFlg,
       this.r);
 
   @override
@@ -46,10 +44,33 @@ class DroppedCardState extends State<DroppedCardWidget> {
   ////////////////////////////
   @override
   Widget build(BuildContext context) {
+    bool canUseInterept1 = false;
+    bool canUseInterept2 = false;
+    bool canUseInterept3 = false;
+    bool canUseInterept4 = false;
     return StreamBuilder(
         stream: widget.attack_stream,
         initialData: 0,
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+          if (snapshot.data == 11 ||
+              snapshot.data == 12 ||
+              snapshot.data == 13 ||
+              snapshot.data == 14) {
+            if (snapshot.data == 11) {
+              canUseInterept1 = true;
+            } else if (snapshot.data == 12) {
+              canUseInterept2 = true;
+            } else if (snapshot.data == 13) {
+              canUseInterept3 = true;
+            } else if (snapshot.data == 14) {
+              canUseInterept4 = true;
+            }
+          } else {
+            canUseInterept1 = false;
+            canUseInterept2 = false;
+            canUseInterept3 = false;
+            canUseInterept4 = false;
+          }
           return Positioned(
               left: widget.left,
               bottom: widget.label == 'deck'
@@ -200,7 +221,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                           )
                         : widget.label == 'unit' && snapshot.data == 1
                             ? Positioned(
-                                left: widget.r(28.0),
+                                left: widget.r(20.0),
                                 top: widget.r(50.0),
                                 child: FloatingActionButton(
                                     backgroundColor: Colors.transparent,
@@ -209,6 +230,7 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                           'attack',
                                           int.parse(widget.cardInfo['card_id']),
                                           widget.index);
+                                      isTapped = false;
                                     },
                                     tooltip: 'Attack',
                                     child: ClipRRect(
@@ -222,30 +244,32 @@ class DroppedCardState extends State<DroppedCardWidget> {
                               )
                             : Container())
                     : Container(),
-                widget.btnShowFlg
-                    ? (widget.label == 'trigger'
-                        ? Positioned(
-                            left: widget.r(16.0),
-                            top: widget.r(35.0),
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  widget.tapCardCallback(
-                                      'use',
-                                      int.parse(widget.cardInfo['card_id']),
-                                      widget.index);
-                                  isTapped = false;
-                                },
-                                tooltip: 'Use',
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(40.0),
-                                  child: Image.asset(
-                                    '${imagePath}button/use.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                )),
-                          )
-                        : Container())
+                widget.label == 'trigger' &&
+                        ((canUseInterept1 = true && widget.index == 0) ||
+                            (canUseInterept2 = true && widget.index == 1) ||
+                            (canUseInterept3 = true && widget.index == 2) ||
+                            (canUseInterept4 = true && widget.index == 3))
+                    ? Positioned(
+                        left: widget.r(16.0),
+                        top: widget.r(35.0),
+                        child: FloatingActionButton(
+                            backgroundColor: Colors.transparent,
+                            onPressed: () {
+                              widget.tapCardCallback(
+                                  'use',
+                                  int.parse(widget.cardInfo['card_id']),
+                                  widget.index);
+                              isTapped = false;
+                            },
+                            tooltip: 'Use',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(40.0),
+                              child: Image.asset(
+                                '${imagePath}button/use.png',
+                                fit: BoxFit.cover,
+                              ),
+                            )),
+                      )
                     : Container()
               ]));
         });

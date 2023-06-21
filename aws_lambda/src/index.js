@@ -92,11 +92,11 @@ const FlowTransactions = {
   turnChange: `
     import CodeOfFlowBeta4 from 0x9e447fb949c3f1b6
 
-    transaction(player_id: UInt, from_opponent: Bool) {
+    transaction(player_id: UInt, from_opponent: Bool, trigger_cards: {UInt8: UInt16}) {
       prepare(signer: AuthAccount) {
         let admin = signer.borrow<&CodeOfFlowBeta4.Admin>(from: CodeOfFlowBeta4.AdminStoragePath)
           ?? panic("Could not borrow reference to the Administrator Resource.")
-        admin.turn_change(player_id: player_id, from_opponent: from_opponent)
+        admin.turn_change(player_id: player_id, from_opponent: from_opponent, trigger_cards: trigger_cards)
       }
       execute {
         log("success")
@@ -337,11 +337,18 @@ exports.handler = async function (event) {
       })
     // change the turn
     } else if (input.type === "turn_change") {
+      const arg2 = [
+        {key: 1, value: message.arg2['1'] || 0},
+        {key: 2, value: message.arg2['2'] || 0},
+        {key: 3, value: message.arg2['3'] || 0},
+        {key: 4, value: message.arg2['4'] || 0},
+      ];
       transactionId = await fcl.mutate({
         cadence: FlowTransactions.turnChange,
         args: (arg, t) => [
           arg(player_id, t.UInt),
           arg(message.arg1, t.Bool),
+          arg(arg2, t.Dictionary({ key: t.UInt8, value: t.UInt16 })), // trigger_cards
         ],
         proposer: authorizationFunctionProposer,
         payer: authorizationFunction,

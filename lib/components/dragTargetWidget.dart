@@ -26,7 +26,6 @@ class DragTargetWidget extends StatefulWidget {
   final bool canOperate;
   final Stream<int> attack_stream;
   final List<dynamic> defaultDropedList;
-  final List<int> canUseInterceptList;
   final List<int?> currentTriggerCards;
   final ResponsiveSizeChangeFunction r;
 
@@ -40,7 +39,6 @@ class DragTargetWidget extends StatefulWidget {
       this.canOperate,
       this.attack_stream,
       this.defaultDropedList,
-      this.canUseInterceptList,
       this.currentTriggerCards,
       this.r);
 
@@ -86,19 +84,22 @@ class DragTargetState extends State<DragTargetWidget> {
   void attack() async {
     if (widget.actedCardPosition != null) {
       showGameLoading();
-      var objStr2 = jsonToString(widget.currentTriggerCards);
-      var objJs2 = jsonDecode(objStr2);
-      List<int?> triggerPositions = [null, null, null, null];
-      for (int i = 1; i <= 4; i++) {
-        if (objJs2[i.toString()] != null) {
-          triggerPositions[i - 1] = objJs2[i.toString()];
-        }
+      var message;
+      if (widget.currentTriggerCards.isEmpty) {
+        TriggerCards triggerCards = TriggerCards(null, null, null, null);
+        List<int> usedInterceptCard = [];
+        message = AttackModel((widget.actedCardPosition! + 1), null,
+            triggerCards, usedInterceptCard);
+      } else {
+        TriggerCards triggerCards = TriggerCards(
+            widget.currentTriggerCards[0],
+            widget.currentTriggerCards[1],
+            widget.currentTriggerCards[2],
+            widget.currentTriggerCards[3]);
+        List<int> usedInterceptCard = [];
+        message = AttackModel((widget.actedCardPosition! + 1), null,
+            triggerCards, usedInterceptCard);
       }
-      TriggerCards triggerCards = TriggerCards(triggerPositions[0],
-          triggerPositions[1], triggerPositions[2], triggerPositions[3]);
-      List<int> usedInterceptCard = [];
-      var message = AttackModel((widget.actedCardPosition! + 1), null,
-          triggerCards, usedInterceptCard);
       var ret = await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
@@ -167,7 +168,6 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length,
                 widget.attack_stream,
-                false,
                 widget.r));
           } else {
             dropedListSecond.add(DroppedCardWidget(
@@ -179,7 +179,6 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 dropedList.length + dropedListSecond.length,
                 widget.attack_stream,
-                false,
                 widget.r));
           }
         }
@@ -204,7 +203,6 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
-                false,
                 widget.r);
           }
         }
@@ -220,12 +218,6 @@ class DragTargetState extends State<DragTargetWidget> {
           if (widget.defaultDropedList[i] != null) {
             int cardId = widget.defaultDropedList[i];
             var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
-            bool showBtn = false;
-            for (int intercepId in widget.canUseInterceptList) {
-              if (intercepId == cardId) {
-                showBtn = true;
-              }
-            }
             dropedList[i] = DroppedCardWidget(
                 widget.r(93.0 * i + 17), // TODO 380 / 440
                 imageUrl,
@@ -235,7 +227,6 @@ class DragTargetState extends State<DragTargetWidget> {
                 widget.tapCardCallback,
                 i,
                 widget.attack_stream,
-                showBtn,
                 widget.r);
           }
         }
@@ -259,7 +250,6 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.tapCardCallback,
               i - 1,
               widget.attack_stream,
-              false,
               widget.r));
         } else {
           dropedListEnemy.add(Container());
@@ -312,7 +302,6 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length + dropedListSecond.length,
                   widget.attack_stream,
-                  false,
                   widget.r));
             } else if (widget.label == 'deck') {
               dropedList.add(DroppedCardWidget(
@@ -324,7 +313,6 @@ class DragTargetState extends State<DragTargetWidget> {
                   widget.tapCardCallback,
                   dropedList.length,
                   widget.attack_stream,
-                  false,
                   widget.r));
             } else if (widget.label == 'unit') {
               for (int i = 0; i < 5; i++) {
@@ -338,19 +326,12 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
-                      false,
                       widget.r);
                   break;
                 }
               }
             } else if (widget.label == 'trigger') {
               for (int i = 0; i < 4; i++) {
-                bool showBtn = false;
-                for (int intercepId in widget.canUseInterceptList) {
-                  if (intercepId == cardId) {
-                    showBtn = true;
-                  }
-                }
                 if (dropedList[i].runtimeType.toString() == 'Container') {
                   dropedList[i] = DroppedCardWidget(
                       widget.r(93.0 * i + 17), // TODO 380 / 440
@@ -361,7 +342,6 @@ class DragTargetState extends State<DragTargetWidget> {
                       widget.tapCardCallback,
                       i,
                       widget.attack_stream,
-                      showBtn,
                       widget.r);
                   break;
                 }
@@ -495,10 +475,10 @@ class DragTargetState extends State<DragTargetWidget> {
                       boxShadow: [
                         BoxShadow(
                           color: Color(snapshot.data ?? 0xFFFFFFFF),
-                          spreadRadius: widget.r(5),
-                          blurRadius: widget.r(7),
+                          spreadRadius: widget.r(4),
+                          blurRadius: widget.r(6),
                           offset: Offset(widget.r(2),
-                              widget.r(5)), // changes position of shadow
+                              widget.r(3)), // changes position of shadow
                         ),
                       ],
                     ),
@@ -513,10 +493,10 @@ class DragTargetState extends State<DragTargetWidget> {
                                                   null &&
                                               attackSignalPosition! >= 2
                                           ? widget.r(-150.0)
-                                          : widget.r(30.0)) +
+                                          : widget.r(40.0)) +
                                       (attackSignalPosition != null
                                           ? widget
-                                              .r(attackSignalPosition! * 100.0)
+                                              .r(attackSignalPosition! * 120.0)
                                           : 0)),
                                   top: widget.r(-5.0),
                                   child: Container(
@@ -524,7 +504,7 @@ class DragTargetState extends State<DragTargetWidget> {
                                         attackSignalPosition != null &&
                                                 attackSignalPosition! >= 2
                                             ? widget.r(340.0)
-                                            : widget.r(170.0)),
+                                            : widget.r(180.0)),
                                     height: widget.r(240.0),
                                     decoration: BoxDecoration(
                                       color: Colors.transparent,

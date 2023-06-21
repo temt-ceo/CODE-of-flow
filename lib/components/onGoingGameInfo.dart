@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flash/flash.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
+import 'package:CodeOfFlow/components/deckButtons.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/models/TurnEndModel.dart';
 import 'package:CodeOfFlow/models/defenceActionModel.dart';
@@ -24,6 +25,7 @@ class OnGoingGameInfo extends StatefulWidget {
   List<int>? opponentUsedInterceptCard;
   int? actedCardPosition;
   final dynamic cardInfos;
+  final List<int?> currentTriggerCards;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
@@ -36,6 +38,7 @@ class OnGoingGameInfo extends StatefulWidget {
       this.opponentUsedInterceptCard,
       this.actedCardPosition,
       this.cardInfos,
+      this.currentTriggerCards,
       this.r);
 
   @override
@@ -94,7 +97,18 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   // Turn End
   void turnEnd(fromOpponent) async {
     showGameLoading();
-    var message = TurnEndModel(fromOpponent);
+    var message;
+    if (widget.currentTriggerCards.isEmpty) {
+      TriggerCards triggerCards = TriggerCards(null, null, null, null);
+      message = TurnEndModel(fromOpponent, triggerCards);
+    } else {
+      TriggerCards triggerCards = TriggerCards(
+          widget.currentTriggerCards[0],
+          widget.currentTriggerCards[1],
+          widget.currentTriggerCards[2],
+          widget.currentTriggerCards[3]);
+      message = TurnEndModel(fromOpponent, triggerCards);
+    }
     var ret = await apiService.saveGameServerProcess(
         'turn_change',
         jsonEncode(message),
@@ -151,7 +165,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
       setState(() {
         reactionLimitTime =
-            700 - now.difference(battleReactionUpdateTime!).inSeconds;
+            70 - now.difference(battleReactionUpdateTime!).inSeconds;
       });
       if (reactionLimitTime != null && reactionLimitTime! < 0) {
         String flashMsg = '';
@@ -193,7 +207,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             });
       }
       // 10秒経過時も判定処理へ
-    } else if (now.difference(battleStartTime).inSeconds > 1000) {
+    } else if (now.difference(battleStartTime).inSeconds > 100) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         actionDecided(now.difference(battleStartTime).inSeconds);
       });

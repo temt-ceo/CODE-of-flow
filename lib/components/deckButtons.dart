@@ -353,13 +353,6 @@ class DeckButtonsState extends State<DeckButtons> {
             Visibility(
                 visible: walletUser.addr == '',
                 child: SizedBox(width: widget.r(20))),
-            Visibility(
-                visible: walletUser.addr == '',
-                child: const FloatingActionButton(
-                  onPressed: authenticate,
-                  tooltip: 'Authenticate',
-                  child: Icon(Icons.key_outlined),
-                )),
             SizedBox(
                 width: widget.r(65.0),
                 child: Visibility(
@@ -394,21 +387,33 @@ class DeckButtonsState extends State<DeckButtons> {
                             fit: BoxFit.cover,
                           ),
                         )))),
+            SizedBox(
+                width: widget.r(65.0),
+                child: Visibility(
+                    visible: walletUser.addr != '',
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        onPressed: () async {
+                          await resetUserDeck();
+                        },
+                        tooltip: 'Reset',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(widget.r(40.0)),
+                          child: Image.asset(
+                            '${imagePath}button/reset.png',
+                            fit: BoxFit.cover,
+                          ),
+                        )))),
             Visibility(
-                visible: walletUser.addr != '',
-                child: FloatingActionButton(
-                    backgroundColor: Colors.transparent,
-                    onPressed: () async {
-                      await resetUserDeck();
-                    },
-                    tooltip: 'Reset',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(widget.r(40.0)),
-                      child: Image.asset(
-                        '${imagePath}button/reset.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ))),
+                visible: walletUser.addr == '',
+                child: SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: const FloatingActionButton(
+                      onPressed: authenticate,
+                      tooltip: 'Authenticate',
+                      child: Icon(Icons.key_outlined)),
+                )),
             SizedBox(width: widget.r(25)),
           ]))
     ]);

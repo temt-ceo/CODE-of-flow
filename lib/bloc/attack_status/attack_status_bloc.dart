@@ -26,8 +26,10 @@ class AttackStatusBloc {
       _attack_status = 1;
     } else if (event is BattlingEvent) {
       _attack_status = 2;
-    } else if (event is BattleFinishedEvent) {
+    } else if (event is BattleFinishingEvent) {
       _attack_status = 3;
+    } else if (event is BattleFinishedEvent) {
+      _attack_status = 4;
     } else if (event is CanUseTriggerIndex1Event) {
       _attack_status = 11;
     } else if (event is CanUseTriggerIndex2Event) {

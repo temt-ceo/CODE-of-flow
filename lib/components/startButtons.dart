@@ -361,31 +361,13 @@ class StartButtonsState extends State<StartButtons> {
           showToast('EN is successfully charged.');
         }
         setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
-        int win = 0;
-        for (int i = 0; i < yourInfo['score'].length; i++) {
-          for (final key in yourInfo['score'][i].keys) {
-            final value = yourInfo['score'][i][key];
-            if (value == '1') {
-              win++;
-            }
-          }
-        }
-        setState(
-            () => yourScore = '${yourInfo['score'].length} games ${win} win');
+        setState(() => yourScore =
+            '${yourInfo['score'].length} games ${yourInfo['win_count']} win');
         setState(() => yourName = yourInfo['player_name']);
         if (gameStarted == true && objJs.length > 1) {
           var opponentInfo = objJs[1];
-          int win2 = 0;
-          for (int i = 0; i < opponentInfo['score'].length; i++) {
-            for (final key in opponentInfo['score'][i].keys) {
-              final value = opponentInfo['score'][i][key];
-              if (value == '1') {
-                win2++;
-              }
-            }
-          }
-          setState(() =>
-              enemyScore = '${opponentInfo['score'].length} games ${win2} win');
+          setState(() => enemyScore =
+              '${opponentInfo['score'].length} games ${opponentInfo['win_count']} win');
           setState(() => enemyName = opponentInfo['player_name']);
         }
       }
@@ -471,14 +453,9 @@ class StartButtonsState extends State<StartButtons> {
   Future<void> gameStart() async {
     showGameLoading();
     // Call GraphQL method.
-    print('Matching Player: ${player.playerId}');
-    var ret = await apiService.saveGameServerProcess(
+    await apiService.saveGameServerProcess(
         'player_matching', '', player.playerId);
     closeGameLoading();
-    debugPrint('transaction published');
-    if (ret != null) {
-      debugPrint(ret.message);
-    }
   }
 
   void countdown() {
@@ -721,7 +698,6 @@ class StartButtonsState extends State<StartButtons> {
                 'surrender', '', player.playerId);
             closeGameLoading();
             if (ret != null) {
-              debugPrint(ret.message);
               QuickAlert.show(
                 context: context,
                 type: QuickAlertType.error,

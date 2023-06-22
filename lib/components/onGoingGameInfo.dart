@@ -21,8 +21,8 @@ class OnGoingGameInfo extends StatefulWidget {
   final TimeupCallback canOperate;
   final Stream<int> attack_stream;
   int? opponentDefendPosition;
-  List<int>? yourUsedInterceptCard;
-  List<int>? opponentUsedInterceptCard;
+  List<int>? attackerUsedInterceptCard;
+  List<int>? defenderUsedInterceptCard;
   int? actedCardPosition;
   final dynamic cardInfos;
   final List<int?> currentTriggerCards;
@@ -34,8 +34,8 @@ class OnGoingGameInfo extends StatefulWidget {
       this.canOperate,
       this.attack_stream,
       this.opponentDefendPosition,
-      this.yourUsedInterceptCard,
-      this.opponentUsedInterceptCard,
+      this.attackerUsedInterceptCard,
+      this.defenderUsedInterceptCard,
       this.actedCardPosition,
       this.cardInfos,
       this.currentTriggerCards,
@@ -96,6 +96,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
   // Turn End
   void turnEnd(fromOpponent) async {
+    print('turnEnd ST');
     showGameLoading();
     var message;
     if (widget.currentTriggerCards.isEmpty) {
@@ -117,55 +118,38 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             : widget.info!.you.toString());
     closeGameLoading();
     debugPrint('transaction published');
-    debugPrint(ret.toString());
-    if (ret != null) {
-      debugPrint(ret.message);
-    }
   }
 
-  void actionDecided(int? diff) async {
-    if (widget.actedCardPosition != null || (diff != null && diff % 10 == 0)) {
-      if (apiCalled == false) {
-        apiCalled = true;
-        showGameLoading();
-        var message = DefenceActionModel(
-            widget.opponentDefendPosition,
-            widget.yourUsedInterceptCard == null
-                ? []
-                : widget.yourUsedInterceptCard!,
-            widget.opponentUsedInterceptCard == null
-                ? []
-                : widget.opponentUsedInterceptCard!,
-            [],
-            []);
-        setState(() {
-          widget.actedCardPosition = null;
-          widget.opponentDefendPosition = null;
-          widget.yourUsedInterceptCard = null;
-          widget.opponentUsedInterceptCard = null;
-        });
-        var ret = await apiService.saveGameServerProcess(
-            'defence_action', jsonEncode(message), widget.info!.you.toString());
-        print('defence_action $message');
-        closeGameLoading();
-        debugPrint('== defence_action transaction published ==');
-        debugPrint('== ${ret.toString()} ==');
-        if (ret != null) {
-          debugPrint(ret.message);
-        }
-      }
-    } else {
-      apiCalled = false;
+  void battleResultDecided() async {
+    if (apiCalled == false) {
+      apiCalled = true;
+      var message = DefenceActionModel(
+          widget.opponentDefendPosition,
+          widget.attackerUsedInterceptCard == null
+              ? []
+              : widget.attackerUsedInterceptCard!,
+          widget.defenderUsedInterceptCard == null
+              ? []
+              : widget.defenderUsedInterceptCard!,
+          [],
+          []);
+      widget.actedCardPosition = null;
+      widget.opponentDefendPosition = null;
+      widget.attackerUsedInterceptCard = null;
+      widget.defenderUsedInterceptCard = null;
+      await apiService.saveGameServerProcess(
+          'defence_action', jsonEncode(message), widget.info!.you.toString());
+      debugPrint('===↓↓↓ defence_action ↓↓↓===');
     }
   }
 
   // Defence Action
-  void defenceActionDecided(DateTime battleStartTime, DateTime now) {
+  void defenceActionDecition(DateTime battleStartTime, DateTime now) {
     if (battleReactionUpdateTime != null &&
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
       setState(() {
         reactionLimitTime =
-            70 - now.difference(battleReactionUpdateTime!).inSeconds;
+            7 - now.difference(battleReactionUpdateTime!).inSeconds;
       });
       if (reactionLimitTime != null && reactionLimitTime! < 0) {
         String flashMsg = '';
@@ -180,9 +164,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         }
 
         // 時間制限を超えた場合、バトル判定処理実行へ
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          actionDecided(null);
-        });
+        battleResultDecided();
+        battleReactionUpdateTime = null;
         showFlash(
             context: context,
             duration: const Duration(seconds: 4),
@@ -206,11 +189,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               );
             });
       }
-      // 10秒経過時も判定処理へ
-    } else if (now.difference(battleStartTime).inSeconds > 100) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        actionDecided(now.difference(battleStartTime).inSeconds);
-      });
+      // 25秒経過時も判定処理へ
+    } else if (now.difference(battleStartTime).inSeconds > 25) {
+      battleResultDecided();
+      battleReactionUpdateTime = null;
     }
   }
 
@@ -259,7 +241,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
-        defenceActionDecided(battleStartTime, now);
+        defenceActionDecition(battleStartTime, now);
       } else if (widget.info!.enemyAttackingCard != null &&
           widget.info!.isFirst != widget.info!.isFirstTurn) {
         var attackedTime = widget.info!.enemyAttackingCard['attacked_time'];
@@ -271,7 +253,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
-        defenceActionDecided(battleStartTime, now);
+        defenceActionDecition(battleStartTime, now);
       }
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
@@ -327,11 +309,16 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
           // バトルリアクション時間更新
           if (snapshot.data == 2) {
+            apiCalled = false;
             WidgetsBinding.instance.addPostFrameCallback((_) {
               setState(() {
                 battleReactionUpdateTime = DateTime.now();
               });
             });
+          }
+          // バトル終了時刻検知
+          if (snapshot.data == 3) {
+            battleResultDecided();
           }
 
           return Stack(children: <Widget>[
@@ -517,7 +504,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             Positioned(
                 left: widget.r(1255.0),
-                top: widget.r(540.0),
+                top: widget.r(530.0),
                 child: Text(
                     'Deck ${widget.info != null ? widget.info!.yourRemainDeck.length : '--'}',
                     style: TextStyle(
@@ -527,7 +514,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             Positioned(
                 left: widget.r(1255.0),
-                top: widget.r(500.0),
+                top: widget.r(490.0),
                 child: Text('Dead -',
                     style: TextStyle(
                       color: Colors.white,
@@ -535,14 +522,14 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             Positioned(
-                left: widget.r(1080.0),
+                left: widget.r(1050.0),
                 top: widget.r(0.0),
                 child: Text(
-                    'Turn $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
+                    'Roound $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: widget.r(22.0),
+                      fontSize: widget.r(28.0),
                     ))),
             Positioned(
                 left: widget.r(30.0),
@@ -579,8 +566,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                   )),
             ),
             Positioned(
-                left: widget.r(1140.0),
-                top: widget.r(480.0),
+                left: widget.r(1120.0),
+                top: widget.r(465.0),
                 child: Visibility(
                   visible: widget.info != null
                       ? widget.info!.isFirst == widget.info!.isFirstTurn &&
@@ -592,7 +579,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     percent: percentIndicatorValue,
                     backgroundWidth: 0.0,
                     center: Column(children: <Widget>[
-                      SizedBox(height: widget.r(10.0)),
+                      SizedBox(height: widget.r(15.0)),
                       Text('$percentIndicatorValueStr s',
                           style: TextStyle(
                             color: Colors.white,
@@ -604,6 +591,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                               widget.info!.yourAttackingCard == null,
                           child: SizedBox(
                               width: widget.r(90.0),
+                              height: widget.r(35.0),
                               child: FloatingActionButton(
                                   backgroundColor: Colors.transparent,
                                   onPressed: () async {

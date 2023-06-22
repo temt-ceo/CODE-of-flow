@@ -100,14 +100,10 @@ class DragTargetState extends State<DragTargetWidget> {
         message = AttackModel((widget.actedCardPosition! + 1), null,
             triggerCards, usedInterceptCard);
       }
-      var ret = await apiService.saveGameServerProcess(
+      await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
       debugPrint('== attack transaction published ==');
-      debugPrint('== ${ret.toString()} ==');
-      if (ret != null) {
-        debugPrint(ret.message);
-      }
       if (widget.info!.opponentDefendableUnitLength == 0) {
         // 敵ユニットがいない場合、そのままダメージへ
         showGameLoading();
@@ -277,7 +273,7 @@ class DragTargetState extends State<DragTargetWidget> {
         initialData: 0,
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
           // バトル終了検知
-          if (snapshot.data == 3) {
+          if (snapshot.data == 4) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               setState(() {
                 attackSignalPosition = null;
@@ -493,10 +489,10 @@ class DragTargetState extends State<DragTargetWidget> {
                                                   null &&
                                               attackSignalPosition! >= 2
                                           ? widget.r(-150.0)
-                                          : widget.r(40.0)) +
+                                          : widget.r(50.0)) +
                                       (attackSignalPosition != null
                                           ? widget
-                                              .r(attackSignalPosition! * 120.0)
+                                              .r(attackSignalPosition! * 140.0)
                                           : 0)),
                                   top: widget.r(-5.0),
                                   child: Container(

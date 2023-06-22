@@ -65,14 +65,5 @@ class APIService {
       onEstablished: () => print('Subscription established'),
     );
     return operation;
-    // try {
-    //   await for (var event in operation) {
-    //     print('*** Subscription event data received: ${event.data}');
-    //     return event.data;
-    //   }
-    // } on Exception catch (e) {
-    //   print('Error in subscription stream: $e');
-    //   return null;
-    // }
   }
 }

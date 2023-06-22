@@ -42,7 +42,8 @@ class HomePageState extends State<HomePage> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
-  List<int> savedGraphQLIds = [];
+  String savedGraphQLId = '';
+  String previousEmitPlayer = '';
   final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   bool gameStarted = false;
   GameObject? gameObject;
@@ -55,7 +56,7 @@ class HomePageState extends State<HomePage> {
   List<dynamic> defaultDropedList = [];
   List<int> handCards = [];
   List<int?> onChainYourTriggerCards = [];
-  List<int?> yourTriggerCards = [];
+  List<dynamic> defaultTriggerCards = [];
   dynamic onChainHandCards;
   BuildContext? loadingContext;
   int? actedCardPosition;
@@ -66,15 +67,16 @@ class HomePageState extends State<HomePage> {
   int activeIndex = 0;
   bool showDefenceUnitsCarousel = false;
   int? opponentDefendPosition;
-  List<int>? yourUsedInterceptCard;
-  List<int>? opponentUsedInterceptCard;
+  List<int>? attackerUsedInterceptCard;
+  List<int>? defenderUsedInterceptCard;
   List<int> attackerUsedCardIds = [];
   List<int> defenderUsedCardIds = [];
   VideoPlayerController? vController;
-  bool showVideo = true;
+  bool isBattling = false;
   int? onBattlePosition;
   bool? isEnemyAttack;
   bool canUseIntercept = false;
+  final _timer = TimerComponent();
 
   @override
   void initState() {
@@ -92,246 +94,259 @@ class HomePageState extends State<HomePage> {
         apiService.subscribeBCGGameServerProcess();
     operation.listen(
       (event) {
-        print('*** Subscription event data received: ${event.data}');
         var ret = event.data;
-        if (ret != null) {
-          print('No. ${ret.playerId} : ${ret.type}');
-          print(ret.message);
-          if (!savedGraphQLIds.any((element) => element == int.parse(ret.id))) {
-            savedGraphQLIds.add(int.parse(ret.id));
-            print('savedGraphQLIds Check : $savedGraphQLIds'); // DEBUG
-            print('savedGraphQLIds ID Check : ${ret.id}'); // DEBUG
-            if (ret.type == 'player_matching' && playerId == ret.playerId) {
-              String transactionId = ret.message.split(',TransactionID:')[1];
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                showFlash(
-                    context: context,
-                    duration: const Duration(seconds: 4),
-                    builder: (context, controller) {
-                      return Flash(
+        if (ret != null && savedGraphQLId != ret.id) {
+          savedGraphQLId = ret.id;
+          print('Player No. ${ret.playerId} => ${ret.type}');
+          print(
+              '*** Subscription event data received: (${ret.id}) ${event.data}');
+          if (ret.type == 'player_matching' && playerId == ret.playerId) {
+            String transactionId = ret.message.split(',TransactionID:')[1];
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
                         controller: controller,
-                        position: FlashPosition.bottom,
-                        child: FlashBar(
-                          controller: controller,
-                          title: const Text('Player Matching is in progress.'),
-                          content: Text('Transaction ID: $transactionId'),
-                          indicatorColor: Colors.blue,
-                          icon: const Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.blue,
-                          ),
+                        title: const Text('Player Matching is in progress.'),
+                        content: Text('Transaction ID: $transactionId'),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
                         ),
-                      );
-                    });
-              });
-            } else if (ret.type == 'player_matching' && gameObject == null) {
-              showToast("No. ${ret.playerId} has entered in Alcana.");
-            } else if (ret.type == 'turn_change' &&
-                gameObject != null &&
-                (gameObject!.you.toString() == ret.playerId ||
-                    gameObject!.opponent.toString() == ret.playerId)) {
-              if (attackSignalPosition == null) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  showFlash(
-                      context: context,
-                      duration: const Duration(seconds: 7),
-                      builder: (context, controller) {
-                        return Flash(
-                          controller: controller,
-                          position: FlashPosition.bottom,
-                          child: FlashBar(
-                            controller: controller,
-                            content: const Text('Turn Change!',
-                                style: TextStyle(fontSize: 24.0)),
-                            indicatorColor: Colors.blue,
-                            icon: const Icon(
-                              Icons.info_outline_rounded,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        );
-                      });
-                });
-              }
-              // あなたの攻撃
-            } else if (ret.type == 'attack' &&
-                gameObject != null &&
-                (gameObject!.you.toString() == ret.playerId)) {
-              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-              var usedInterceptPositions = msg['arg4'];
-              // 攻撃時に使用したトリガーカード
-              List<int> _yourUsedInterceptCard = [];
-              for (var i in usedInterceptPositions) {
-                _yourUsedInterceptCard.add(int.parse(i));
-              }
-              setState(() => yourUsedInterceptCard = _yourUsedInterceptCard);
-              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-              // トリガーカードが発動したことを攻撃者に伝える
-              if (yourUsedInterceptCard!.isNotEmpty) {
-                String toastMsg = L10n.of(context)!
-                    .yourAttackTrigger(yourUsedInterceptCard!.length);
-                showFlash(
-                    context: context,
-                    duration: const Duration(seconds: 4),
-                    builder: (context, controller) {
-                      return Flash(
-                        controller: controller,
-                        position: FlashPosition.bottom,
-                        child: FlashBar(
-                          controller: controller,
-                          content: Text(toastMsg,
-                              style: const TextStyle(fontSize: 24.0)),
-                          indicatorColor: Colors.blue,
-                          icon: const Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      );
-                    });
-              }
-              // 敵の攻撃
-            } else if (ret.type == 'attack' &&
-                gameObject != null &&
-                (gameObject!.opponent.toString() == ret.playerId)) {
-              showDefenceUnitsCarousel = true;
-              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-              onBattlePosition = msg['arg1'];
-              var usedInterceptPositions = msg['arg4'];
-              // 攻撃時に使用したトリガーカード
-              List<int> _yourUsedInterceptCard = [];
-              for (var i in usedInterceptPositions) {
-                _yourUsedInterceptCard.add(int.parse(i));
-              }
-              setState(() => yourUsedInterceptCard = _yourUsedInterceptCard);
-              isEnemyAttack = true;
-              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-              String toastMsg = L10n.of(context)!.opponentAttack;
-              if (yourUsedInterceptCard!.isNotEmpty) {
-                toastMsg =
-                    '$toastMsg ${L10n.of(context)!.opponentAttackTrigger(yourUsedInterceptCard!.length)}';
-              }
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                showFlash(
-                    context: context,
-                    duration: const Duration(seconds: 4),
-                    builder: (context, controller) {
-                      return Flash(
-                        controller: controller,
-                        position: FlashPosition.bottom,
-                        child: FlashBar(
-                          controller: controller,
-                          content: Text(toastMsg,
-                              style: const TextStyle(fontSize: 24.0)),
-                          indicatorColor: Colors.blue,
-                          icon: const Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      );
-                    });
-              });
-              // バトルの相手側の対応
-            } else if (ret.type == 'battle_reaction' &&
-                gameObject != null &&
-                gameObject!.opponent.toString() == ret.playerId) {
-              attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-              var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-              onBattlePosition = msg['arg1'];
-              // isEnemyAttackがnullの場合はfalseをセットする。
-              isEnemyAttack ??= false;
-              // 攻撃側が使用中のトリガー/インターセプトカードをセット
-              List<int> _attackerUsedCardIds = [];
-              for (var i in msg['attackerUsedCardIds']) {
-                _attackerUsedCardIds.add(int.parse(i));
-              }
-              setState(() => attackerUsedCardIds = _attackerUsedCardIds);
-              // 防御側が使用中のトリガー/インターセプトカードをセット
-              List<int> _defenderUsedCardIds = [];
-              for (var i in msg['defenderUsedCardIds']) {
-                _defenderUsedCardIds.add(int.parse(i));
-              }
-              setState(() => defenderUsedCardIds = _defenderUsedCardIds);
-
-              /////////////////
-              //// Ability ////
-              /////////////////
-              // トリガーゾーンのカードはバトル時に発動可能なインターセプトか?
-              if (onChainYourTriggerCards.isNotEmpty &&
-                  onChainYourTriggerCards[0] == 26) {
-                // 無色か同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex1Event());
-                canUseIntercept = true;
-              } else if (onChainYourTriggerCards.isNotEmpty &&
-                  onChainYourTriggerCards[1] == 26) {
-                // 無色か同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex2Event());
-                canUseIntercept = true;
-              } else if (onChainYourTriggerCards.isNotEmpty &&
-                  onChainYourTriggerCards[2] == 26) {
-                // 無色か同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex3Event());
-                canUseIntercept = true;
-              } else if (onChainYourTriggerCards.isNotEmpty &&
-                  onChainYourTriggerCards[3] == 26) {
-                // 無色か同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex4Event());
-                canUseIntercept = true;
-              }
-
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                showFlash(
-                    context: context,
-                    duration: const Duration(seconds: 4),
-                    builder: (context, controller) {
-                      return Flash(
-                        controller: controller,
-                        position: FlashPosition.bottom,
-                        child: FlashBar(
-                          controller: controller,
-                          content: Text(L10n.of(context)!.opponentBlocking,
-                              style: const TextStyle(fontSize: 24.0)),
-                          indicatorColor: Colors.blue,
-                          icon: const Icon(
-                            Icons.info_outline_rounded,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      );
-                    });
-              });
-            } else if (ret.type == 'defence_action' &&
-                gameObject != null &&
-                (gameObject!.you.toString() == ret.playerId ||
-                    gameObject!.opponent.toString() == ret.playerId)) {
-              // バトルパラメータをnullにする
-              setState(() {
-                onBattlePosition = null;
-                isEnemyAttack = null;
-                showDefenceUnitsCarousel = false;
-                opponentDefendPosition = null;
-                yourUsedInterceptCard = null;
-                opponentUsedInterceptCard = null;
-                attackerUsedCardIds = [];
-                defenderUsedCardIds = [];
-                actedCardPosition = null;
-                canUseIntercept = false;
-              });
-
-              attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (mounted) {
-                  setState(() {
-                    attackSignalPosition = null;
+                      ),
+                    );
                   });
-                }
+            });
+          } else if (ret.type == 'player_matching' &&
+              gameObject == null &&
+              previousEmitPlayer != ret.playerId) {
+            previousEmitPlayer = ret.playerId;
+            showToast("No. ${ret.playerId} has entered in Alcana.");
+          } else if (ret.type == 'turn_change' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
+            isBattling = false;
+            if (attackSignalPosition == null) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 7),
+                    builder: (context, controller) {
+                      return Flash(
+                        controller: controller,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          content: const Text('Turn Change!',
+                              style: TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      );
+                    });
               });
             }
+            // あなたの攻撃
+          } else if (ret.type == 'attack' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId)) {
+            var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+            var usedInterceptPositions = msg['arg4'];
+            // 攻撃時に使用したトリガーカード
+            List<int> _attackerUsedInterceptCard = [];
+            for (var i in usedInterceptPositions) {
+              _attackerUsedInterceptCard.add(int.parse(i));
+            }
+            setState(
+                () => attackerUsedInterceptCard = _attackerUsedInterceptCard);
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            // トリガーカードが発動したことを攻撃者に伝える
+            if (attackerUsedInterceptCard!.isNotEmpty) {
+              String toastMsg = L10n.of(context)!
+                  .yourAttackTrigger(attackerUsedInterceptCard!.length);
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        content: Text(toastMsg,
+                            style: const TextStyle(fontSize: 24.0)),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            }
+            // 敵の攻撃
+          } else if (ret.type == 'attack' &&
+              gameObject != null &&
+              (gameObject!.opponent.toString() == ret.playerId)) {
+            isBattling = true;
+            _timer.countdownStart(7, () {
+              isBattling = false;
+              attackStatusBloc.canAttackEventSink.add(BattleFinishingEvent());
+            });
+            showDefenceUnitsCarousel = true;
+            var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+            onBattlePosition = msg['arg1'];
+            var usedInterceptPositions = msg['arg4'];
+            // 攻撃時に使用したトリガーカード
+            List<int> _defenderUsedInterceptCard = [];
+            for (var i in usedInterceptPositions) {
+              _defenderUsedInterceptCard.add(int.parse(i));
+            }
+            setState(
+                () => defenderUsedInterceptCard = _defenderUsedInterceptCard);
+            isEnemyAttack = true;
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            String toastMsg = L10n.of(context)!.opponentAttack;
+            if (defenderUsedInterceptCard!.isNotEmpty) {
+              toastMsg =
+                  '$toastMsg ${L10n.of(context)!.opponentAttackTrigger(defenderUsedInterceptCard!.length)}';
+            }
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        content: Text(toastMsg,
+                            style: const TextStyle(fontSize: 24.0)),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+            // バトルの相手側の対応
+          } else if (ret.type == 'battle_reaction' &&
+              gameObject != null &&
+              gameObject!.opponent.toString() == ret.playerId) {
+            isBattling = true;
+            _timer.countdownStart(7, () {
+              isBattling = false;
+              attackStatusBloc.canAttackEventSink.add(BattleFinishingEvent());
+            });
+            attackStatusBloc.canAttackEventSink.add(BattlingEvent());
+            var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+            onBattlePosition = msg['arg1'];
+            // isEnemyAttackがnullの場合はfalseをセットする。
+            isEnemyAttack ??= false;
+            // 攻撃側が使用中のトリガー/インターセプトカードをセット
+            List<int> _attackerUsedCardIds = [];
+            for (var i in msg['attackerUsedCardIds']) {
+              _attackerUsedCardIds.add(int.parse(i));
+            }
+            setState(() => attackerUsedCardIds = _attackerUsedCardIds);
+            // 防御側が使用中のトリガー/インターセプトカードをセット
+            List<int> _defenderUsedCardIds = [];
+            for (var i in msg['defenderUsedCardIds']) {
+              _defenderUsedCardIds.add(int.parse(i));
+            }
+            setState(() => defenderUsedCardIds = _defenderUsedCardIds);
+
+            /////////////////
+            //// Ability ////
+            /////////////////
+            // トリガーゾーンのカードはバトル時に発動可能なインターセプトか?
+            if (onChainYourTriggerCards.isNotEmpty &&
+                onChainYourTriggerCards[0] == 26) {
+              // 無色か同色のカードがフィールドにあるので選択可能
+              attackStatusBloc.canAttackEventSink
+                  .add(CanUseTriggerIndex1Event());
+              canUseIntercept = true;
+            } else if (onChainYourTriggerCards.isNotEmpty &&
+                onChainYourTriggerCards[1] == 26) {
+              // 無色か同色のカードがフィールドにあるので選択可能
+              attackStatusBloc.canAttackEventSink
+                  .add(CanUseTriggerIndex2Event());
+              canUseIntercept = true;
+            } else if (onChainYourTriggerCards.isNotEmpty &&
+                onChainYourTriggerCards[2] == 26) {
+              // 無色か同色のカードがフィールドにあるので選択可能
+              attackStatusBloc.canAttackEventSink
+                  .add(CanUseTriggerIndex3Event());
+              canUseIntercept = true;
+            } else if (onChainYourTriggerCards.isNotEmpty &&
+                onChainYourTriggerCards[3] == 26) {
+              // 無色か同色のカードがフィールドにあるので選択可能
+              attackStatusBloc.canAttackEventSink
+                  .add(CanUseTriggerIndex4Event());
+              canUseIntercept = true;
+            }
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              showFlash(
+                  context: context,
+                  duration: const Duration(seconds: 4),
+                  builder: (context, controller) {
+                    return Flash(
+                      controller: controller,
+                      position: FlashPosition.bottom,
+                      child: FlashBar(
+                        controller: controller,
+                        content: Text(L10n.of(context)!.opponentBlocking,
+                            style: const TextStyle(fontSize: 24.0)),
+                        indicatorColor: Colors.blue,
+                        icon: const Icon(
+                          Icons.info_outline_rounded,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    );
+                  });
+            });
+          } else if (ret.type == 'defence_action' &&
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
+            isBattling = false;
+            // バトルパラメータをnullにする
+            setState(() {
+              onBattlePosition = null;
+              isEnemyAttack = null;
+              showDefenceUnitsCarousel = false;
+              opponentDefendPosition = null;
+              attackerUsedInterceptCard = null;
+              defenderUsedInterceptCard = null;
+              attackerUsedCardIds = [];
+              defenderUsedCardIds = [];
+              actedCardPosition = null;
+              canUseIntercept = false;
+            });
+
+            attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                setState(() {
+                  attackSignalPosition = null;
+                });
+              }
+            });
           }
         }
       },
@@ -361,7 +376,7 @@ class HomePageState extends State<HomePage> {
     setState(() {
       showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
-      opponentUsedInterceptCard = [];
+      defenderUsedInterceptCard = [];
       canUseIntercept = false;
       attackerUsedCardIds =
           []; // これはブロックチェーンから取ってくるしかない。相手のトリガーゾーンに何が入っているかは相手の攻撃アクション時にはわからない。
@@ -371,18 +386,14 @@ class HomePageState extends State<HomePage> {
     showGameLoading();
     var message = DefenceActionModel(
         opponentDefendPosition!,
-        yourUsedInterceptCard!,
-        opponentUsedInterceptCard!,
+        attackerUsedInterceptCard == null ? [] : attackerUsedInterceptCard!,
+        defenderUsedInterceptCard == null ? [] : defenderUsedInterceptCard!,
         attackerUsedCardIds,
         defenderUsedCardIds);
-    var ret = await apiService.saveGameServerProcess(
+    await apiService.saveGameServerProcess(
         'battle_reaction', jsonEncode(message), gameObject!.you.toString());
     closeGameLoading();
     debugPrint('== transaction published ==');
-    debugPrint('== ${ret.toString()} ==');
-    if (ret != null) {
-      debugPrint(ret.message);
-    }
   }
 
   /*
@@ -392,12 +403,12 @@ class HomePageState extends State<HomePage> {
     if (isEnemyAttack != null) {
       if (isEnemyAttack == true) {
         setState(() {
-          opponentUsedInterceptCard!.add(activeIndex);
+          defenderUsedInterceptCard!.add(activeIndex);
           defenderUsedCardIds.add(cardId);
         });
       } else {
         setState(() {
-          yourUsedInterceptCard!.add(activeIndex);
+          attackerUsedInterceptCard!.add(activeIndex);
           attackerUsedCardIds.add(cardId);
         });
       }
@@ -405,25 +416,20 @@ class HomePageState extends State<HomePage> {
       showGameLoading();
       var message = DefenceActionModel(
           opponentDefendPosition!,
-          yourUsedInterceptCard!,
-          opponentUsedInterceptCard!,
+          attackerUsedInterceptCard!,
+          defenderUsedInterceptCard!,
           attackerUsedCardIds,
           defenderUsedCardIds);
-      var ret = await apiService.saveGameServerProcess(
+      await apiService.saveGameServerProcess(
           'battle_reaction', jsonEncode(message), gameObject!.you.toString());
       closeGameLoading();
       debugPrint('== transaction published ==');
-      debugPrint('== ${ret.toString()} ==');
-      if (ret != null) {
-        debugPrint(ret.message);
-      }
     }
   }
 
   /*
   **  startButtonsで1秒おきにデータ取得した後の処理
   */
-  final _timer = TimerComponent();
   void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
     bool turnChanged = false;
     if (gameProgressStatus < 2) {
@@ -440,7 +446,96 @@ class HomePageState extends State<HomePage> {
             gameObject!.isFirstTurn != data.isFirstTurn) {
           turnChanged = true;
         }
+        if (data.yourLife < gameObject!.yourLife) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showFlash(
+                context: context,
+                duration: const Duration(seconds: 4),
+                builder: (context, controller) {
+                  return Flash(
+                    controller: controller,
+                    position: FlashPosition.bottom,
+                    child: FlashBar(
+                      controller: controller,
+                      content: Text(L10n.of(context)!.gotDamage,
+                          style: const TextStyle(fontSize: 24.0)),
+                      indicatorColor: Colors.blue,
+                      icon: const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  );
+                });
+          });
+        } else if (data.opponentLife < gameObject!.opponentLife) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showFlash(
+                context: context,
+                duration: const Duration(seconds: 4),
+                builder: (context, controller) {
+                  return Flash(
+                    controller: controller,
+                    position: FlashPosition.bottom,
+                    child: FlashBar(
+                      controller: controller,
+                      content: Text(L10n.of(context)!.giveDamage,
+                          style: const TextStyle(fontSize: 24.0)),
+                      indicatorColor: Colors.blue,
+                      icon: const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  );
+                });
+          });
+        } else if ((data.yourAttackingCard == null &&
+                gameObject!.yourAttackingCard != null) ||
+            (data.enemyAttackingCard == null &&
+                gameObject!.enemyAttackingCard != null)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            showFlash(
+                context: context,
+                duration: const Duration(seconds: 4),
+                builder: (context, controller) {
+                  return Flash(
+                    controller: controller,
+                    position: FlashPosition.bottom,
+                    child: FlashBar(
+                      controller: controller,
+                      content: Text(L10n.of(context)!.battleSettled,
+                          style: const TextStyle(fontSize: 24.0)),
+                      indicatorColor: Colors.blue,
+                      icon: const Icon(
+                        Icons.info_outline_rounded,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  );
+                });
+          });
+        }
       }
+    } else {
+      // データがない = 10ターンが終わった可能性
+      if (gameObject!.turn == 10 && gameObject!.isFirstTurn == false) {
+        if (gameObject!.yourLife < gameObject!.opponentLife ||
+            (gameObject!.isFirst &&
+                gameObject!.yourLife == gameObject!.opponentLife)) {
+          QuickAlert.show(
+            context: context,
+            type: QuickAlertType.error,
+            title: 'You Lose...',
+            text: 'Try Again!',
+          );
+        }
+      }
+      // 内部データ初期化
+      setState(() {
+        onChainYourTriggerCards = [];
+        canOperate = true;
+      });
     }
     setState(() => gameObject = data);
 
@@ -453,9 +548,8 @@ class HomePageState extends State<HomePage> {
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
     } else {
+      // 通常時はこちら
       if (turnChanged || onChainHandCards == null) {
-        attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
-
         // ハンドのブロックチェーンデータとの調整
         List<int> _hand = [];
         for (int i = 1; i <= 7; i++) {
@@ -486,31 +580,21 @@ class HomePageState extends State<HomePage> {
             title: 'You Lose...',
             text: 'Try Again!',
           );
-        } else if (gameObject!.turn == 10) {
-          if (gameObject!.yourLife < gameObject!.opponentLife ||
-              (gameObject!.isFirst &&
-                  gameObject!.yourLife == gameObject!.opponentLife)) {
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: 'You Lose...',
-              text: 'Try Again!',
-            );
-          }
         }
         setState(() {
           handCards = _hand;
           onChainHandCards = gameObject!.yourHand;
           onChainYourFieldUnit = _units;
           onChainYourTriggerCards = _triggerCards;
-          defaultDropedList = _units;
-          yourTriggerCards = _triggerCards;
+          // ターンチェンジ後に空になっている場合は空であることをコンポーネントに伝える必要がある
+          defaultDropedList = _units.isEmpty ? [null] : _units;
+          defaultTriggerCards = _triggerCards.isEmpty ? [null] : _triggerCards;
         });
       } else {
         setState(() {
-          // フイールドユニットのブロックチェーンデータとの調整
+          // フイールドユニットのブロックチェーンデータとの調整(こうしないとプレイヤーが操作した動きがリセットされる為)
           defaultDropedList = [];
-          yourTriggerCards = [];
+          defaultTriggerCards = [];
         });
       }
 
@@ -691,28 +775,20 @@ class HomePageState extends State<HomePage> {
         // Call GraphQL method.
         var message = PutCardModel(
             fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
-        var ret = await apiService.saveGameServerProcess(
-            'put_card_on_the_field',
-            jsonEncode(message),
-            gameObject!.you.toString());
+        await apiService.saveGameServerProcess('put_card_on_the_field',
+            jsonEncode(message), gameObject!.you.toString());
         closeGameLoading();
         debugPrint('transaction published');
-        if (ret != null) {
-          debugPrint(ret.message);
-        }
       });
     } else {
       showGameLoading();
       // Call GraphQL method.
       var message = PutCardModel(
           fieldUnit, enemySkillTarget, triggerCards, usedInterceptCard);
-      var ret = await apiService.saveGameServerProcess('put_card_on_the_field',
+      await apiService.saveGameServerProcess('put_card_on_the_field',
           jsonEncode(message), gameObject!.you.toString());
       closeGameLoading();
       debugPrint('transaction published');
-      if (ret != null) {
-        debugPrint(ret.message);
-      }
     }
   }
 
@@ -952,8 +1028,8 @@ class HomePageState extends State<HomePage> {
                     setCanOperate,
                     attackStatusBloc.attack_stream,
                     opponentDefendPosition,
-                    yourUsedInterceptCard,
-                    opponentUsedInterceptCard,
+                    attackerUsedInterceptCard,
+                    defenderUsedInterceptCard,
                     actedCardPosition,
                     cardInfos,
                     onChainYourTriggerCards,
@@ -980,8 +1056,8 @@ class HomePageState extends State<HomePage> {
                             actedCardPosition,
                             canOperate,
                             attackStatusBloc.attack_stream,
-                            yourTriggerCards,
-                            yourTriggerCards,
+                            defaultTriggerCards,
+                            onChainYourTriggerCards,
                             r),
                       ),
                       Padding(
@@ -997,7 +1073,7 @@ class HomePageState extends State<HomePage> {
                             canOperate,
                             attackStatusBloc.attack_stream,
                             defaultDropedList,
-                            yourTriggerCards,
+                            onChainYourTriggerCards,
                             r),
                       ),
                     ])),
@@ -1587,9 +1663,9 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(400),
+                        height: r(450),
                         // aspectRatio: 9 / 9,
-                        viewportFraction: 1, // 1.0:1つが全体に出る
+                        viewportFraction: 0.7, // 1.0:1つが全体に出る
                         initialPage: 0,
                         enableInfiniteScroll: true,
                         enlargeCenterPage: true,
@@ -1611,12 +1687,16 @@ class HomePageState extends State<HomePage> {
                       );
                     },
                   ),
-                  SizedBox(height: r(32.0)),
+                  SizedBox(height: r(20.0)),
                   buildIndicator(),
-                  ElevatedButton(
-                    onPressed: () => block(activeIndex),
-                    child: const Text('Block'),
-                  ),
+                  SizedBox(
+                      width: r(240.0),
+                      height: r(100.0),
+                      child: ElevatedButton(
+                        onPressed: () => block(activeIndex),
+                        child: const Text('Block',
+                            style: TextStyle(fontSize: 24.0)),
+                      )),
                 ])),
             // Visibility(
             //     visible: showVideo == true,
@@ -1726,6 +1806,22 @@ class HomePageState extends State<HomePage> {
                         SizedBox(width: r(2)),
                       ],
                     ))),
+            Visibility(
+                visible: isBattling == true,
+                child: Center(
+                    child: SizedBox(
+                        width: r(180.0),
+                        child: StreamBuilder<int>(
+                            stream: _timer.events.stream,
+                            builder: (BuildContext context,
+                                AsyncSnapshot<int> snapshot) {
+                              return Center(
+                                  child: Text(
+                                '0:0${snapshot.data.toString()}',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(60.0)),
+                              ));
+                            })))),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

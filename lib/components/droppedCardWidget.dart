@@ -201,47 +201,54 @@ class DroppedCardState extends State<DroppedCardWidget> {
                         ? Positioned(
                             left: widget.r(16.0),
                             top: widget.r(30.0),
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  widget.tapCardCallback(
-                                      'remove',
-                                      int.parse(widget.cardInfo['card_id']),
-                                      widget.index);
-                                  isTapped = false;
-                                },
-                                tooltip: 'Remove',
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(40.0),
-                                  child: Image.asset(
-                                    '${imagePath}button/remove.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                )),
-                          )
+                            child: SizedBox(
+                              width: widget.r(50.0),
+                              height: widget.r(20.0),
+                              child: FloatingActionButton(
+                                  backgroundColor: Colors.transparent,
+                                  onPressed: () {
+                                    widget.tapCardCallback(
+                                        'remove',
+                                        int.parse(widget.cardInfo['card_id']),
+                                        widget.index);
+                                    isTapped = false;
+                                  },
+                                  tooltip: 'Remove',
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(40.0),
+                                    child: Image.asset(
+                                      '${imagePath}button/remove.png',
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )),
+                            ))
                         : widget.label == 'unit' && snapshot.data == 1
                             ? Positioned(
                                 left: widget.r(20.0),
                                 top: widget.r(50.0),
-                                child: FloatingActionButton(
-                                    backgroundColor: Colors.transparent,
-                                    onPressed: () {
-                                      widget.tapCardCallback(
-                                          'attack',
-                                          int.parse(widget.cardInfo['card_id']),
-                                          widget.index);
-                                      isTapped = false;
-                                    },
-                                    tooltip: 'Attack',
-                                    child: ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.circular(widget.r(40.0)),
-                                      child: Image.asset(
-                                        '${imagePath}button/attack.png',
-                                        fit: BoxFit.cover,
-                                      ),
-                                    )),
-                              )
+                                child: SizedBox(
+                                  width: widget.r(50.0),
+                                  height: widget.r(20.0),
+                                  child: FloatingActionButton(
+                                      backgroundColor: Colors.transparent,
+                                      onPressed: () {
+                                        widget.tapCardCallback(
+                                            'attack',
+                                            int.parse(
+                                                widget.cardInfo['card_id']),
+                                            widget.index);
+                                        isTapped = false;
+                                      },
+                                      tooltip: 'Attack',
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                            widget.r(40.0)),
+                                        child: Image.asset(
+                                          '${imagePath}button/attack.png',
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )),
+                                ))
                             : Container())
                     : Container(),
                 widget.label == 'trigger' &&
@@ -250,26 +257,29 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             (canUseInterept3 = true && widget.index == 2) ||
                             (canUseInterept4 = true && widget.index == 3))
                     ? Positioned(
-                        left: widget.r(16.0),
-                        top: widget.r(35.0),
-                        child: FloatingActionButton(
-                            backgroundColor: Colors.transparent,
-                            onPressed: () {
-                              widget.tapCardCallback(
-                                  'use',
-                                  int.parse(widget.cardInfo['card_id']),
-                                  widget.index);
-                              isTapped = false;
-                            },
-                            tooltip: 'Use',
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(40.0),
-                              child: Image.asset(
-                                '${imagePath}button/use.png',
-                                fit: BoxFit.cover,
-                              ),
-                            )),
-                      )
+                        left: widget.r(12.0),
+                        top: widget.r(40.0),
+                        child: SizedBox(
+                          width: widget.r(50.0),
+                          height: widget.r(20.0),
+                          child: FloatingActionButton(
+                              backgroundColor: Colors.transparent,
+                              onPressed: () {
+                                widget.tapCardCallback(
+                                    'use',
+                                    int.parse(widget.cardInfo['card_id']),
+                                    widget.index);
+                                isTapped = false;
+                              },
+                              tooltip: 'Use',
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(40.0),
+                                child: Image.asset(
+                                  '${imagePath}button/use.png',
+                                  fit: BoxFit.cover,
+                                ),
+                              )),
+                        ))
                     : Container()
               ]));
         });

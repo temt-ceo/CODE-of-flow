@@ -924,7 +924,7 @@ class HomePageState extends State<HomePage> {
                           curve: Curves.linear,
                           child: Row(
                             children: [
-                              for (var cardId in [16, 13, 1, 3, 25, 20, 26])
+                              for (var cardId in [16, 13, 4, 3, 25, 20, 26])
                                 GestureDetector(
                                     onTap: () {
                                       setState(() {

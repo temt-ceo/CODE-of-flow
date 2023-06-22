@@ -199,11 +199,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
                 isTapped
                     ? (widget.label == 'deck'
                         ? Positioned(
-                            left: widget.r(16.0),
-                            top: widget.r(30.0),
+                            left: widget.r(23.0),
+                            top: widget.r(60.0),
                             child: SizedBox(
-                              width: widget.r(50.0),
-                              height: widget.r(20.0),
+                              width: widget.r(60.0),
+                              height: widget.r(25.0),
                               child: FloatingActionButton(
                                   backgroundColor: Colors.transparent,
                                   onPressed: () {
@@ -222,13 +222,15 @@ class DroppedCardState extends State<DroppedCardWidget> {
                                     ),
                                   )),
                             ))
-                        : widget.label == 'unit' && snapshot.data == 1
+                        : widget.label == 'unit' &&
+                                widget.isSecondRow == false &&
+                                snapshot.data == 1
                             ? Positioned(
-                                left: widget.r(20.0),
-                                top: widget.r(50.0),
+                                left: widget.r(23.0),
+                                top: widget.r(60.0),
                                 child: SizedBox(
-                                  width: widget.r(50.0),
-                                  height: widget.r(20.0),
+                                  width: widget.r(60.0),
+                                  height: widget.r(25.0),
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
                                       onPressed: () {
@@ -252,10 +254,10 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             : Container())
                     : Container(),
                 widget.label == 'trigger' &&
-                        ((canUseInterept1 = true && widget.index == 0) ||
-                            (canUseInterept2 = true && widget.index == 1) ||
-                            (canUseInterept3 = true && widget.index == 2) ||
-                            (canUseInterept4 = true && widget.index == 3))
+                        ((canUseInterept1 == true && widget.index == 0) ||
+                            (canUseInterept2 == true && widget.index == 1) ||
+                            (canUseInterept3 == true && widget.index == 2) ||
+                            (canUseInterept4 == true && widget.index == 3))
                     ? Positioned(
                         left: widget.r(12.0),
                         top: widget.r(40.0),

@@ -105,7 +105,8 @@ class DeckCardInfoState extends State<DeckCardInfo> {
             cardId == 6 ||
             cardId == 13 ||
             cardId == 14 ||
-            cardId == 16) {
+            cardId == 16 ||
+            cardId == 27) {
           return ' R ';
         } else if (cardId == 7 || cardId == 25 || cardId == 26) {
           return 'VR';

@@ -1764,6 +1764,35 @@ class HomePageState extends State<HomePage> {
                                 : '${imagePath}unit/bg-2.jpg'),
                   )),
             ),
+            // あなたのバトルカード
+            Visibility(
+              visible: gameObject != null &&
+                  ((isEnemyAttack == true && opponentDefendPosition != null) ||
+                      (isEnemyAttack == false && actedCardPosition != null)),
+              child: Positioned(
+                  right: r(720.0),
+                  top: r(90.0),
+                  child: GFImageOverlay(
+                    width: r(200.0),
+                    height: r(300.0),
+                    shape: BoxShape.rectangle,
+                    image: AssetImage(gameObject == null
+                        ? ''
+                        : isEnemyAttack == true
+                            ? gameObject!.yourFieldUnit[
+                                        opponentDefendPosition.toString()] !=
+                                    null
+                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                                : '${imagePath}unit/bg-2.jpg'
+                            : actedCardPosition != null &&
+                                    gameObject!.yourFieldUnit[
+                                            (actedCardPosition! + 1)
+                                                .toString()] !=
+                                        null
+                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
+                                : '${imagePath}unit/bg-2.jpg'),
+                  )),
+            ),
             // 攻撃側の使用したトリガー・インターセプトカード
             Visibility(
                 visible: gameObject != null &&

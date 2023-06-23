@@ -123,7 +123,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                             padding: EdgeInsets.all(r(5)),
                             child: Row(
                               children: [
-                                for (int cardId = 1; cardId <= 26; cardId++)
+                                for (int cardId = 1; cardId <= 27; cardId++)
                                   cardInfos == null || cardId == 12
                                       ? Container()
                                       : GestureDetector(

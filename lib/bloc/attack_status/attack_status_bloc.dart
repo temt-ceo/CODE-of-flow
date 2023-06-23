@@ -38,6 +38,8 @@ class AttackStatusBloc {
       _attack_status = 13;
     } else if (event is CanUseTriggerIndex4Event) {
       _attack_status = 14;
+    } else if (event is CanNotUseTriggerEvent) {
+      _attack_status = 15;
     } else {
       _attack_status = 0;
     }

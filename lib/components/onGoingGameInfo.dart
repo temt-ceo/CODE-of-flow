@@ -121,6 +121,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   void battleResultDecided() async {
+    print('battleResultDecided');
     if (apiCalled == false) {
       apiCalled = true;
       var message = DefenceActionModel(
@@ -144,7 +145,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   // Defence Action
-  void defenceActionDecition(DateTime battleStartTime, DateTime now) {
+  void defenceActionDecision(DateTime battleStartTime, DateTime now) {
     if (battleReactionUpdateTime != null &&
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
       setState(() {
@@ -241,7 +242,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
-        defenceActionDecition(battleStartTime, now);
+        defenceActionDecision(battleStartTime, now);
       } else if (widget.info!.enemyAttackingCard != null &&
           widget.info!.isFirst != widget.info!.isFirstTurn) {
         var attackedTime = widget.info!.enemyAttackingCard['attacked_time'];
@@ -253,7 +254,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 Duration(seconds: now.difference(battleStartTime).inSeconds));
           }
         }
-        defenceActionDecition(battleStartTime, now);
+        defenceActionDecision(battleStartTime, now);
       }
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
@@ -380,7 +381,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 left: widget.r(80.0),
                 top: widget.r(130.0),
                 child: Text(
-                    'Dead - / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
+                    'Dead ${widget.info != null ? widget.info!.opponentDeadCount : '--'} / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
@@ -515,7 +516,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             Positioned(
                 left: widget.r(1255.0),
                 top: widget.r(490.0),
-                child: Text('Dead -',
+                child: Text(
+                    'Dead ${widget.info != null ? widget.info!.yourDeadCount : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,

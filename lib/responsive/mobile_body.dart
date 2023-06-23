@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import 'package:CodeOfFlow/pages/mobile/homePage.dart';
 import 'package:CodeOfFlow/pages/mobile/deckEditPage.dart';
+import 'package:CodeOfFlow/pages/desktop/rankingPage.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 typedef void StringCallback(Locale val);
@@ -103,7 +104,9 @@ class MobileBodyState extends State<MobileBody> {
             ),
       body: widget.route == 'Home'
           ? HomePage(enLocale: activeLocale)
-          : DeckEditPage(enLocale: activeLocale),
+          : widget.route == 'DeckEditor'
+              ? DeckEditPage(enLocale: activeLocale)
+              : RankingPage(enLocale: activeLocale),
     );
   }
 }

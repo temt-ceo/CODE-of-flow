@@ -653,6 +653,7 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(objJs['your_life']),
       objJs['your_remain_deck'],
       objJs['your_trigger_cards'],
+      int.parse(objJs['your_dead_count']),
       int.parse(objJs['opponent']),
       int.parse(objJs['opponent_cp']),
       objJs['opponent_field_unit'],
@@ -662,22 +663,21 @@ class StartButtonsState extends State<StartButtons> {
       int.parse(objJs['opponent_life']),
       int.parse(objJs['opponent_remain_deck']),
       int.parse(objJs['opponent_trigger_cards']),
+      int.parse(objJs['opponent_dead_count']),
       objJs['your_attacking_card'],
       objJs['enemy_attacking_card'],
+      objJs['newly_drawed_cards'],
     );
   }
 
   List<List<int>> setMariganCards(marignaCardIds) {
     final List<List<int>> retArr = [];
-    print(marignaCardIds);
-    print(userDeck);
     for (int i = 0; i < 5; i++) {
       retArr.add([]);
       for (int j = 0; j < 4; j++) {
         retArr[i].add(int.parse(marignaCardIds[i][j]));
       }
     }
-    print(retArr);
     return retArr;
   }
 
@@ -848,11 +848,12 @@ class StartButtonsState extends State<StartButtons> {
                 child: SizedBox(
                     width: widget.r(50.0),
                     height: widget.r(50.0),
-                    child: const FloatingActionButton(
+                    child: const FittedBox(
+                        child: FloatingActionButton(
                       onPressed: authenticate,
                       tooltip: 'Authenticate',
                       child: Icon(Icons.key_outlined),
-                    ))),
+                    )))),
             Visibility(
                 visible: walletUser.addr != '' &&
                     player.uuid != '' &&

@@ -41,5 +41,6 @@
   "battleSettled": "Battle is settled!",
   "gotDamage": "1 damaged!",
   "giveDamage": "Succeeded in inflicting 1 damage to the enemy player!",
-  "activatedAbility": "'s ability is activated!"
+  "activatedAbility": "'s ability is activated!",
+  "interceptAbailable": "Intercept card is available (limit:5 seconds)"
 }

@@ -41,5 +41,6 @@
   "battleSettled": "バトルが決着!",
   "gotDamage": "1ダメージの損傷!",
   "giveDamage": "敵プレイヤーに1ダメージ与えることに成功!",
-  "activatedAbility": "の能力が発動!"
+  "activatedAbility": "の能力が発動!",
+  "interceptAbailable": "インターセプトカード利用できます (limit:5秒)"
 }

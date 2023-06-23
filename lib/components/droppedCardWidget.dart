@@ -52,20 +52,15 @@ class DroppedCardState extends State<DroppedCardWidget> {
         stream: widget.attack_stream,
         initialData: 0,
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-          if (snapshot.data == 11 ||
-              snapshot.data == 12 ||
-              snapshot.data == 13 ||
-              snapshot.data == 14) {
-            if (snapshot.data == 11) {
-              canUseInterept1 = true;
-            } else if (snapshot.data == 12) {
-              canUseInterept2 = true;
-            } else if (snapshot.data == 13) {
-              canUseInterept3 = true;
-            } else if (snapshot.data == 14) {
-              canUseInterept4 = true;
-            }
-          } else {
+          if (snapshot.data == 11) {
+            canUseInterept1 = true;
+          } else if (snapshot.data == 12) {
+            canUseInterept2 = true;
+          } else if (snapshot.data == 13) {
+            canUseInterept3 = true;
+          } else if (snapshot.data == 14) {
+            canUseInterept4 = true;
+          } else if (snapshot.data == 15) {
             canUseInterept1 = false;
             canUseInterept2 = false;
             canUseInterept3 = false;
@@ -199,8 +194,8 @@ class DroppedCardState extends State<DroppedCardWidget> {
                 isTapped
                     ? (widget.label == 'deck'
                         ? Positioned(
-                            left: widget.r(23.0),
-                            top: widget.r(60.0),
+                            left: widget.r(11.0),
+                            top: widget.r(45.0),
                             child: SizedBox(
                               width: widget.r(60.0),
                               height: widget.r(25.0),

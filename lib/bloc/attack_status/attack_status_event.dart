@@ -17,3 +17,5 @@ class CanUseTriggerIndex2Event extends AttackEvent {}
 class CanUseTriggerIndex3Event extends AttackEvent {}
 
 class CanUseTriggerIndex4Event extends AttackEvent {}
+
+class CanNotUseTriggerEvent extends AttackEvent {}

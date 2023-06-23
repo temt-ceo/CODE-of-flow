@@ -44,12 +44,16 @@ class PutCardModel {
   final int arg2;
   final TriggerCards arg3;
   final List<int> arg4;
+  final String skillMessage;
+  final List<int> usedTriggers;
 
   PutCardModel(
     this.arg1,
     this.arg2,
     this.arg3,
     this.arg4,
+    this.skillMessage,
+    this.usedTriggers,
   );
 
   Map toJson() {
@@ -60,6 +64,8 @@ class PutCardModel {
       'arg2': arg2,
       'arg3': arg3Json,
       'arg4': arg4,
+      'skillMessage': skillMessage,
+      'usedTriggers': usedTriggers,
     };
   }
 }

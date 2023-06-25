@@ -635,30 +635,6 @@ class HomePageState extends State<HomePage> {
           });
         }
       }
-    } else {
-      // バトルデータなし
-      if (gameObject != null) {
-        print('You Lose?? $gameObject');
-        // データがない = 10ターンが終わった可能性
-        if (gameObject!.turn == 10 && gameObject!.isFirstTurn == false) {
-          if (gameObject!.yourLife < gameObject!.opponentLife ||
-              (gameObject!.isFirst &&
-                  gameObject!.yourLife == gameObject!.opponentLife)) {
-            print('You Lose...');
-            QuickAlert.show(
-              context: context,
-              type: QuickAlertType.error,
-              title: 'You Lose...',
-              text: 'Try Again!',
-            );
-          }
-        }
-      }
-      // 内部データ初期化
-      setState(() {
-        onChainYourTriggerCards = [];
-        canOperate = true;
-      });
     }
     setState(() => gameObject = data);
 
@@ -2230,7 +2206,30 @@ class HomePageState extends State<HomePage> {
                     break;
                   case 'not-game-starting':
                     print('not-game-starting');
+                    // バトルデータなし
+                    if (gameObject != null) {
+                      print('You Lose?? $gameObject');
+                      // データがない = 10ターンが終わった可能性
+                      if (gameObject!.turn == 10 &&
+                          gameObject!.isFirstTurn == false) {
+                        if (gameObject!.yourLife < gameObject!.opponentLife ||
+                            (gameObject!.isFirst &&
+                                gameObject!.yourLife ==
+                                    gameObject!.opponentLife)) {
+                          print('You Lose...');
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            title: 'You Lose...',
+                            text: 'Try Again!',
+                          );
+                        }
+                      }
+                    }
+                    // 内部データ初期化
                     setState(() {
+                      onChainYourTriggerCards = [];
+                      canOperate = true;
                       gameStarted = false;
                       gameObject = null;
                     });

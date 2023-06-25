@@ -795,7 +795,7 @@ class StartButtonsState extends State<StartButtons> {
                     fontSize: widget.r(20.0)),
               )),
           Positioned(
-            left: widget.r(350.0),
+            left: widget.r(320.0),
             top: widget.r(82.0),
             child: Text(
               enemyScore,
@@ -814,7 +814,7 @@ class StartButtonsState extends State<StartButtons> {
                     fontSize: widget.r(20.0)),
               )),
           Positioned(
-            left: widget.r(350.0),
+            left: widget.r(320.0),
             top: widget.r(222.0),
             child: Text(
               yourScore,
@@ -836,7 +836,7 @@ class StartButtonsState extends State<StartButtons> {
                       ? 'connect to wallet→'
                       : (player.uuid == ''
                           ? 'Address: ${walletUser.addr} '
-                          : 'Hello! ${player.nickname}. Click the button to start the game→'),
+                          : 'Hey ${player.nickname}! start the game→'),
                   style:
                       TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
                 )),

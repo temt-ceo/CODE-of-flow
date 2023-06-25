@@ -143,7 +143,7 @@ class HomePageState extends State<HomePage> {
               gameObject != null) {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             // List<dynamic> から List<int> への変換
-            for (var i = 0; i < msg['usedTriggers'].lenght; i++) {
+            for (var i = 0; i < msg['usedTriggers'].length; i++) {
               timelyUsedTriggers.add(msg['usedTriggers']);
             }
             Future.delayed(const Duration(seconds: 3), () async {
@@ -1398,6 +1398,21 @@ class HomePageState extends State<HomePage> {
                     ),
                   ),
                 )),
+            Positioned(
+              left: r(470.0),
+              top: r(60.0),
+              child: Container(
+                width: r(125.0),
+                height: r(45.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.7,
+                      image: AssetImage('${imagePath}trigger/trigger.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
             Positioned(
               left: r(648.0),
               top: r(160.0),

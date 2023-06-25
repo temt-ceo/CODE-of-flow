@@ -96,7 +96,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
   // Turn End
   void turnEnd(fromOpponent) async {
-    print('turnEnd ST');
     showGameLoading();
     var message;
     if (widget.currentTriggerCards.isEmpty) {
@@ -379,7 +378,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             Positioned(
                 left: widget.r(80.0),
-                top: widget.r(130.0),
+                top: widget.r(160.0),
                 child: Text(
                     'Dead ${widget.info != null ? widget.info!.opponentDeadCount : '--'} / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
                     style: TextStyle(
@@ -388,8 +387,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             Positioned(
-                left: widget.r(320.0),
-                top: widget.r(100.0),
+                left: widget.r(80.0),
+                top: widget.r(130.0),
                 child: Text('Hand',
                     style: TextStyle(
                       color: Colors.white,
@@ -398,8 +397,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.opponentHand; i++)
               Positioned(
-                left: widget.r(400.0 + i * 21),
-                top: widget.r(103.0),
+                left: widget.r(152.0 + i * 21),
+                top: widget.r(133.0),
                 child: Container(
                   width: widget.r(20.0),
                   height: widget.r(20.0),
@@ -418,22 +417,13 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                   ),
                 ),
               ),
-            Positioned(
-                left: widget.r(320.0),
-                top: widget.r(130.0),
-                child: Text('Trigger',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: widget.r(22.0),
-                    ))),
             for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
               Positioned(
-                left: widget.r(400.0 + i * 26),
-                top: widget.r(133.0),
+                left: widget.r(470.0 + i * 36),
+                top: widget.r(60.0),
                 child: Container(
-                  width: widget.r(25.0),
-                  height: widget.r(25.0),
+                  width: widget.r(35.0),
+                  height: widget.r(35.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('${imagePath}button/enemyHand.png'),

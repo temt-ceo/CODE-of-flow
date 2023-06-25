@@ -806,7 +806,7 @@ class StartButtonsState extends State<StartButtons> {
           ),
           Positioned(
               left: 0.0,
-              top: widget.r(222.0),
+              top: widget.r(252.0),
               child: Text(
                 '$yourName :',
                 style: TextStyle(
@@ -815,7 +815,7 @@ class StartButtonsState extends State<StartButtons> {
               )),
           Positioned(
             left: widget.r(320.0),
-            top: widget.r(222.0),
+            top: widget.r(252.0),
             child: Text(
               yourScore,
               style: TextStyle(

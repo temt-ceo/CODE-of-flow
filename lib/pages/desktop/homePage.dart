@@ -1400,14 +1400,14 @@ class HomePageState extends State<HomePage> {
                 )),
             Positioned(
               left: r(470.0),
-              top: r(60.0),
+              top: r(90.0),
               child: Container(
                 width: r(125.0),
                 height: r(45.0),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   image: DecorationImage(
-                      opacity: 0.7,
+                      opacity: 0.5,
                       image: AssetImage('${imagePath}trigger/trigger.png'),
                       fit: BoxFit.cover),
                 ),

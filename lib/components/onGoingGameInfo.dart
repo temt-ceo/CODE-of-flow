@@ -98,7 +98,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   void turnEnd(fromOpponent) async {
     showGameLoading();
     var message;
-    if (widget.currentTriggerCards.isEmpty) {
+    if (widget.currentTriggerCards.isEmpty || fromOpponent) {
       TriggerCards triggerCards = TriggerCards(null, null, null, null);
       message = TurnEndModel(fromOpponent, triggerCards);
     } else {
@@ -109,7 +109,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           widget.currentTriggerCards[3]);
       message = TurnEndModel(fromOpponent, triggerCards);
     }
-    var ret = await apiService.saveGameServerProcess(
+    await apiService.saveGameServerProcess(
         'turn_change',
         jsonEncode(message),
         fromOpponent
@@ -397,7 +397,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.opponentHand; i++)
               Positioned(
-                left: widget.r(152.0 + i * 21),
+                left: widget.r(150.0 + i * 21),
                 top: widget.r(133.0),
                 child: Container(
                   width: widget.r(20.0),
@@ -419,11 +419,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
               Positioned(
-                left: widget.r(470.0 + i * 36),
-                top: widget.r(60.0),
+                left: widget.r(473.0 + i * 31),
+                top: widget.r(90.0),
                 child: Container(
-                  width: widget.r(35.0),
-                  height: widget.r(35.0),
+                  width: widget.r(27.0),
+                  height: widget.r(27.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('${imagePath}button/enemyHand.png'),
@@ -442,7 +442,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             for (var i = 0; i < widget.info!.yourLife; i++)
               Positioned(
                 left: widget.r(150.0 + i * 21),
-                top: widget.r(210.0),
+                top: widget.r(240.0),
                 child: Container(
                   width: widget.r(20.0),
                   height: widget.r(20.0),
@@ -462,8 +462,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(80.0),
-                top: widget.r(240.0),
+                left: widget.r(130.0),
+                top: widget.r(290.0),
                 child: Text(
                     'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
                     style: TextStyle(
@@ -473,8 +473,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.yourCp; i++)
               Positioned(
-                left: widget.r(152.0 + i * 16),
-                top: widget.r(248.0),
+                left: widget.r(202.0 + i * 16),
+                top: widget.r(298.0),
                 child: Container(
                   width: widget.r(15.0),
                   height: widget.r(15.0),

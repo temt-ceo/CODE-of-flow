@@ -44,12 +44,14 @@ class AttackModel {
   final int? arg2;
   final TriggerCards arg3;
   final List<int> arg4;
+  final List<int> usedCardIds;
 
   AttackModel(
     this.arg1,
     this.arg2,
     this.arg3,
     this.arg4,
+    this.usedCardIds,
   );
 
   Map toJson() {
@@ -59,6 +61,7 @@ class AttackModel {
       'arg2': arg2,
       'arg3': arg3Json,
       'arg4': arg4,
+      'usedCardIds': usedCardIds,
     };
   }
 }

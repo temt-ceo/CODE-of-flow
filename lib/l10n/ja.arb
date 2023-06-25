@@ -40,6 +40,7 @@
   "interceptDesc": "あなたが発動タイミングを選べる（しかし色付きは同色のユニットがフィールド上にいることが条件となる）",
   "battleSettled": "バトルが決着!",
   "gotDamage": "1ダメージの損傷!",
+  "gotUnitDamage": "{unit}に1000ダメージ！",
   "giveDamage": "敵プレイヤーに1ダメージ与えることに成功!",
   "activatedAbility": "の能力が発動!",
   "activatedEffect": "の効果が発動!",

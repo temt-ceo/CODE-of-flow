@@ -40,6 +40,7 @@
   "interceptDesc": "You can choose when to activate (but colored requires a unit of the same color to be on the field)",
   "battleSettled": "Battle is settled!",
   "gotDamage": "1 damaged!",
+  "gotUnitDamage": "1000 damage to the {unit}！",
   "giveDamage": "Succeeded in inflicting 1 damage to the enemy player!",
   "activatedAbility": "'s ability is activated!",
   "activatedEffect": "'s effect is activated!",

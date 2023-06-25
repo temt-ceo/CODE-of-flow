@@ -81,16 +81,18 @@ class HomePageState extends State<HomePage> {
   List<int?> unitPositions = [null, null, null, null, null];
   FieldUnits fieldUnit = FieldUnits(null, null, null, null, null);
   int enemySkillTarget = 0;
+  int enemySkillTargetPosition = 0; // こちらはattack()時のみ使う
   TriggerCards triggerCards = TriggerCards(null, null, null, null);
-  List<int> usedInterceptCard = [];
+  List<int> usedInterceptCardPosition = [];
   String skillMessage = '';
   List<int> usedTriggers = [];
   List<int> timelyUsedTriggers = [];
   List<int> cannotDefendUnitPositions = [];
   bool selectTargetFlg = false;
-  int reviewingTriggerCard = 0;
+  int reviewingTriggerCardPosition = 0;
   int? cardTriggerAbilityCase;
-  bool? calledEnterTheFieldTrans;
+  bool? calledFieldUnitActionTrans;
+  int? tapCardIndex;
 
   @override
   void initState() {
@@ -218,42 +220,93 @@ class HomePageState extends State<HomePage> {
             setState(
                 () => attackerUsedInterceptCard = _attackerUsedInterceptCard);
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-            // トリガーカードが発動したことを攻撃者に伝える
-            if (attackerUsedInterceptCard!.isNotEmpty) {
-              String toastMsg = L10n.of(context)!
-                  .yourAttackTrigger(attackerUsedInterceptCard!.length);
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
-                        controller: controller,
-                        content: Text(toastMsg,
-                            style: const TextStyle(fontSize: 24.0)),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    );
-                  });
-            }
-            // 敵の攻撃
+            /////////////
+            // 敵の攻撃 //
+            /////////////
           } else if (ret.type == 'attack' &&
               gameObject != null &&
               (gameObject!.opponent.toString() == ret.playerId)) {
             isBattling = true;
             _timer.countdownStart(7, () {
               isBattling = false;
+              onBattlePosition = null;
               attackStatusBloc.canAttackEventSink.add(BattleFinishingEvent());
             });
-            showDefenceUnitsCarousel = true;
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             onBattlePosition = msg['arg1'];
+            var skillTarget = msg['arg2'];
+            var usedCardIds = msg['usedCardIds'];
+            if (gameObject!.opponentFieldUnit[onBattlePosition] == 6) {
+              // Valkyrie
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
+                        controller: controller,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          content: Text(
+                              'Valkyrie ${L10n.of(context)!.activatedAbility} Cannot Block!',
+                              style: const TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      );
+                    });
+              });
+              return;
+            }
+            // used_intercept_position
+            for (var i = 0; i < usedCardIds.length; i++) {
+              if (usedCardIds[0] == 25) {
+                // Judge
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  showFlash(
+                      context: context,
+                      duration: const Duration(seconds: 4),
+                      builder: (context, controller) {
+                        return Flash(
+                          controller: controller,
+                          position: FlashPosition.bottom,
+                          child: FlashBar(
+                            controller: controller,
+                            content: Text(
+                                'Judge ${L10n.of(context)!.activatedEffect} Cannot Block!',
+                                style: const TextStyle(fontSize: 24.0)),
+                            indicatorColor: Colors.blue,
+                            icon: const Icon(
+                              Icons.info_outline_rounded,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        );
+                      });
+                });
+                return;
+              }
+            }
+            showDefenceUnitsCarousel = true;
+            String enemyAbility = '';
+            if (gameObject!.opponentFieldUnit[onBattlePosition] == 2) {
+              // Fighter
+              enemyAbility = 'Fighter ${L10n.of(context)!.activatedAbility} ';
+            } else if (gameObject!.opponentFieldUnit[onBattlePosition] == 3) {
+              // Lancer
+              enemyAbility = 'Lancer ${L10n.of(context)!.activatedAbility} ';
+              var damagedCardId = gameObject!.yourFieldUnit[skillTarget];
+              enemyAbility =
+                  '$enemyAbility ${L10n.of(context)!.gotUnitDamage(getCardName(damagedCardId))}';
+            } else if (gameObject!.opponentFieldUnit[onBattlePosition] == 7) {
+              // Lilim
+              enemyAbility = 'Lilim ${L10n.of(context)!.activatedAbility} ';
+            }
+
             var usedInterceptPositions = msg['arg4'];
             // 攻撃時に使用したトリガーカード
             List<int> _defenderUsedInterceptCard = [];
@@ -279,7 +332,7 @@ class HomePageState extends State<HomePage> {
                       position: FlashPosition.bottom,
                       child: FlashBar(
                         controller: controller,
-                        content: Text(toastMsg,
+                        content: Text('$enemyAbility $toastMsg',
                             style: const TextStyle(fontSize: 24.0)),
                         indicatorColor: Colors.blue,
                         icon: const Icon(
@@ -290,6 +343,7 @@ class HomePageState extends State<HomePage> {
                     );
                   });
             });
+            // === 敵の攻撃 ここまで ===
             // バトルの相手側の対応
           } else if (ret.type == 'battle_reaction' &&
               gameObject != null &&
@@ -303,8 +357,12 @@ class HomePageState extends State<HomePage> {
             });
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
+            bool enemyHasBlocked = false;
             // isEnemyAttackがnullの場合はfalseをセットする。
-            isEnemyAttack ??= false;
+            if (isEnemyAttack == null) {
+              enemyHasBlocked = true;
+              isEnemyAttack = false;
+            }
             // 敵のposition
             if (gameObject!.opponent.toString() == ret.playerId) {
               onBattlePosition = msg['arg1'];
@@ -351,7 +409,18 @@ class HomePageState extends State<HomePage> {
                   .add(CanUseTriggerIndex4Event());
               canUseIntercept = true;
             }
-            if (gameObject!.opponent.toString() == ret.playerId) {
+
+            if (enemyHasBlocked &&
+                gameObject!.opponent.toString() == ret.playerId) {
+              String enemyAbility = '';
+              if (gameObject!.opponentFieldUnit[onBattlePosition] == 9) {
+                // Sohei
+                enemyAbility = 'Sohei ${L10n.of(context)!.activatedAbility} ';
+              } else if (gameObject!.opponentFieldUnit[onBattlePosition] ==
+                  15) {
+                // Roin
+                enemyAbility = 'Roin ${L10n.of(context)!.activatedAbility} ';
+              }
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
@@ -366,8 +435,8 @@ class HomePageState extends State<HomePage> {
                               style: const TextStyle(fontSize: 24.0)),
                           content: Text(
                               canUseIntercept
-                                  ? L10n.of(context)!.interceptAbailable
-                                  : '',
+                                  ? '$enemyAbility ${L10n.of(context)!.interceptAbailable}'
+                                  : enemyAbility,
                               style: const TextStyle(fontSize: 24.0)),
                           indicatorColor: Colors.blue,
                           icon: const Icon(
@@ -760,15 +829,15 @@ class HomePageState extends State<HomePage> {
         onChainYourTriggerCards[1],
         onChainYourTriggerCards[2],
         onChainYourTriggerCards[3]);
-    usedInterceptCard = [];
+    usedInterceptCardPosition = [];
     skillMessage = '';
     usedTriggers = [];
     cannotDefendUnitPositions = [];
     selectTargetFlg = false;
     // 使用可能なインターセプトを初期化
     canUseIntercept = false;
-    reviewingTriggerCard = 0;
-    calledEnterTheFieldTrans = null;
+    reviewingTriggerCardPosition = 0;
+    calledFieldUnitActionTrans = null;
     cardTriggerAbilityCase = 1; // カードがフィールドに出た時の能力
     reviewFieldUnitAbility(cardId);
   }
@@ -779,6 +848,10 @@ class HomePageState extends State<HomePage> {
   // trigger=1: trigger when the card is put on the field (フィールド上にカードを置いた時)
   // unit: 4,5,7,8,11,13,16 trigger: 18,19 intercept: 20,21,23,27
   // (HellDog,Arty,Lilim,Belial,Allie,Caim,Rairyu,Canon,Merchant,Breaker,Imperiale,Photon,Signal for assault)
+
+  // When card ATTACKs trigger=1,4:
+  // 2(Fighter),3(Lancer), 6(Valkyrie),7(Lilim)
+
   //  ask 0: Not choose target. (選ばない)
   //  ask 1: Target one unit (相手を選ぶ)
   //  ask 2: Only target which has no action right(行動権がない相手を選ぶ)
@@ -802,6 +875,15 @@ class HomePageState extends State<HomePage> {
             if (cardTriggerAbilityCase == 1) {
               // Lilim
               skillMessage = 'Lilim ${L10n.of(context)!.activatedAbility}';
+              showUnitTargetCarousel = true;
+              _timer.countdownStart(6, () {
+                showUnitTargetCarousel = false;
+                selectTarget(0); // 左端を強制選択
+              });
+              return;
+            } else if (cardTriggerAbilityCase == 2) {
+              // Lancer
+              skillMessage = 'Lancer ${L10n.of(context)!.activatedAbility}';
               showUnitTargetCarousel = true;
               _timer.countdownStart(6, () {
                 showUnitTargetCarousel = false;
@@ -833,8 +915,12 @@ class HomePageState extends State<HomePage> {
           // 行動ずみユニットの対象を選ぶ
           if (cardTriggerAbilityCase == 1) {
             // Rairyu
+            var leftMost = 0;
             for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
               if (gameObject!.opponentFieldUnitAction[i.toString()] == '0') {
+                if (leftMost == 0) {
+                  leftMost = i;
+                }
                 cannotDefendUnitPositions.add(i);
               }
             }
@@ -842,7 +928,7 @@ class HomePageState extends State<HomePage> {
               skillMessage = 'Rairyu ${L10n.of(context)!.activatedAbility}';
               showUnitTargetCarousel = true;
               _timer.countdownStart(6, () {
-                selectTarget(0); // 左端を強制選択
+                selectTarget(leftMost - 1); // 左端を強制選択
               });
               return;
             }
@@ -873,11 +959,31 @@ class HomePageState extends State<HomePage> {
   void selectTarget(int index) {
     if (selectTargetFlg == false) {
       selectTargetFlg = true;
-      enemySkillTarget = index + 1;
-      if (calledEnterTheFieldTrans == null) {
+      if (index == 0) {
+        // もし左端に敵ユニットがいないと困るので...
+        for (int i = 1; i <= 5; i++) {
+          if (gameObject!.opponentFieldUnit[i.toString()] != null) {
+            enemySkillTarget = i;
+            break;
+          }
+        }
+      } else {
+        enemySkillTarget = index + 1;
+      }
+
+      if (calledFieldUnitActionTrans == null) {
         reviewTriggerCards();
       } else {
-        callEnterTheFieldTransaction();
+        if (cardTriggerAbilityCase == 2) {
+          // カードが攻撃に出た時の能力
+          setState(() {
+            attackSignalPosition = tapCardIndex;
+            actedCardPosition = tapCardIndex;
+          });
+        } else {
+          // カードがフィールドに出た時
+          callEnterTheFieldTransaction();
+        }
       }
     }
   }
@@ -886,17 +992,20 @@ class HomePageState extends State<HomePage> {
   // トリガーゾーンの効果判定処理 //
   /////////////////////////////
   void reviewTriggerCards() {
-    reviewingTriggerCard++;
-    if (reviewingTriggerCard > 4) {
+    reviewingTriggerCardPosition++;
+    if (reviewingTriggerCardPosition > 4) {
       reviewInterceptCards();
     }
+    // When put the card on FIELD:
     // trigger: 18,19 intercept: 20,21,23,27
     // Canon,Merchant, Breaker,Imperiale,Photon,Signal for assault)
+    // When card ATTACK:
+    // trigger: 17(Drive) intercept: 22(Dainsleif),24(Titan's Lock),25(Judge)
 
     // トリガーゾーンのカードはカードを置いたとき発動可能なインターセプトか?
     if (onChainYourTriggerCards.isNotEmpty &&
-        onChainYourTriggerCards[reviewingTriggerCard - 1] != null) {
-      int cardId = onChainYourTriggerCards[reviewingTriggerCard - 1]!;
+        onChainYourTriggerCards[reviewingTriggerCardPosition - 1] != null) {
+      int cardId = onChainYourTriggerCards[reviewingTriggerCardPosition - 1]!;
       var skill = getCardSkill(cardId.toString());
       debugPrint('INTERCEPT Card Skill: $skill');
       if (skill != null) {
@@ -921,7 +1030,7 @@ class HomePageState extends State<HomePage> {
             // トリガー(Canon,Merchant) //
             /////////////////////////////
             usedTriggers.add(cardId);
-            usedInterceptCard.add(reviewingTriggerCard);
+            usedInterceptCardPosition.add(reviewingTriggerCardPosition);
             if (cardId == 18) {
               // Canon
               skillMessage = skillMessage != ''
@@ -933,7 +1042,12 @@ class HomePageState extends State<HomePage> {
                   selectTarget(0); // 左端を強制選択
                 });
               }
-            } else {
+            } else if (cardId == 17) {
+              // Drive
+              skillMessage = skillMessage != ''
+                  ? '$skillMessage \nTRIGGER Drive ${L10n.of(context)!.activatedEffect}'
+                  : 'TRIGGER Drive ${L10n.of(context)!.activatedEffect}';
+            } else if (cardId == 19) {
               // Merchant
               skillMessage = skillMessage != ''
                   ? '$skillMessage \nTRIGGER Merchant ${L10n.of(context)!.activatedEffect}'
@@ -972,10 +1086,68 @@ class HomePageState extends State<HomePage> {
       _timer.countdownStart(6, () async {
         canUseIntercept = false;
         attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
-        callEnterTheFieldTransaction();
+        if (cardTriggerAbilityCase == 2) {
+          // カードが攻撃に出た時の能力
+          setState(() {
+            attackSignalPosition = tapCardIndex;
+            actedCardPosition = tapCardIndex;
+          });
+        } else {
+          // カードがフィールドに出た時
+          callEnterTheFieldTransaction();
+        }
       });
     } else {
-      callEnterTheFieldTransaction();
+      if (cardTriggerAbilityCase == 2) {
+        // カードが攻撃に出た時の能力の場合
+        if (enemySkillTarget == 0) {
+          calledFieldUnitActionTrans = false;
+          for (var i = 0; i < usedTriggers.length; i++) {
+            if (usedTriggers[i] == 22) {
+              // Dainsleif
+              skillMessage = 'Dainsleif ${L10n.of(context)!.activatedAbility}';
+              return;
+            } else if (usedTriggers[i] == 24) {
+              // Titan's Lock
+              var leftMost = 0;
+              for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
+                if (gameObject!.opponentFieldUnitAction[i.toString()] != '0') {
+                  if (leftMost == 0) {
+                    leftMost = 1;
+                  }
+                  cannotDefendUnitPositions.add(i);
+                }
+              }
+              if (cannotDefendUnitPositions.isNotEmpty) {
+                skillMessage =
+                    "Titan's Lock ${L10n.of(context)!.activatedAbility}";
+                showUnitTargetCarousel = true;
+                _timer.countdownStart(6, () {
+                  selectTarget(leftMost - 1); // 左端を強制選択
+                });
+                return;
+              }
+            } else if (usedTriggers[i] == 25) {
+              // Judge
+              skillMessage = 'Judge ${L10n.of(context)!.activatedAbility}';
+              return;
+            }
+          }
+        }
+        if (calledFieldUnitActionTrans == null ||
+            calledFieldUnitActionTrans == false) {
+          calledFieldUnitActionTrans = true;
+        }
+        setState(() {
+          attackSignalPosition = tapCardIndex;
+          actedCardPosition = tapCardIndex;
+          enemySkillTargetPosition = enemySkillTarget;
+        });
+        // カードが攻撃に出た時の能力ここまで
+      } else {
+        // カードがフィールドに出た時
+        callEnterTheFieldTransaction();
+      }
     }
   }
 
@@ -986,16 +1158,17 @@ class HomePageState extends State<HomePage> {
     // (Breaker,Imperiale,Photon,Signal for assault)
     // それ以外
     usedTriggers.add(cardId);
-    usedInterceptCard.add(activeIndex + 1);
+    usedInterceptCardPosition.add(activeIndex + 1);
   }
 
   // ユニットカードをフィールドに置くトランザクション実行処理
   void callEnterTheFieldTransaction() async {
     if (enemySkillTarget == 0) {
-      calledEnterTheFieldTrans = false;
+      calledFieldUnitActionTrans = false;
       for (var i = 0; i < usedTriggers.length; i++) {
         if (usedTriggers[i] == 20) {
           // Breaker
+          skillMessage = 'Breaker ${L10n.of(context)!.activatedAbility}';
           if (enemySkillTarget == 0) {
             showUnitTargetCarousel = true;
             _timer.countdownStart(6, () {
@@ -1011,7 +1184,7 @@ class HomePageState extends State<HomePage> {
             }
           }
           if (cannotDefendUnitPositions.isNotEmpty) {
-            skillMessage = 'Rairyu ${L10n.of(context)!.activatedAbility}';
+            skillMessage = 'Photon ${L10n.of(context)!.activatedAbility}';
             showUnitTargetCarousel = true;
             _timer.countdownStart(6, () {
               selectTarget(0); // 左端を強制選択
@@ -1021,15 +1194,16 @@ class HomePageState extends State<HomePage> {
         }
       }
     }
-    if (calledEnterTheFieldTrans == null || calledEnterTheFieldTrans == false) {
-      calledEnterTheFieldTrans = true;
+    if (calledFieldUnitActionTrans == null ||
+        calledFieldUnitActionTrans == false) {
+      calledFieldUnitActionTrans = true;
 
       showGameLoading();
       // 使用可能なインターセプトを初期化
       canUseIntercept = false;
       // Call GraphQL method.
       var message = PutCardModel(fieldUnit, enemySkillTarget, triggerCards,
-          usedInterceptCard, skillMessage, usedTriggers);
+          usedInterceptCardPosition, skillMessage, usedTriggers);
       await apiService.saveGameServerProcess('put_card_on_the_field',
           jsonEncode(message), gameObject!.you.toString());
       closeGameLoading();
@@ -1037,7 +1211,9 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-  // カードのタップ時処理
+  ///////////////////////
+  // カードのタップ時処理 //
+  ///////////////////////
   void tapCard(message, cardId, index) {
     if (message == 'tapped') {
       if (gameObject != null) {
@@ -1052,10 +1228,13 @@ class HomePageState extends State<HomePage> {
         });
       }
     } else if (message == 'attack') {
-      setState(() {
-        attackSignalPosition = index;
-        actedCardPosition = index;
-      });
+      // 使用可能なインターセプトを初期化
+      canUseIntercept = false;
+      reviewingTriggerCardPosition = 0;
+      calledFieldUnitActionTrans = null;
+      cardTriggerAbilityCase = 2; // カードが攻撃に出た時の能力
+      tapCardIndex = index;
+      reviewFieldUnitAbility(cardId);
     } else if (message == 'use') {
       if (isEnemyAttack != null) {
         useInterceptCardForBattle(cardId, index);
@@ -1308,6 +1487,9 @@ class HomePageState extends State<HomePage> {
                             attackStatusBloc.attack_stream,
                             defaultTriggerCards,
                             onChainYourTriggerCards,
+                            const [],
+                            const [],
+                            null,
                             r),
                       ),
                       Padding(
@@ -1324,6 +1506,9 @@ class HomePageState extends State<HomePage> {
                             attackStatusBloc.attack_stream,
                             defaultDropedList,
                             onChainYourTriggerCards,
+                            usedInterceptCardPosition,
+                            usedTriggers,
+                            enemySkillTargetPosition,
                             r),
                       ),
                     ])),

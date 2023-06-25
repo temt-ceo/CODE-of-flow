@@ -27,6 +27,9 @@ class DragTargetWidget extends StatefulWidget {
   final Stream<int> attack_stream;
   final List<dynamic> defaultDropedList;
   final List<int?> currentTriggerCards;
+  final List<int> usedInterceptCardPosition;
+  final List<int> usedTriggers;
+  final int? enemySkillTargetPosition;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -40,6 +43,9 @@ class DragTargetWidget extends StatefulWidget {
       this.attack_stream,
       this.defaultDropedList,
       this.currentTriggerCards,
+      this.usedInterceptCardPosition,
+      this.usedTriggers,
+      this.enemySkillTargetPosition,
       this.r);
 
   @override
@@ -87,24 +93,54 @@ class DragTargetState extends State<DragTargetWidget> {
       var message;
       if (widget.currentTriggerCards.isEmpty) {
         TriggerCards triggerCards = TriggerCards(null, null, null, null);
-        List<int> usedInterceptCard = [];
-        message = AttackModel((widget.actedCardPosition! + 1), null,
-            triggerCards, usedInterceptCard);
+        message = AttackModel(
+          (widget.actedCardPosition! + 1),
+          widget.enemySkillTargetPosition, // enemy_skill_target
+          triggerCards,
+          widget.usedInterceptCardPosition,
+          widget.usedTriggers,
+        );
       } else {
         TriggerCards triggerCards = TriggerCards(
             widget.currentTriggerCards[0],
             widget.currentTriggerCards[1],
             widget.currentTriggerCards[2],
             widget.currentTriggerCards[3]);
-        List<int> usedInterceptCard = [];
-        message = AttackModel((widget.actedCardPosition! + 1), null,
-            triggerCards, usedInterceptCard);
+        message = AttackModel(
+          (widget.actedCardPosition! + 1),
+          null,
+          triggerCards,
+          widget.usedInterceptCardPosition,
+          widget.usedTriggers,
+        );
       }
       await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
       closeGameLoading();
       debugPrint('== attack transaction published ==');
-      if (widget.info!.opponentDefendableUnitLength == 0) {
+
+      bool canBlock = true;
+      for (var i = 0; i < widget.usedTriggers.length; i++) {
+        if (widget.usedTriggers[i] == 25) {
+          // Judge
+          canBlock = false;
+        } else if (widget.usedTriggers[i] == 24 &&
+            widget.info!.opponentDefendableUnitLength == 1) {
+          // Titan's Lock
+          canBlock = false;
+        }
+      }
+      if (widget.enemySkillTargetPosition != null) {
+        if (widget.info!.opponentFieldUnitBpAmountOfChange[
+                widget.enemySkillTargetPosition.toString()] !=
+            null) {
+          var opponentBpChange = widget.info!.opponentFieldUnitBpAmountOfChange[
+              widget.enemySkillTargetPosition.toString()];
+          // if
+        }
+      }
+
+      if (widget.info!.opponentDefendableUnitLength == 0 || canBlock == false) {
         // 敵ユニットがいない場合、そのままダメージへ
         showGameLoading();
         List<int> yourUsedInterceptCard = [];

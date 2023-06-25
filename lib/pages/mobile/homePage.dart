@@ -142,7 +142,10 @@ class HomePageState extends State<HomePage> {
           } else if (ret.type == 'put_card_on_the_field' &&
               gameObject != null) {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-            timelyUsedTriggers = msg['usedTriggers'];
+            // List<dynamic> から List<int> への変換
+            for (var i = 0; i < msg['usedTriggers'].length; i++) {
+              timelyUsedTriggers.add(msg['usedTriggers']);
+            }
             Future.delayed(const Duration(seconds: 3), () async {
               setState(() => timelyUsedTriggers = []);
             });
@@ -287,7 +290,8 @@ class HomePageState extends State<HomePage> {
             // バトルの相手側の対応
           } else if (ret.type == 'battle_reaction' &&
               gameObject != null &&
-              gameObject!.opponent.toString() == ret.playerId) {
+              (gameObject!.opponent.toString() == ret.playerId ||
+                  playerId == ret.playerId)) {
             isBattling = true;
             _timer.countdownStart(7, () {
               isBattling = false;
@@ -296,9 +300,12 @@ class HomePageState extends State<HomePage> {
             });
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-            onBattlePosition = msg['arg1'];
             // isEnemyAttackがnullの場合はfalseをセットする。
             isEnemyAttack ??= false;
+            // 敵のposition
+            if (gameObject!.opponent.toString() == ret.playerId) {
+              onBattlePosition = msg['arg1'];
+            }
             // 攻撃側が使用中のトリガー/インターセプトカードをセット
             List<int> _attackerUsedCardIds = [];
             for (var i in msg['attackerUsedCardIds']) {
@@ -341,28 +348,56 @@ class HomePageState extends State<HomePage> {
                   .add(CanUseTriggerIndex4Event());
               canUseIntercept = true;
             }
-
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              showFlash(
-                  context: context,
-                  duration: const Duration(seconds: 4),
-                  builder: (context, controller) {
-                    return Flash(
-                      controller: controller,
-                      position: FlashPosition.bottom,
-                      child: FlashBar(
+            if (gameObject!.opponent.toString() == ret.playerId) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
                         controller: controller,
-                        content: Text(L10n.of(context)!.opponentBlocking,
-                            style: const TextStyle(fontSize: 24.0)),
-                        indicatorColor: Colors.blue,
-                        icon: const Icon(
-                          Icons.info_outline_rounded,
-                          color: Colors.blue,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          title: Text(L10n.of(context)!.opponentBlocking,
+                              style: const TextStyle(fontSize: 24.0)),
+                          content: Text(
+                              canUseIntercept
+                                  ? L10n.of(context)!.interceptAbailable
+                                  : '',
+                              style: const TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
                         ),
-                      ),
-                    );
-                  });
-            });
+                      );
+                    });
+              });
+            } else if (canUseIntercept) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showFlash(
+                    context: context,
+                    duration: const Duration(seconds: 4),
+                    builder: (context, controller) {
+                      return Flash(
+                        controller: controller,
+                        position: FlashPosition.bottom,
+                        child: FlashBar(
+                          controller: controller,
+                          content: Text(L10n.of(context)!.interceptAbailable,
+                              style: const TextStyle(fontSize: 24.0)),
+                          indicatorColor: Colors.blue,
+                          icon: const Icon(
+                            Icons.info_outline_rounded,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      );
+                    });
+              });
+            }
           } else if (ret.type == 'defence_action' &&
               gameObject != null &&
               (gameObject!.you.toString() == ret.playerId ||
@@ -476,7 +511,7 @@ class HomePageState extends State<HomePage> {
   }
 
   /*
-  **  startButtonsで1秒おきにデータ取得した後の処理
+  **  1秒おきにブロックチェーンから取得したデータの処理
   */
   void setDataAndMarigan(GameObject? data, List<List<int>>? mariganCardIds) {
     bool turnChanged = false;
@@ -565,19 +600,52 @@ class HomePageState extends State<HomePage> {
                 });
           });
         }
+        // 存在していたユニットが消えていたら攻撃でやられている
+        List<dynamic> _units = [];
+        bool unitDecreased = false;
+        for (int i = 1; i <= 5; i++) {
+          if (gameObject!.yourFieldUnit[i.toString()] != null &&
+              data.yourFieldUnit[i.toString()] == null) {
+            _units.add(null);
+            unitDecreased = true;
+          } else if (onChainYourFieldUnit.length >= i) {
+            _units.add(onChainYourFieldUnit[i - 1]);
+          }
+          if (unitDecreased == true) {
+            setState(() {
+              onChainYourFieldUnit = _units;
+              defaultDropedList = _units.isEmpty ? [null] : _units;
+            });
+          }
+        }
+        // 新しいカードをドローしているケース
+        if (data!.newlyDrawedCards.isNotEmpty) {
+          for (var i = 0; i < data.newlyDrawedCards.length; i++) {
+            if (gameObject!.newlyDrawedCards[i] != data.newlyDrawedCards[i]) {
+              // 新しくドローしたカードをセット
+              handCards.add(int.parse(data.newlyDrawedCards[i]));
+            }
+          }
+          setState(() {
+            handCards = handCards;
+          });
+        }
       }
     } else {
-      // データがない = 10ターンが終わった可能性
-      if (gameObject!.turn == 10 && gameObject!.isFirstTurn == false) {
-        if (gameObject!.yourLife < gameObject!.opponentLife ||
-            (gameObject!.isFirst &&
-                gameObject!.yourLife == gameObject!.opponentLife)) {
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'You Lose...',
-            text: 'Try Again!',
-          );
+      // バトルデータなし
+      if (gameObject != null) {
+        // データがない = 10ターンが終わった可能性
+        if (gameObject!.turn == 10 && gameObject!.isFirstTurn == false) {
+          if (gameObject!.yourLife < gameObject!.opponentLife ||
+              (gameObject!.isFirst &&
+                  gameObject!.yourLife == gameObject!.opponentLife)) {
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.error,
+              title: 'You Lose...',
+              text: 'Try Again!',
+            );
+          }
         }
       }
       // 内部データ初期化
@@ -933,6 +1001,26 @@ class HomePageState extends State<HomePage> {
       }
     }
     if (canUseIntercept == true) {
+      showFlash(
+          context: context,
+          duration: const Duration(seconds: 4),
+          builder: (context, controller) {
+            return Flash(
+              controller: controller,
+              position: FlashPosition.bottom,
+              child: FlashBar(
+                controller: controller,
+                content: Text(L10n.of(context)!.interceptAbailable,
+                    style: const TextStyle(fontSize: 24.0)),
+                indicatorColor: Colors.blue,
+                icon: const Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.blue,
+                ),
+              ),
+            );
+          });
+
       _timer.countdownStart(6, () async {
         canUseIntercept = false;
         attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
@@ -1197,6 +1285,7 @@ class HomePageState extends State<HomePage> {
                     actedCardPosition,
                     cardInfos,
                     onChainYourTriggerCards,
+                    isEnemyAttack,
                     r)
                 : Container(),
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
@@ -1274,6 +1363,10 @@ class HomePageState extends State<HomePage> {
                                     mariganClickCount = mariganClickCount + 1);
                                 setState(() => handCards =
                                     mariganCardIdList[mariganClickCount]);
+                              } else {
+                                // 6回目は1回目をセット
+                                setState(
+                                    () => handCards = mariganCardIdList[0]);
                               }
                             },
                             tooltip: 'Redraw',
@@ -1306,6 +1399,21 @@ class HomePageState extends State<HomePage> {
                     ),
                   ),
                 )),
+            Positioned(
+              left: r(470.0),
+              top: r(90.0),
+              child: Container(
+                width: r(125.0),
+                height: r(45.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.5,
+                      image: AssetImage('${imagePath}trigger/trigger.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
             Positioned(
               left: r(648.0),
               top: r(160.0),
@@ -2049,36 +2157,40 @@ class HomePageState extends State<HomePage> {
             Visibility(
                 visible: isBattling == true,
                 child: Center(
-                    child: SizedBox(
-                        width: r(180.0),
-                        child: StreamBuilder<int>(
-                            stream: _timer.events.stream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<int> snapshot) {
-                              return Center(
-                                  child: Text(
-                                '0:0${snapshot.data.toString()}',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: r(60.0)),
-                              ));
-                            })))),
+                    child: Padding(
+                        padding: EdgeInsets.only(bottom: r(50.0)),
+                        child: SizedBox(
+                            width: r(180.0),
+                            child: StreamBuilder<int>(
+                                stream: _timer.events.stream,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<int> snapshot) {
+                                  return Center(
+                                      child: Text(
+                                    '0:0${snapshot.data.toString()}',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: r(60.0)),
+                                  ));
+                                }))))),
             Visibility(
                 visible:
                     canUseIntercept == true || showUnitTargetCarousel == true,
                 child: Center(
-                    child: SizedBox(
-                        width: r(180.0),
-                        child: StreamBuilder<int>(
-                            stream: _timer.events.stream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<int> snapshot) {
-                              return Center(
-                                  child: Text(
-                                '0:0${snapshot.data.toString()}',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: r(60.0)),
-                              ));
-                            })))),
+                    child: Padding(
+                        padding: EdgeInsets.only(bottom: r(50.0)),
+                        child: SizedBox(
+                            width: r(180.0),
+                            child: StreamBuilder<int>(
+                                stream: _timer.events.stream,
+                                builder: (BuildContext context,
+                                    AsyncSnapshot<int> snapshot) {
+                                  return Center(
+                                      child: Text(
+                                    '0:0${snapshot.data.toString()}',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: r(60.0)),
+                                  ));
+                                }))))),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(

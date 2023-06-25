@@ -787,7 +787,7 @@ class StartButtonsState extends State<StartButtons> {
         child: Stack(children: [
           Positioned(
               left: 0.0,
-              top: widget.r(82.0),
+              top: widget.r(78.0),
               child: Text(
                 '$enemyName :',
                 style: TextStyle(
@@ -796,7 +796,7 @@ class StartButtonsState extends State<StartButtons> {
               )),
           Positioned(
             left: widget.r(320.0),
-            top: widget.r(82.0),
+            top: widget.r(83.0),
             child: Text(
               enemyScore,
               style: TextStyle(
@@ -806,7 +806,7 @@ class StartButtonsState extends State<StartButtons> {
           ),
           Positioned(
               left: 0.0,
-              top: widget.r(252.0),
+              top: widget.r(232.0),
               child: Text(
                 '$yourName :',
                 style: TextStyle(
@@ -815,7 +815,7 @@ class StartButtonsState extends State<StartButtons> {
               )),
           Positioned(
             left: widget.r(320.0),
-            top: widget.r(252.0),
+            top: widget.r(235.0),
             child: Text(
               yourScore,
               style: TextStyle(
@@ -836,7 +836,7 @@ class StartButtonsState extends State<StartButtons> {
                       ? 'connect to wallet→'
                       : (player.uuid == ''
                           ? 'Address: ${walletUser.addr} '
-                          : 'Hey ${player.nickname}! start the game→'),
+                          : 'Hello ${player.nickname}! start the game→'),
                   style:
                       TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
                 )),

@@ -180,7 +180,6 @@ class RankingPageState extends State<RankingPage> {
                 setCardInfo(cardInfo);
                 break;
               case 'sort':
-                print(11);
                 sort();
                 break;
             }

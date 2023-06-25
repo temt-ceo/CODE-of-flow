@@ -180,7 +180,6 @@ class DeckEditPageState extends State<DeckEditPage> {
                 setCardInfo(cardInfo);
                 break;
               case 'sort':
-                print(11);
                 sort();
                 break;
             }

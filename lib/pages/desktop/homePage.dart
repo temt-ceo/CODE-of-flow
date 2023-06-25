@@ -621,7 +621,11 @@ class HomePageState extends State<HomePage> {
         // 新しいカードをドローしているケース
         if (data!.newlyDrawedCards.isNotEmpty) {
           for (var i = 0; i < data.newlyDrawedCards.length; i++) {
-            if (gameObject!.newlyDrawedCards[i] != data.newlyDrawedCards[i]) {
+            if (gameObject!.newlyDrawedCards.length < i + 1) {
+              // 新しくドローしたカードをセット
+              handCards.add(int.parse(data.newlyDrawedCards[i]));
+            } else if (gameObject!.newlyDrawedCards[i] !=
+                data.newlyDrawedCards[i]) {
               // 新しくドローしたカードをセット
               handCards.add(int.parse(data.newlyDrawedCards[i]));
             }
@@ -634,11 +638,13 @@ class HomePageState extends State<HomePage> {
     } else {
       // バトルデータなし
       if (gameObject != null) {
+        print('You Lose?? $gameObject');
         // データがない = 10ターンが終わった可能性
         if (gameObject!.turn == 10 && gameObject!.isFirstTurn == false) {
           if (gameObject!.yourLife < gameObject!.opponentLife ||
               (gameObject!.isFirst &&
                   gameObject!.yourLife == gameObject!.opponentLife)) {
+            print('You Lose...');
             QuickAlert.show(
               context: context,
               type: QuickAlertType.error,
@@ -1285,6 +1291,7 @@ class HomePageState extends State<HomePage> {
                     actedCardPosition,
                     cardInfos,
                     onChainYourTriggerCards,
+                    isEnemyAttack,
                     r)
                 : Container(),
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',

@@ -26,6 +26,7 @@ class OnGoingGameInfo extends StatefulWidget {
   int? actedCardPosition;
   final dynamic cardInfos;
   final List<int?> currentTriggerCards;
+  final bool? isEnemyAttack;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
@@ -39,6 +40,7 @@ class OnGoingGameInfo extends StatefulWidget {
       this.actedCardPosition,
       this.cardInfos,
       this.currentTriggerCards,
+      this.isEnemyAttack,
       this.r);
 
   @override
@@ -120,8 +122,9 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   void battleResultDecided() async {
-    print('battleResultDecided');
-    if (apiCalled == false) {
+    if (apiCalled == false && widget.isEnemyAttack != null) {
+      debugPrint('battleResultDecided');
+
       apiCalled = true;
       var message = DefenceActionModel(
           widget.opponentDefendPosition,
@@ -322,6 +325,16 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           }
 
           return Stack(children: <Widget>[
+            Positioned(
+                left: widget.r(152.0),
+                top: widget.r(50.0),
+                child: Text(
+                    '(Life ${widget.info != null ? (widget.info!.opponentLife < 10 ? '0${widget.info!.opponentLife}' : widget.info!.opponentLife) : '--'})',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: widget.r(12.0),
+                    ))),
             for (var i = 0; i < widget.info!.opponentLife; i++)
               Positioned(
                 left: widget.r(150.0 + i * 21),
@@ -377,14 +390,24 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(80.0),
-                top: widget.r(160.0),
+                left: widget.r(335.0),
+                top: widget.r(110.0),
                 child: Text(
-                    'Dead ${widget.info != null ? widget.info!.opponentDeadCount : '--'} / Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
+                    'Dead ${widget.info != null ? widget.info!.opponentDeadCount : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: widget.r(22.0),
+                      fontSize: widget.r(16.0),
+                    ))),
+            Positioned(
+                left: widget.r(335.0),
+                top: widget.r(130.0),
+                child: Text(
+                    'Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: widget.r(16.0),
                     ))),
             Positioned(
                 left: widget.r(80.0),
@@ -439,13 +462,23 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                   ),
                 ),
               ),
+            Positioned(
+                left: widget.r(152.0),
+                top: widget.r(196.0),
+                child: Text(
+                    '(Life ${widget.info != null ? (widget.info!.yourLife < 10 ? '0${widget.info!.yourLife}' : widget.info!.yourLife) : '--'})',
+                    style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.none,
+                      fontSize: widget.r(15.0),
+                    ))),
             for (var i = 0; i < widget.info!.yourLife; i++)
               Positioned(
-                left: widget.r(150.0 + i * 21),
-                top: widget.r(240.0),
+                left: widget.r(150.0 + i * 24),
+                top: widget.r(220.0),
                 child: Container(
-                  width: widget.r(20.0),
-                  height: widget.r(20.0),
+                  width: widget.r(23.0),
+                  height: widget.r(23.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('${imagePath}button/yourLife.png'),
@@ -462,22 +495,22 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(130.0),
-                top: widget.r(290.0),
+                left: widget.r(90.0),
+                top: widget.r(272.0),
                 child: Text(
                     'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: widget.r(22.0),
+                      fontSize: widget.r(28.0),
                     ))),
             for (var i = 0; i < widget.info!.yourCp; i++)
               Positioned(
-                left: widget.r(202.0 + i * 16),
-                top: widget.r(298.0),
+                left: widget.r(180.0 + i * 27),
+                top: widget.r(280.0),
                 child: Container(
-                  width: widget.r(15.0),
-                  height: widget.r(15.0),
+                  width: widget.r(25.0),
+                  height: widget.r(25.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('${imagePath}button/cp.png'),

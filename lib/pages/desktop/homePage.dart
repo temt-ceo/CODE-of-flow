@@ -898,13 +898,14 @@ class HomePageState extends State<HomePage> {
           if (getCardCategory(cardId1.toString()) == '2') {
             // インターセプト (Breaker,Imperiale,Photon,Signal for assault)
             for (String position in ['1', '2', '3', '4']) {
-              print('2222 ${getCardType(gameObject!.yourFieldUnit[position])}');
-              if (getCardType(gameObject!.yourFieldUnit[position]) ==
-                  getCardType(cardId1.toString())) {
-                // 同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex1Event());
-                canUseIntercept = true;
+              if (gameObject!.yourFieldUnit[position] != null) {
+                if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                    getCardType(cardId1.toString())) {
+                  // 同色のカードがフィールドにあるので選択可能
+                  attackStatusBloc.canAttackEventSink
+                      .add(CanUseTriggerIndex1Event());
+                  canUseIntercept = true;
+                }
               }
             }
           } else if (getCardCategory(cardId1.toString()) == '1') {
@@ -929,12 +930,14 @@ class HomePageState extends State<HomePage> {
           if (getCardCategory(cardId2.toString()) == '2') {
             // インターセプト
             for (String position in ['1', '2', '3', '4']) {
-              if (getCardType(gameObject!.yourFieldUnit[position]) ==
-                  getCardType(cardId2.toString())) {
-                // 同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex2Event());
-                canUseIntercept = true;
+              if (gameObject!.yourFieldUnit[position] != null) {
+                if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                    getCardType(cardId2.toString())) {
+                  // 同色のカードがフィールドにあるので選択可能
+                  attackStatusBloc.canAttackEventSink
+                      .add(CanUseTriggerIndex2Event());
+                  canUseIntercept = true;
+                }
               }
             }
           } else if (getCardCategory(cardId2.toString()) == '1') {
@@ -958,12 +961,14 @@ class HomePageState extends State<HomePage> {
           if (getCardCategory(cardId3.toString()) == '2') {
             // インターセプト
             for (String position in ['1', '2', '3', '4']) {
-              if (getCardType(gameObject!.yourFieldUnit[position]) ==
-                  getCardType(cardId3.toString())) {
-                // 同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex3Event());
-                canUseIntercept = true;
+              if (gameObject!.yourFieldUnit[position] != null) {
+                if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                    getCardType(cardId3.toString())) {
+                  // 同色のカードがフィールドにあるので選択可能
+                  attackStatusBloc.canAttackEventSink
+                      .add(CanUseTriggerIndex3Event());
+                  canUseIntercept = true;
+                }
               }
             }
           } else if (getCardCategory(cardId3.toString()) == '1') {
@@ -987,12 +992,14 @@ class HomePageState extends State<HomePage> {
           if (getCardCategory(cardId4.toString()) == '2') {
             // インターセプト
             for (String position in ['1', '2', '3', '4']) {
-              if (getCardType(gameObject!.yourFieldUnit[position]) ==
-                  getCardType(cardId4.toString())) {
-                // 同色のカードがフィールドにあるので選択可能
-                attackStatusBloc.canAttackEventSink
-                    .add(CanUseTriggerIndex4Event());
-                canUseIntercept = true;
+              if (gameObject!.yourFieldUnit[position] != null) {
+                if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                    getCardType(cardId4.toString())) {
+                  // 同色のカードがフィールドにあるので選択可能
+                  attackStatusBloc.canAttackEventSink
+                      .add(CanUseTriggerIndex4Event());
+                  canUseIntercept = true;
+                }
               }
             }
           } else if (getCardCategory(cardId4.toString()) == '1') {

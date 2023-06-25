@@ -506,7 +506,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.yourCp; i++)
               Positioned(
-                left: widget.r(180.0 + i * 27),
+                left: widget.r(180.0 + i * 26),
                 top: widget.r(280.0),
                 child: Container(
                   width: widget.r(25.0),

@@ -149,7 +149,7 @@ class HomePageState extends State<HomePage> {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             // List<dynamic> から List<int> への変換
             for (var i = 0; i < msg['usedTriggers'].length; i++) {
-              timelyUsedTriggers.add(msg['usedTriggers']);
+              timelyUsedTriggers.add(msg['usedTriggers'][i]);
             }
             Future.delayed(const Duration(seconds: 3), () async {
               setState(() => timelyUsedTriggers = []);
@@ -1053,12 +1053,11 @@ class HomePageState extends State<HomePage> {
                   ? '$skillMessage \nTRIGGER Merchant ${L10n.of(context)!.activatedEffect}'
                   : 'TRIGGER Merchant ${L10n.of(context)!.activatedEffect}';
             }
-          } else {
-            return;
           }
         }
       }
     }
+    reviewTriggerCards();
   }
 
   void reviewInterceptCards() {
@@ -1305,16 +1304,6 @@ class HomePageState extends State<HomePage> {
     if (cardInfos != null) {
       var cardInfo = cardInfos[cardId];
       return cardInfo['name'];
-    } else {
-      return '';
-    }
-  }
-
-  // カードBP
-  String getCardBP(String cardId) {
-    if (cardInfos != null) {
-      var cardInfo = cardInfos[cardId];
-      return cardInfo['bp'];
     } else {
       return '';
     }
@@ -1642,10 +1631,19 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.opponentFieldUnit['1'])
+                            gameObject!.opponentFiledUnitBps['1']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['1'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['1']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1695,10 +1693,19 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.opponentFieldUnit['2'])
+                            gameObject!.opponentFiledUnitBps['2']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['2'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['2']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1748,10 +1755,19 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.opponentFieldUnit['3'])
+                            gameObject!.opponentFiledUnitBps['3']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['3'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['3']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1801,10 +1817,19 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.opponentFieldUnit['4'])
+                            gameObject!.opponentFiledUnitBps['4']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['4'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['4']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1854,10 +1879,19 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.opponentFieldUnit['5'])
+                            gameObject!.opponentFiledUnitBps['5']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['5'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .opponentFieldUnitBpAmountOfChange['5']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1904,10 +1938,18 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['1'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.yourFieldUnit['1'])
+                            gameObject!.yourFiledUnitBps['1']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!.yourFieldUnitBpAmountOfChange['1'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .yourFieldUnitBpAmountOfChange['1']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -1954,10 +1996,18 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['2'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.yourFieldUnit['2'])
+                            gameObject!.yourFiledUnitBps['2']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!.yourFieldUnitBpAmountOfChange['2'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .yourFieldUnitBpAmountOfChange['2']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -2004,10 +2054,18 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['3'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.yourFieldUnit['3'])
+                            gameObject!.yourFiledUnitBps['3']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!.yourFieldUnitBpAmountOfChange['3'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .yourFieldUnitBpAmountOfChange['3']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -2054,10 +2112,18 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['4'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.yourFieldUnit['4'])
+                            gameObject!.yourFiledUnitBps['4']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!.yourFieldUnitBpAmountOfChange['4'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .yourFieldUnitBpAmountOfChange['4']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
@@ -2104,10 +2170,18 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['5x'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            getCardBP(gameObject!.yourFieldUnit['4'])
+                            gameObject!.yourFiledUnitBps['5']
                         : '',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: gameObject != null &&
+                              gameObject!.yourFieldUnitBpAmountOfChange['5'] !=
+                                  null
+                          ? (int.parse(gameObject!
+                                      .yourFieldUnitBpAmountOfChange['5']) >
+                                  0
+                              ? Colors.blue
+                              : Colors.red)
+                          : Colors.white,
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),

@@ -327,6 +327,16 @@ class StartButtonsState extends State<StartButtons> {
     } catch (e) {}
   }
 
+  // カードBP
+  String getCardBP(String cardId) {
+    if (cardList != null) {
+      var cardInfo = cardList[cardId];
+      return cardInfo['bp'];
+    } else {
+      return '';
+    }
+  }
+
   void getBalances() async {
     getBalanceFlg = false;
     if (walletUser.addr != '') {
@@ -622,10 +632,20 @@ class StartButtonsState extends State<StartButtons> {
 
   GameObject setGameInfo(objJs) {
     int yourDefendableUnitLength = 0;
+    dynamic yourFiledUnitBps = {};
+    dynamic opponentFiledUnitBps = {};
     for (int i = 1; i <= int.parse(objJs['your_field_unit_length']); i++) {
       if (objJs['your_field_unit_action'][i.toString()] == '1' ||
           objJs['your_field_unit_action'][i.toString()] == '2') {
         yourDefendableUnitLength++;
+      }
+      var unitBp = getCardBP(objJs['your_field_unit'][i.toString()]);
+      if (objJs['your_field_unit_bp_amount_of_change'][i.toString()] != null) {
+        yourFiledUnitBps[i.toString()] = int.parse(unitBp);
+      } else {
+        yourFiledUnitBps[i.toString()] = int.parse(unitBp) +
+            int.parse(
+                objJs['your_field_unit_bp_amount_of_change'][i.toString()]);
       }
     }
     int opponentDefendableUnitLength = 0;
@@ -633,6 +653,15 @@ class StartButtonsState extends State<StartButtons> {
       if (objJs['opponent_field_unit_action'][i.toString()] == '1' ||
           objJs['opponent_field_unit_action'][i.toString()] == '2') {
         opponentDefendableUnitLength++;
+      }
+      var unitBp = getCardBP(objJs['opponent_field_unit'][i.toString()]);
+      if (objJs['opponent_field_unit_bp_amount_of_change'][i.toString()] !=
+          null) {
+        opponentFiledUnitBps[i.toString()] = int.parse(unitBp);
+      } else {
+        opponentFiledUnitBps[i.toString()] = int.parse(unitBp) +
+            int.parse(
+                objJs['opponent_field_unit_bp_amount_of_change'][i.toString()]);
       }
     }
     return GameObject(
@@ -667,6 +696,8 @@ class StartButtonsState extends State<StartButtons> {
       objJs['your_attacking_card'],
       objJs['enemy_attacking_card'],
       objJs['newly_drawed_cards'],
+      yourFiledUnitBps,
+      opponentFiledUnitBps,
     );
   }
 

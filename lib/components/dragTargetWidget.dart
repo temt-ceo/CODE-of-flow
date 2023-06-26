@@ -239,13 +239,7 @@ class DragTargetState extends State<DragTargetWidget> {
           }
         }
       } else if (widget.label == 'trigger') {
-        dropedList = [
-          Container(),
-          Container(),
-          Container(),
-          Container(),
-          Container()
-        ];
+        dropedList = [Container(), Container(), Container(), Container()];
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
           if (widget.defaultDropedList[i] != null) {
             int cardId = widget.defaultDropedList[i];
@@ -420,6 +414,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   return false;
                 }
                 if (dropedList.isEmpty) {
+                  // print('dropedList.isEmpty');
                   _dropBloc.counterEventSink.add(DropDeniedEvent());
                   return false;
                 }
@@ -525,7 +520,7 @@ class DragTargetState extends State<DragTargetWidget> {
                                     left: widget.r((attackSignalPosition !=
                                                     null &&
                                                 attackSignalPosition! >= 2
-                                            ? widget.r(-150.0)
+                                            ? widget.r(-110.0)
                                             : widget.r(50.0)) +
                                         (attackSignalPosition != null
                                             ? widget.r(
@@ -674,6 +669,7 @@ class DragTargetState extends State<DragTargetWidget> {
             return false;
           }
           if (dropedList.isEmpty) {
+            // print('dropedList.isEmpty');
             _dropBloc.counterEventSink.add(DropDeniedEvent());
             return false;
           }
@@ -689,7 +685,7 @@ class DragTargetState extends State<DragTargetWidget> {
           if (widget.label == 'unit' &&
               imageUrl.startsWith('${imagePath}unit')) {
             if (widget.info != null) {
-              // カード情報がない。
+              // // カード情報がない。
               if (widget.cardInfos == null ||
                   widget.cardInfos[cardIdStr] == null) {
                 _dropBloc.counterEventSink.add(DropDeniedEvent());
@@ -778,7 +774,7 @@ class DragTargetState extends State<DragTargetWidget> {
                             child: Positioned(
                               left: widget.r((attackSignalPosition != null &&
                                           attackSignalPosition! >= 2
-                                      ? widget.r(-150.0)
+                                      ? widget.r(-120.0)
                                       : widget.r(50.0)) +
                                   (attackSignalPosition != null
                                       ? widget.r(attackSignalPosition! * 140.0)

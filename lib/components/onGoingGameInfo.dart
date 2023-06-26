@@ -122,7 +122,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   void battleResultDecided() async {
-    if (apiCalled == false && widget.isEnemyAttack != null) {
+    // if (apiCalled == false && widget.isEnemyAttack != null) {
+    if (apiCalled == false) {
       debugPrint('battleResultDecided');
 
       apiCalled = true;
@@ -171,7 +172,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         battleReactionUpdateTime = null;
         showFlash(
             context: context,
-            duration: const Duration(seconds: 4),
+            duration: const Duration(seconds: 5),
             builder: (context, controller) {
               return Flash(
                 controller: controller,

@@ -56,6 +56,7 @@ class HomePageState extends State<HomePage> {
   List<dynamic> defaultDropedList = [];
   List<int> handCards = [];
   List<int?> onChainYourTriggerCards = [];
+  List<int?> onChainYourTriggerCardsDisplay = [];
   List<dynamic> defaultTriggerCards = [];
   dynamic onChainHandCards;
   BuildContext? loadingContext;
@@ -93,6 +94,7 @@ class HomePageState extends State<HomePage> {
   int? cardTriggerAbilityCase;
   bool? calledFieldUnitActionTrans;
   int? tapCardIndex;
+  String? putCardOnFieldType;
 
   @override
   void initState() {
@@ -121,7 +123,7 @@ class HomePageState extends State<HomePage> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showFlash(
                   context: context,
-                  duration: const Duration(seconds: 4),
+                  duration: const Duration(seconds: 5),
                   builder: (context, controller) {
                     return Flash(
                       controller: controller,
@@ -151,9 +153,15 @@ class HomePageState extends State<HomePage> {
             for (var i = 0; i < msg['usedTriggers'].length; i++) {
               timelyUsedTriggers.add(msg['usedTriggers'][i]);
             }
-            Future.delayed(const Duration(seconds: 3), () async {
+            Future.delayed(const Duration(seconds: 4), () async {
               setState(() => timelyUsedTriggers = []);
             });
+            if (gameObject != null &&
+                (gameObject!.you.toString() == ret.playerId)) {
+              setState(() {
+                defaultTriggerCards = onChainYourTriggerCardsDisplay;
+              });
+            }
 
             if (msg['skillMessage'] != '') {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -217,8 +225,10 @@ class HomePageState extends State<HomePage> {
             for (var i in usedInterceptPositions) {
               _attackerUsedInterceptCard.add(i);
             }
-            setState(
-                () => attackerUsedInterceptCard = _attackerUsedInterceptCard);
+            setState(() {
+              attackerUsedInterceptCard = _attackerUsedInterceptCard;
+              defaultTriggerCards = onChainYourTriggerCardsDisplay;
+            });
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
             /////////////
             // 敵の攻撃 //
@@ -241,7 +251,7 @@ class HomePageState extends State<HomePage> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
-                    duration: const Duration(seconds: 4),
+                    duration: const Duration(seconds: 5),
                     builder: (context, controller) {
                       return Flash(
                         controller: controller,
@@ -269,7 +279,7 @@ class HomePageState extends State<HomePage> {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   showFlash(
                       context: context,
-                      duration: const Duration(seconds: 4),
+                      duration: const Duration(seconds: 5),
                       builder: (context, controller) {
                         return Flash(
                           controller: controller,
@@ -311,7 +321,7 @@ class HomePageState extends State<HomePage> {
             // 攻撃時に使用したトリガーカード
             List<int> _defenderUsedInterceptCard = [];
             for (var i in usedInterceptPositions) {
-              _defenderUsedInterceptCard.add(int.parse(i));
+              _defenderUsedInterceptCard.add(i);
             }
             setState(
                 () => defenderUsedInterceptCard = _defenderUsedInterceptCard);
@@ -325,7 +335,7 @@ class HomePageState extends State<HomePage> {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showFlash(
                   context: context,
-                  duration: const Duration(seconds: 4),
+                  duration: const Duration(seconds: 5),
                   builder: (context, controller) {
                     return Flash(
                       controller: controller,
@@ -365,7 +375,7 @@ class HomePageState extends State<HomePage> {
             }
             // 敵のposition
             if (gameObject!.opponent.toString() == ret.playerId) {
-              onBattlePosition = msg['arg1'];
+              setState(() => opponentDefendPosition = msg['arg1']);
             }
             // 攻撃側が使用中のトリガー/インターセプトカードをセット
             List<int> _attackerUsedCardIds = [];
@@ -413,18 +423,21 @@ class HomePageState extends State<HomePage> {
             if (enemyHasBlocked &&
                 gameObject!.opponent.toString() == ret.playerId) {
               String enemyAbility = '';
-              if (gameObject!.opponentFieldUnit[onBattlePosition] == 9) {
+              if (gameObject!.opponentFieldUnit[opponentDefendPosition] == 9) {
                 // Sohei
-                enemyAbility = 'Sohei ${L10n.of(context)!.activatedAbility} ';
-              } else if (gameObject!.opponentFieldUnit[onBattlePosition] ==
+                enemyAbility =
+                    'Sohei ${L10n.of(context)!.activatedAbility} - Defensive Specialization! -';
+              } else if (gameObject!
+                      .opponentFieldUnit[opponentDefendPosition] ==
                   15) {
                 // Roin
-                enemyAbility = 'Roin ${L10n.of(context)!.activatedAbility} ';
+                enemyAbility =
+                    'Roin ${L10n.of(context)!.activatedAbility} - Defensive Specialization! -';
               }
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
-                    duration: const Duration(seconds: 4),
+                    duration: const Duration(seconds: 5),
                     builder: (context, controller) {
                       return Flash(
                         controller: controller,
@@ -451,7 +464,7 @@ class HomePageState extends State<HomePage> {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showFlash(
                     context: context,
-                    duration: const Duration(seconds: 4),
+                    duration: const Duration(seconds: 5),
                     builder: (context, controller) {
                       return Flash(
                         controller: controller,
@@ -574,6 +587,8 @@ class HomePageState extends State<HomePage> {
       await apiService.saveGameServerProcess(
           'battle_reaction', jsonEncode(message), gameObject!.you.toString());
       closeGameLoading();
+      onChainYourTriggerCards[activeIndex] = null;
+      onChainYourTriggerCardsDisplay[activeIndex] = null;
       debugPrint('== transaction published ==');
     }
   }
@@ -602,7 +617,7 @@ class HomePageState extends State<HomePage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             showFlash(
                 context: context,
-                duration: const Duration(seconds: 4),
+                duration: const Duration(seconds: 5),
                 builder: (context, controller) {
                   return Flash(
                     controller: controller,
@@ -624,7 +639,7 @@ class HomePageState extends State<HomePage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             showFlash(
                 context: context,
-                duration: const Duration(seconds: 4),
+                duration: const Duration(seconds: 5),
                 builder: (context, controller) {
                   return Flash(
                     controller: controller,
@@ -649,7 +664,7 @@ class HomePageState extends State<HomePage> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             showFlash(
                 context: context,
-                duration: const Duration(seconds: 4),
+                duration: const Duration(seconds: 5),
                 builder: (context, controller) {
                   return Flash(
                     controller: controller,
@@ -679,13 +694,35 @@ class HomePageState extends State<HomePage> {
           } else if (onChainYourFieldUnit.length >= i) {
             _units.add(onChainYourFieldUnit[i - 1]);
           }
-          if (unitDecreased == true) {
-            setState(() {
-              onChainYourFieldUnit = _units;
-              defaultDropedList = _units.isEmpty ? [null] : _units;
-            });
+        }
+        if (unitDecreased == true) {
+          setState(() {
+            onChainYourFieldUnit = _units;
+            defaultDropedList = _units.isEmpty ? [null] : _units;
+          });
+        }
+        // 存在したトリガーカードが消えていたら攻撃でロストされている
+        List<int?> _triggerCards = [];
+        bool triggerDecreased = false;
+        for (int i = 1; i <= 4; i++) {
+          if (gameObject!.yourTriggerCards[i.toString()] != null &&
+              data.yourTriggerCards[i.toString()] == null) {
+            triggerDecreased = true;
+            _triggerCards.add(null);
+          } else if (onChainYourTriggerCards.length >= i) {
+            _triggerCards.add(onChainYourTriggerCards[i - 1]);
           }
         }
+        if (triggerDecreased == true) {
+          setState(() {
+            onChainYourTriggerCards = _triggerCards;
+            onChainYourTriggerCardsDisplay = _triggerCards;
+            defaultTriggerCards =
+                _triggerCards.isEmpty ? [null] : _triggerCards;
+          });
+          print(defaultTriggerCards);
+        }
+        //
         // 新しいカードをドローしているケース
         if (data!.newlyDrawedCards.isNotEmpty) {
           for (var i = 0; i < data.newlyDrawedCards.length; i++) {
@@ -708,10 +745,14 @@ class HomePageState extends State<HomePage> {
 
     // マリガン時のみこちらへ
     if (mariganCardIds != null) {
-      setState(() => mariganCardIdList = mariganCardIds);
-      setState(() => mariganClickCount = 0);
-      setState(() => handCards = mariganCardIdList[mariganClickCount]);
-      setState(() => gameProgressStatus = 1);
+      setState(() {
+        mariganCardIdList = mariganCardIds;
+        mariganClickCount = 0;
+        handCards = mariganCardIdList[mariganClickCount];
+        gameProgressStatus = 1;
+        defaultDropedList = [null];
+        defaultTriggerCards = [null];
+      });
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
     } else {
@@ -753,6 +794,7 @@ class HomePageState extends State<HomePage> {
           onChainHandCards = gameObject!.yourHand;
           onChainYourFieldUnit = _units;
           onChainYourTriggerCards = _triggerCards;
+          onChainYourTriggerCardsDisplay = _triggerCards;
           // ターンチェンジ後に空になっている場合は空であることをコンポーネントに伝える必要がある
           defaultDropedList = _units.isEmpty ? [null] : _units;
           defaultTriggerCards = _triggerCards.isEmpty ? [null] : _triggerCards;
@@ -838,6 +880,7 @@ class HomePageState extends State<HomePage> {
     canUseIntercept = false;
     reviewingTriggerCardPosition = 0;
     calledFieldUnitActionTrans = null;
+    putCardOnFieldType = null;
     cardTriggerAbilityCase = 1; // カードがフィールドに出た時の能力
     reviewFieldUnitAbility(cardId);
   }
@@ -866,15 +909,19 @@ class HomePageState extends State<HomePage> {
   void reviewFieldUnitAbility(cardId) {
     // フィールドに置いたカードは置いたとき発動可能なユニットか?
     var skill = getCardSkill(cardId.toString());
+    if (cardTriggerAbilityCase == 1) {
+      putCardOnFieldType = getCardType(cardId.toString());
+    }
     if (skill != null) {
       if (skill['trigger_1'] == cardTriggerAbilityCase.toString()) {
         if (skill['ask_1'] == '1') {
           // 対象を選ぶ
           if (skill['type_1'] == '1' &&
-              gameObject!.opponentFieldUnit.length > 0) {
+              gameObject!.opponentFieldUnitLength > 0) {
             if (cardTriggerAbilityCase == 1) {
               // Lilim
-              skillMessage = 'Lilim ${L10n.of(context)!.activatedAbility}';
+              skillMessage =
+                  'Lilim ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
               showUnitTargetCarousel = true;
               _timer.countdownStart(6, () {
                 showUnitTargetCarousel = false;
@@ -883,7 +930,8 @@ class HomePageState extends State<HomePage> {
               return;
             } else if (cardTriggerAbilityCase == 2) {
               // Lancer
-              skillMessage = 'Lancer ${L10n.of(context)!.activatedAbility}';
+              skillMessage =
+                  'Lancer ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
               showUnitTargetCarousel = true;
               _timer.countdownStart(6, () {
                 showUnitTargetCarousel = false;
@@ -892,19 +940,21 @@ class HomePageState extends State<HomePage> {
               return;
             }
           } else if (skill['type_1'] == '5' &&
-              gameObject!.opponentFieldUnit.length > 0) {
+              gameObject!.opponentFieldUnitLength > 0) {
             if (cardTriggerAbilityCase == 1) {
               // Allie
-              for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
+              for (var i = 1; i <= gameObject!.opponentFieldUnitLength; i++) {
                 if (gameObject!.opponentFieldUnitAction[i.toString()] == '1' ||
                     gameObject!.opponentFieldUnitAction[i.toString()] == '2') {
                   cannotDefendUnitPositions.add(i);
                 }
               }
               if (cannotDefendUnitPositions.isNotEmpty) {
-                skillMessage = 'Allie ${L10n.of(context)!.activatedAbility}';
+                skillMessage =
+                    'Allie ${L10n.of(context)!.activatedAbility} - Remove Action Right! -';
                 showUnitTargetCarousel = true;
                 _timer.countdownStart(6, () {
+                  showUnitTargetCarousel = false;
                   selectTarget(0); // 左端を強制選択
                 });
                 return;
@@ -916,7 +966,7 @@ class HomePageState extends State<HomePage> {
           if (cardTriggerAbilityCase == 1) {
             // Rairyu
             var leftMost = 0;
-            for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
+            for (var i = 1; i <= gameObject!.opponentFieldUnitLength; i++) {
               if (gameObject!.opponentFieldUnitAction[i.toString()] == '0') {
                 if (leftMost == 0) {
                   leftMost = i;
@@ -925,9 +975,11 @@ class HomePageState extends State<HomePage> {
               }
             }
             if (cannotDefendUnitPositions.isNotEmpty) {
-              skillMessage = 'Rairyu ${L10n.of(context)!.activatedAbility}';
+              skillMessage =
+                  'Rairyu ${L10n.of(context)!.activatedAbility} - Dmage Acted-up Unit! -';
               showUnitTargetCarousel = true;
               _timer.countdownStart(6, () {
+                showUnitTargetCarousel = false;
                 selectTarget(leftMost - 1); // 左端を強制選択
               });
               return;
@@ -937,7 +989,8 @@ class HomePageState extends State<HomePage> {
           // 全体が対象
           if (cardTriggerAbilityCase == 1) {
             // Belial
-            skillMessage = 'Belial ${L10n.of(context)!.activatedAbility}';
+            skillMessage =
+                'Belial ${L10n.of(context)!.activatedAbility} - Dmage All Units! -';
           }
         } else {
           // 対象を選ばない
@@ -945,11 +998,25 @@ class HomePageState extends State<HomePage> {
             // HellDog,Arty,Caim
             var unit =
                 cardId == 4 ? 'HellDog' : (cardId == 5 ? 'Arty' : 'Caim');
-            skillMessage = '$unit ${L10n.of(context)!.activatedAbility}';
+            var ability = cardId == 4
+                ? '- Trigger Card Lost! -'
+                : (cardId == 5 ? '- Speed Move! -' : '- Card Draw! -');
+            if (cardId == 4 && gameObject!.opponentTriggerCards == 0) {
+              // 発動しない
+            } else {
+              skillMessage =
+                  '$unit ${L10n.of(context)!.activatedAbility} $ability';
+            }
           } else if (cardTriggerAbilityCase == 2) {
             // Fighter,Lilim
             var unit = cardId == 2 ? 'Fighter' : 'Lilim';
-            skillMessage = '$unit ${L10n.of(context)!.activatedAbility}';
+            var ability = cardId == 2
+                ? '- Augmented Power! -'
+                : (gameObject!.opponentTriggerCards > 0
+                    ? '- Trigger Card Lost! -'
+                    : '');
+            skillMessage =
+                '$unit ${L10n.of(context)!.activatedAbility} $ability';
           }
         }
       }
@@ -1011,51 +1078,82 @@ class HomePageState extends State<HomePage> {
         onChainYourTriggerCards[reviewingTriggerCardPosition - 1] != null) {
       int cardId = onChainYourTriggerCards[reviewingTriggerCardPosition - 1]!;
       var skill = getCardSkill(cardId.toString());
-      debugPrint('INTERCEPT Card Skill: $skill');
       if (skill != null) {
         if (skill['trigger_1'] == cardTriggerAbilityCase.toString()) {
           if (getCardCategory(cardId.toString()) == '2') {
             /////////////////////////////
             // インターセプト (Breaker,Imperiale,Photon,Signal for assault)
             /////////////////////////////
-            for (String position in ['1', '2', '3', '4']) {
-              if (gameObject!.yourFieldUnit[position] != null) {
-                if (getCardType(gameObject!.yourFieldUnit[position]) ==
-                    getCardType(cardId.toString())) {
-                  // 同色のカードがフィールドにあるので選択可能
-                  attackStatusBloc.canAttackEventSink
-                      .add(CanUseTriggerIndex1Event());
-                  canUseIntercept = true;
+            if (putCardOnFieldType != null &&
+                (putCardOnFieldType == getCardType(cardId.toString()) ||
+                    getCardType(cardId.toString()) == '4')) {
+              canUseIntercept = true;
+            } else {
+              for (String position in ['1', '2', '3', '4']) {
+                if (gameObject!.yourFieldUnit[position] != null) {
+                  if (getCardType(gameObject!.yourFieldUnit[position]) ==
+                      getCardType(cardId.toString())) {
+                    canUseIntercept = true;
+                  }
                 }
+              }
+            }
+            if (canUseIntercept) {
+              // 同色のカードがフィールドにあるので選択可能
+              if (reviewingTriggerCardPosition == 1) {
+                attackStatusBloc.canAttackEventSink
+                    .add(CanUseTriggerIndex1Event());
+              } else if (reviewingTriggerCardPosition == 2) {
+                attackStatusBloc.canAttackEventSink
+                    .add(CanUseTriggerIndex2Event());
+              } else if (reviewingTriggerCardPosition == 3) {
+                attackStatusBloc.canAttackEventSink
+                    .add(CanUseTriggerIndex3Event());
+              } else if (reviewingTriggerCardPosition == 4) {
+                attackStatusBloc.canAttackEventSink
+                    .add(CanUseTriggerIndex4Event());
               }
             }
           } else if (getCardCategory(cardId.toString()) == '1') {
             /////////////////////////////
             // トリガー(Canon,Merchant) //
             /////////////////////////////
-            usedTriggers.add(cardId);
-            usedInterceptCardPosition.add(reviewingTriggerCardPosition);
             if (cardId == 18) {
-              // Canon
-              skillMessage = skillMessage != ''
-                  ? '$skillMessage \nTRIGGER Canon ${L10n.of(context)!.activatedEffect}'
-                  : 'TRIGGER Canon ${L10n.of(context)!.activatedEffect}';
-              if (enemySkillTarget == 0) {
-                showUnitTargetCarousel = true;
-                _timer.countdownStart(6, () {
-                  selectTarget(0); // 左端を強制選択
-                });
+              if (gameObject!.opponentFieldUnitLength > 0) {
+                // Canon
+                skillMessage = skillMessage != ''
+                    ? '$skillMessage \nTRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -'
+                    : 'TRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -';
+                if (enemySkillTarget == 0) {
+                  showUnitTargetCarousel = true;
+                  _timer.countdownStart(6, () {
+                    showUnitTargetCarousel = false;
+                    selectTarget(0); // 左端を強制選択
+                  });
+                }
+                onChainYourTriggerCardsDisplay[
+                    reviewingTriggerCardPosition - 1] = null;
+                usedTriggers.add(cardId);
+                usedInterceptCardPosition.add(reviewingTriggerCardPosition);
               }
             } else if (cardId == 17) {
               // Drive
               skillMessage = skillMessage != ''
-                  ? '$skillMessage \nTRIGGER Drive ${L10n.of(context)!.activatedEffect}'
-                  : 'TRIGGER Drive ${L10n.of(context)!.activatedEffect}';
+                  ? '$skillMessage \nTRIGGER Drive ${L10n.of(context)!.activatedEffect} - Augmented Power! -'
+                  : 'TRIGGER Drive ${L10n.of(context)!.activatedEffect} - Augmented Power! -';
+              onChainYourTriggerCardsDisplay[reviewingTriggerCardPosition - 1] =
+                  null;
+              usedTriggers.add(cardId);
+              usedInterceptCardPosition.add(reviewingTriggerCardPosition);
             } else if (cardId == 19) {
               // Merchant
               skillMessage = skillMessage != ''
-                  ? '$skillMessage \nTRIGGER Merchant ${L10n.of(context)!.activatedEffect}'
-                  : 'TRIGGER Merchant ${L10n.of(context)!.activatedEffect}';
+                  ? '$skillMessage \nTRIGGER Merchant ${L10n.of(context)!.activatedEffect} - Card Draw! -'
+                  : 'TRIGGER Merchant ${L10n.of(context)!.activatedEffect} - Card Draw! -';
+              onChainYourTriggerCardsDisplay[reviewingTriggerCardPosition - 1] =
+                  null;
+              usedTriggers.add(cardId);
+              usedInterceptCardPosition.add(reviewingTriggerCardPosition);
             }
           }
         }
@@ -1068,7 +1166,7 @@ class HomePageState extends State<HomePage> {
     if (canUseIntercept == true) {
       showFlash(
           context: context,
-          duration: const Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
           builder: (context, controller) {
             return Flash(
               controller: controller,
@@ -1095,7 +1193,7 @@ class HomePageState extends State<HomePage> {
             attackSignalPosition = tapCardIndex;
             actedCardPosition = tapCardIndex;
           });
-        } else {
+        } else if (cardTriggerAbilityCase == 1) {
           // カードがフィールドに出た時
           callEnterTheFieldTransaction();
         }
@@ -1108,12 +1206,13 @@ class HomePageState extends State<HomePage> {
           for (var i = 0; i < usedTriggers.length; i++) {
             if (usedTriggers[i] == 22) {
               // Dainsleif
-              skillMessage = 'Dainsleif ${L10n.of(context)!.activatedAbility}';
+              skillMessage =
+                  'Dainsleif ${L10n.of(context)!.activatedAbility} - Trigger Card Lost! -';
               return;
             } else if (usedTriggers[i] == 24) {
               // Titan's Lock
               var leftMost = 0;
-              for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
+              for (var i = 1; i <= gameObject!.opponentFieldUnitLength; i++) {
                 if (gameObject!.opponentFieldUnitAction[i.toString()] != '0') {
                   if (leftMost == 0) {
                     leftMost = 1;
@@ -1123,16 +1222,18 @@ class HomePageState extends State<HomePage> {
               }
               if (cannotDefendUnitPositions.isNotEmpty) {
                 skillMessage =
-                    "Titan's Lock ${L10n.of(context)!.activatedAbility}";
+                    "Titan's Lock ${L10n.of(context)!.activatedAbility} - Remove Action Right! -";
                 showUnitTargetCarousel = true;
                 _timer.countdownStart(6, () {
+                  showUnitTargetCarousel = false;
                   selectTarget(leftMost - 1); // 左端を強制選択
                 });
                 return;
               }
             } else if (usedTriggers[i] == 25) {
               // Judge
-              skillMessage = 'Judge ${L10n.of(context)!.activatedAbility}';
+              skillMessage =
+                  'Judge ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
               return;
             }
           }
@@ -1147,7 +1248,7 @@ class HomePageState extends State<HomePage> {
           enemySkillTargetPosition = enemySkillTarget;
         });
         // カードが攻撃に出た時の能力ここまで
-      } else {
+      } else if (cardTriggerAbilityCase == 1) {
         // カードがフィールドに出た時
         callEnterTheFieldTransaction();
       }
@@ -1159,9 +1260,9 @@ class HomePageState extends State<HomePage> {
   */
   void useInterceptCardForField(int cardId, int activeIndex) async {
     // (Breaker,Imperiale,Photon,Signal for assault)
-    // それ以外
     usedTriggers.add(cardId);
     usedInterceptCardPosition.add(activeIndex + 1);
+    onChainYourTriggerCardsDisplay[activeIndex] = null;
   }
 
   // ユニットカードをフィールドに置くトランザクション実行処理
@@ -1171,25 +1272,29 @@ class HomePageState extends State<HomePage> {
       for (var i = 0; i < usedTriggers.length; i++) {
         if (usedTriggers[i] == 20) {
           // Breaker
-          skillMessage = 'Breaker ${L10n.of(context)!.activatedAbility}';
+          skillMessage =
+              'Breaker ${L10n.of(context)!.activatedAbility}  - Damage One Unit! -';
           if (enemySkillTarget == 0) {
             showUnitTargetCarousel = true;
             _timer.countdownStart(6, () {
+              showUnitTargetCarousel = false;
               selectTarget(0); // 左端を強制選択
             });
           }
           return;
         } else if (usedTriggers[i] == 23) {
           // Photon
-          for (var i = 1; i <= gameObject!.opponentFieldUnit.length; i++) {
+          for (var i = 1; i <= gameObject!.opponentFieldUnitLength; i++) {
             if (gameObject!.opponentFieldUnitAction[i.toString()] == '0') {
               cannotDefendUnitPositions.add(i);
             }
           }
           if (cannotDefendUnitPositions.isNotEmpty) {
-            skillMessage = 'Photon ${L10n.of(context)!.activatedAbility}';
+            skillMessage =
+                'Photon ${L10n.of(context)!.activatedAbility} - Damage Acted-up Unit! -';
             showUnitTargetCarousel = true;
             _timer.countdownStart(6, () {
+              showUnitTargetCarousel = false;
               selectTarget(0); // 左端を強制選択
             });
             return;
@@ -1201,7 +1306,7 @@ class HomePageState extends State<HomePage> {
         calledFieldUnitActionTrans == false) {
       calledFieldUnitActionTrans = true;
 
-      showGameLoading();
+      // showGameLoading();
       // 使用可能なインターセプトを初期化
       canUseIntercept = false;
       // Call GraphQL method.
@@ -1209,7 +1314,7 @@ class HomePageState extends State<HomePage> {
           usedInterceptCardPosition, skillMessage, usedTriggers);
       await apiService.saveGameServerProcess('put_card_on_the_field',
           jsonEncode(message), gameObject!.you.toString());
-      closeGameLoading();
+      // closeGameLoading();
       debugPrint('transaction published');
     }
   }
@@ -1231,15 +1336,17 @@ class HomePageState extends State<HomePage> {
         });
       }
     } else if (message == 'attack') {
-      // 使用可能なインターセプトを初期化
-      canUseIntercept = false;
-      reviewingTriggerCardPosition = 0;
-      calledFieldUnitActionTrans = null;
-      cardTriggerAbilityCase = 2; // カードが攻撃に出た時の能力
-      tapCardIndex = index;
-      reviewFieldUnitAbility(cardId);
+      if (gameObject!.yourFieldUnitAction[(index + 1).toString()] == '2') {
+        // 使用可能なインターセプトを初期化
+        canUseIntercept = false;
+        reviewingTriggerCardPosition = 0;
+        calledFieldUnitActionTrans = null;
+        cardTriggerAbilityCase = 2; // カードが攻撃に出た時の能力
+        tapCardIndex = index;
+        reviewFieldUnitAbility(cardId);
+      }
     } else if (message == 'use') {
-      if (isEnemyAttack != null) {
+      if (isEnemyAttack == true || isEnemyAttack == false) {
         useInterceptCardForBattle(cardId, index);
       } else {
         useInterceptCardForField(cardId, index);
@@ -1348,10 +1455,10 @@ class HomePageState extends State<HomePage> {
     gameProgressStatus = 2;
     // Call GraphQL method.
     if (gameObject != null) {
-      showGameLoading();
+      // showGameLoading();
       var ret = await apiService.saveGameServerProcess(
           'game_start', jsonEncode(handCards), gameObject!.you.toString());
-      closeGameLoading();
+      // closeGameLoading();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showFlash(
             context: context,
@@ -1516,42 +1623,54 @@ class HomePageState extends State<HomePage> {
                             stream: _timer.events.stream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<int> snapshot) {
-                              return Center(
-                                  child: Text(
-                                '0:0${snapshot.data.toString()}',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: r(42.0)),
-                              ));
+                              return Visibility(
+                                  visible: snapshot.data != 0,
+                                  child: Center(
+                                      child: Text(
+                                    '0:0${snapshot.data.toString()}',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: r(42.0)),
+                                  )));
                             })))),
             Visibility(
                 visible: mariganClickCount < 5 && gameProgressStatus == 1,
                 child: Positioned(
                     left: r(900),
                     top: r(500),
-                    child: SizedBox(
-                        width: r(100.0),
-                        child: FloatingActionButton(
-                            backgroundColor: Colors.transparent,
-                            onPressed: () {
-                              if (mariganClickCount < 5) {
-                                setState(() =>
-                                    mariganClickCount = mariganClickCount + 1);
-                                setState(() => handCards =
-                                    mariganCardIdList[mariganClickCount]);
-                              } else {
-                                // 6回目は1回目をセット
-                                setState(
-                                    () => handCards = mariganCardIdList[0]);
-                              }
-                            },
-                            tooltip: 'Redraw',
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20.0),
-                              child: Image.asset(
-                                '${imagePath}button/redo.png',
-                                fit: BoxFit.cover, //prefer cover over fill
-                              ),
-                            ))))),
+                    child: StreamBuilder<int>(
+                        stream: _timer.events.stream,
+                        builder: (BuildContext context,
+                            AsyncSnapshot<int> snapshot) {
+                          return Visibility(
+                              visible: snapshot.data != 0,
+                              child: SizedBox(
+                                  width: snapshot.data != 0 ? r(100.0) : 0.0,
+                                  child: FloatingActionButton(
+                                      backgroundColor: Colors.transparent,
+                                      onPressed: () {
+                                        if (mariganClickCount < 5) {
+                                          setState(() => mariganClickCount =
+                                              mariganClickCount + 1);
+                                          setState(() => handCards =
+                                              mariganCardIdList[
+                                                  mariganClickCount]);
+                                        } else {
+                                          // 6回目は1回目をセット
+                                          setState(() =>
+                                              handCards = mariganCardIdList[0]);
+                                        }
+                                      },
+                                      tooltip: 'Redraw',
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(20.0),
+                                        child: Image.asset(
+                                          '${imagePath}button/redo.png',
+                                          fit: BoxFit
+                                              .cover, //prefer cover over fill
+                                        ),
+                                      ))));
+                        }))),
             Visibility(
                 visible: attackSignalPosition != null,
                 child: Positioned(
@@ -2152,11 +2271,11 @@ class HomePageState extends State<HomePage> {
                 top: r(389.0),
                 width: r(100.0),
                 child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
+                    gameObject != null && gameObject!.yourFieldUnit['5'] != null
                         ? (gameObject!.yourFieldUnitAction['5'] == '2'
                                 ? '🗡️'
                                 : '　') +
-                            getCardName(gameObject!.yourFieldUnit['4'])
+                            getCardName(gameObject!.yourFieldUnit['5'])
                         : '',
                     style: TextStyle(
                       color: Colors.white,
@@ -2212,7 +2331,7 @@ class HomePageState extends State<HomePage> {
                         ? 0
                         : (cannotDefendUnitPositions.isNotEmpty
                             ? cannotDefendUnitPositions.length
-                            : gameObject!.opponentFieldUnit.length),
+                            : gameObject!.opponentFieldUnitLength),
                     itemBuilder: (context, index, realIndex) {
                       // 行動済みのみ
                       if (cannotDefendUnitPositions.isNotEmpty) {
@@ -2303,7 +2422,10 @@ class HomePageState extends State<HomePage> {
             //     )),
             // 敵のバトルカード
             Visibility(
-              visible: gameObject != null && onBattlePosition != null,
+              visible: gameObject != null &&
+                  ((isEnemyAttack == true && onBattlePosition != null) ||
+                      (isEnemyAttack == false &&
+                          opponentDefendPosition != null)),
               child: Positioned(
                 right: r(80.0),
                 top: r(90.0),
@@ -2319,9 +2441,9 @@ class HomePageState extends State<HomePage> {
                               ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
                               : '${imagePath}unit/bg-2.jpg'
                           : gameObject!.opponentFieldUnit[
-                                      onBattlePosition.toString()] !=
+                                      opponentDefendPosition.toString()] !=
                                   null
-                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
+                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]}.jpeg'
                               : '${imagePath}unit/bg-2.jpg'),
                 ),
               ),
@@ -2437,7 +2559,7 @@ class HomePageState extends State<HomePage> {
                     canUseIntercept == true || showUnitTargetCarousel == true,
                 child: Center(
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: r(50.0)),
+                        padding: EdgeInsets.only(bottom: r(250.0)),
                         child: SizedBox(
                             width: r(180.0),
                             child: StreamBuilder<int>(
@@ -2500,6 +2622,7 @@ class HomePageState extends State<HomePage> {
                     // 内部データ初期化
                     setState(() {
                       onChainYourTriggerCards = [];
+                      onChainYourTriggerCardsDisplay = [];
                       canOperate = true;
                       gameStarted = false;
                       gameObject = null;

@@ -254,11 +254,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             (canUseInterept3 == true && widget.index == 2) ||
                             (canUseInterept4 == true && widget.index == 3))
                     ? Positioned(
-                        left: widget.r(12.0),
+                        left: widget.r(7.0),
                         top: widget.r(40.0),
                         child: SizedBox(
-                          width: widget.r(50.0),
-                          height: widget.r(20.0),
+                          width: widget.r(60.0),
+                          height: widget.r(24.0),
                           child: FloatingActionButton(
                               backgroundColor: Colors.transparent,
                               onPressed: () {

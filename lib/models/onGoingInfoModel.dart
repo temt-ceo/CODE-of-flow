@@ -10,6 +10,7 @@ class GameObject {
   final dynamic yourFieldUnit;
   final int yourDefendableUnitLength;
   final int opponentDefendableUnitLength;
+  final int opponentFieldUnitLength;
   final dynamic yourFieldUnitAction;
   final dynamic yourFieldUnitBpAmountOfChange;
   final dynamic yourHand;
@@ -45,6 +46,7 @@ class GameObject {
     this.yourFieldUnit,
     this.yourDefendableUnitLength,
     this.opponentDefendableUnitLength,
+    this.opponentFieldUnitLength,
     this.yourFieldUnitAction,
     this.yourFieldUnitBpAmountOfChange,
     this.yourHand,
@@ -80,6 +82,7 @@ class GameObject {
       1,
       1,
       {},
+      0,
       0,
       0,
       1,

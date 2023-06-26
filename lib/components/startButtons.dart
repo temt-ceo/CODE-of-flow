@@ -634,34 +634,39 @@ class StartButtonsState extends State<StartButtons> {
     int yourDefendableUnitLength = 0;
     dynamic yourFiledUnitBps = {};
     dynamic opponentFiledUnitBps = {};
-    for (int i = 1; i <= int.parse(objJs['your_field_unit_length']); i++) {
+    for (int i = 1; i <= 5; i++) {
       if (objJs['your_field_unit_action'][i.toString()] == '1' ||
           objJs['your_field_unit_action'][i.toString()] == '2') {
         yourDefendableUnitLength++;
       }
-      var unitBp = getCardBP(objJs['your_field_unit'][i.toString()]);
-      if (objJs['your_field_unit_bp_amount_of_change'][i.toString()] == null) {
-        yourFiledUnitBps[i.toString()] = int.parse(unitBp);
-      } else {
-        yourFiledUnitBps[i.toString()] = int.parse(unitBp) +
-            int.parse(
-                objJs['your_field_unit_bp_amount_of_change'][i.toString()]);
+      if (objJs['your_field_unit'][i.toString()] != null) {
+        var unitBp = getCardBP(objJs['your_field_unit'][i.toString()]);
+        if (objJs['your_field_unit_bp_amount_of_change'][i.toString()] ==
+            null) {
+          yourFiledUnitBps[i.toString()] = int.parse(unitBp);
+        } else {
+          yourFiledUnitBps[i.toString()] = int.parse(unitBp) +
+              int.parse(
+                  objJs['your_field_unit_bp_amount_of_change'][i.toString()]);
+        }
       }
     }
     int opponentDefendableUnitLength = 0;
-    for (int i = 1; i <= int.parse(objJs['opponent_field_unit_length']); i++) {
+    for (int i = 1; i <= 5; i++) {
       if (objJs['opponent_field_unit_action'][i.toString()] == '1' ||
           objJs['opponent_field_unit_action'][i.toString()] == '2') {
         opponentDefendableUnitLength++;
       }
-      var unitBp = getCardBP(objJs['opponent_field_unit'][i.toString()]);
-      if (objJs['opponent_field_unit_bp_amount_of_change'][i.toString()] ==
-          null) {
-        opponentFiledUnitBps[i.toString()] = int.parse(unitBp);
-      } else {
-        opponentFiledUnitBps[i.toString()] = int.parse(unitBp) +
-            int.parse(
-                objJs['opponent_field_unit_bp_amount_of_change'][i.toString()]);
+      if (objJs['opponent_field_unit'][i.toString()] != null) {
+        var unitBp = getCardBP(objJs['opponent_field_unit'][i.toString()]);
+        if (objJs['opponent_field_unit_bp_amount_of_change'][i.toString()] ==
+            null) {
+          opponentFiledUnitBps[i.toString()] = int.parse(unitBp);
+        } else {
+          opponentFiledUnitBps[i.toString()] = int.parse(unitBp) +
+              int.parse(objJs['opponent_field_unit_bp_amount_of_change']
+                  [i.toString()]);
+        }
       }
     }
     return GameObject(
@@ -676,6 +681,7 @@ class StartButtonsState extends State<StartButtons> {
       objJs['your_field_unit'],
       yourDefendableUnitLength,
       opponentDefendableUnitLength,
+      int.parse(objJs['opponent_field_unit_length']),
       objJs['your_field_unit_action'],
       objJs['your_field_unit_bp_amount_of_change'],
       objJs['your_hand'],

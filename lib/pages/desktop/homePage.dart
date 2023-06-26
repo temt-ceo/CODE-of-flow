@@ -215,7 +215,7 @@ class HomePageState extends State<HomePage> {
             // 攻撃時に使用したトリガーカード
             List<int> _attackerUsedInterceptCard = [];
             for (var i in usedInterceptPositions) {
-              _attackerUsedInterceptCard.add(int.parse(i));
+              _attackerUsedInterceptCard.add(i);
             }
             setState(
                 () => attackerUsedInterceptCard = _attackerUsedInterceptCard);
@@ -946,6 +946,10 @@ class HomePageState extends State<HomePage> {
             var unit =
                 cardId == 4 ? 'HellDog' : (cardId == 5 ? 'Arty' : 'Caim');
             skillMessage = '$unit ${L10n.of(context)!.activatedAbility}';
+          } else if (cardTriggerAbilityCase == 2) {
+            // Fighter,Lilim
+            var unit = cardId == 2 ? 'Fighter' : 'Lilim';
+            skillMessage = '$unit ${L10n.of(context)!.activatedAbility}';
           }
         }
       }
@@ -1631,7 +1635,7 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.opponentFiledUnitBps['1']
+                            gameObject!.opponentFiledUnitBps['1'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1693,7 +1697,7 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.opponentFiledUnitBps['2']
+                            gameObject!.opponentFiledUnitBps['2'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1755,7 +1759,7 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.opponentFiledUnitBps['3']
+                            gameObject!.opponentFiledUnitBps['3'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1817,7 +1821,7 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.opponentFiledUnitBps['4']
+                            gameObject!.opponentFiledUnitBps['4'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1879,7 +1883,7 @@ class HomePageState extends State<HomePage> {
                                         '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.opponentFiledUnitBps['5']
+                            gameObject!.opponentFiledUnitBps['5'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1938,7 +1942,7 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['1'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.yourFiledUnitBps['1']
+                            gameObject!.yourFiledUnitBps['1'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -1996,7 +2000,7 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['2'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.yourFiledUnitBps['2']
+                            gameObject!.yourFiledUnitBps['2'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -2054,7 +2058,7 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['3'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.yourFiledUnitBps['3']
+                            gameObject!.yourFiledUnitBps['3'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -2112,7 +2116,7 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['4'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.yourFiledUnitBps['4']
+                            gameObject!.yourFiledUnitBps['4'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&
@@ -2170,7 +2174,7 @@ class HomePageState extends State<HomePage> {
                                     gameObject!.yourFieldUnitAction['5x'] == '2'
                                 ? '🛡️'
                                 : '　') +
-                            gameObject!.yourFiledUnitBps['5']
+                            gameObject!.yourFiledUnitBps['5'].toString()
                         : '',
                     style: TextStyle(
                       color: gameObject != null &&

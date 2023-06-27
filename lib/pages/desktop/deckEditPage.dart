@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
+import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
 import 'package:CodeOfFlow/components/draggableCardWidgetForDeckEditor.dart';
 import 'package:CodeOfFlow/components/dragTargetWidget.dart';
 import 'package:CodeOfFlow/components/deckCardInfo.dart';
@@ -77,6 +78,7 @@ class DeckEditPageState extends State<DeckEditPage> {
         tappedCardId = cardId;
       });
     } else if (message == 'remove') {
+      attackStatusBloc.canAttackEventSink.add(ButtonTapedEvent());
       playerDeck.removeAt(index);
       setState(() => playerDeck = playerDeck);
     }
@@ -165,6 +167,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                               const [],
                               const [],
                               null,
+                              '',
                               r),
                         ),
                       ])),

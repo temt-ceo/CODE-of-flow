@@ -19,3 +19,13 @@ class CanUseTriggerIndex3Event extends AttackEvent {}
 class CanUseTriggerIndex4Event extends AttackEvent {}
 
 class CanNotUseTriggerEvent extends AttackEvent {}
+
+class ButtonTapedEvent extends AttackEvent {}
+
+class DisableTriggerIndex1Event extends AttackEvent {}
+
+class DisableTriggerIndex2Event extends AttackEvent {}
+
+class DisableTriggerIndex3Event extends AttackEvent {}
+
+class DisableTriggerIndex4Event extends AttackEvent {}

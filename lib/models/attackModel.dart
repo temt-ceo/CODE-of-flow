@@ -45,6 +45,8 @@ class AttackModel {
   final TriggerCards arg3;
   final List<int> arg4;
   final List<int> usedCardIds;
+  final bool canBlock;
+  final String skillMessage;
 
   AttackModel(
     this.arg1,
@@ -52,6 +54,8 @@ class AttackModel {
     this.arg3,
     this.arg4,
     this.usedCardIds,
+    this.canBlock,
+    this.skillMessage,
   );
 
   Map toJson() {
@@ -62,6 +66,8 @@ class AttackModel {
       'arg3': arg3Json,
       'arg4': arg4,
       'usedCardIds': usedCardIds,
+      'canBlock': canBlock,
+      'skillMessage': skillMessage,
     };
   }
 }

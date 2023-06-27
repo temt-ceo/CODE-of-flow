@@ -221,7 +221,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
                 height: 1.2,
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(13.0),
+                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(14.0),
               ))),
     ]);
   }

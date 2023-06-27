@@ -40,6 +40,16 @@ class AttackStatusBloc {
       _attack_status = 14;
     } else if (event is CanNotUseTriggerEvent) {
       _attack_status = 15;
+    } else if (event is ButtonTapedEvent) {
+      _attack_status = 20;
+    } else if (event is DisableTriggerIndex1Event) {
+      _attack_status = 21;
+    } else if (event is DisableTriggerIndex2Event) {
+      _attack_status = 22;
+    } else if (event is DisableTriggerIndex3Event) {
+      _attack_status = 23;
+    } else if (event is DisableTriggerIndex4Event) {
+      _attack_status = 24;
     } else {
       _attack_status = 0;
     }

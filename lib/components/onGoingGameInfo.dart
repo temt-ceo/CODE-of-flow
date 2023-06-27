@@ -18,7 +18,7 @@ typedef double ResponsiveSizeChangeFunction(double data);
 class OnGoingGameInfo extends StatefulWidget {
   final GameObject? info;
   final String cardText;
-  final TimeupCallback canOperate;
+  final TimeupCallback setCanOperate;
   final Stream<int> attack_stream;
   int? opponentDefendPosition;
   List<int>? attackerUsedInterceptCard;
@@ -27,12 +27,13 @@ class OnGoingGameInfo extends StatefulWidget {
   final dynamic cardInfos;
   final List<int?> currentTriggerCards;
   final bool? isEnemyAttack;
+  final bool canOperate;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
       this.info,
       this.cardText,
-      this.canOperate,
+      this.setCanOperate,
       this.attack_stream,
       this.opponentDefendPosition,
       this.attackerUsedInterceptCard,
@@ -41,6 +42,7 @@ class OnGoingGameInfo extends StatefulWidget {
       this.cardInfos,
       this.currentTriggerCards,
       this.isEnemyAttack,
+      this.canOperate,
       this.r);
 
   @override
@@ -151,9 +153,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   void defenceActionDecision(DateTime battleStartTime, DateTime now) {
     if (battleReactionUpdateTime != null &&
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
-      setState(() {
-        reactionLimitTime =
-            7 - now.difference(battleReactionUpdateTime!).inSeconds;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          reactionLimitTime =
+              7 - now.difference(battleReactionUpdateTime!).inSeconds;
+        });
       });
       if (reactionLimitTime != null && reactionLimitTime! < 0) {
         String flashMsg = '';
@@ -281,11 +285,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           percentIndicatorValueStr = '0';
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          widget.canOperate(false);
+          widget.setCanOperate(false);
         });
       } else {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          widget.canOperate(true);
+          widget.setCanOperate(true);
         });
         var displayValue = turnEndTime.difference(now).inSeconds / 60;
         setState(() {
@@ -531,7 +535,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 left: widget.r(1255.0),
                 top: widget.r(530.0),
                 child: Text(
-                    'Deck ${widget.info != null ? widget.info!.yourRemainDeck.length : '--'}',
+                    'Deck ${widget.info != null ? (widget.info!.gameStarted ? widget.info!.yourRemainDeck.length : 30) : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
@@ -572,7 +576,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               top: 0.0,
               child: Visibility(
                   visible: widget.info != null
-                      ? widget.info!.isFirst != widget.info!.isFirstTurn
+                      ? widget.info!.isFirst != widget.info!.isFirstTurn &&
+                          widget.info!.gameStarted == true
                       : false,
                   child: CircularPercentIndicator(
                     radius: widget.r(45.0),

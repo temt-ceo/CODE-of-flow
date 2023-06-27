@@ -44,5 +44,6 @@
   "giveDamage": "敵プレイヤーに1ダメージ与えることに成功!",
   "activatedAbility": "の能力が発動!",
   "activatedEffect": "の効果が発動!",
-  "interceptAbailable": "インターセプトカード利用できます (limit:5秒)"
+  "interceptAbailable": "インターセプトカード利用できます (limit:5秒)",
+  "tooEarly": "おっと、焦らないで、Speed Moveはまだブロックチェーンに反映されていないよ。"
 }

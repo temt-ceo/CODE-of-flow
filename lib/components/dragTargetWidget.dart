@@ -30,6 +30,7 @@ class DragTargetWidget extends StatefulWidget {
   final List<int> usedInterceptCardPosition;
   final List<int> usedTriggers;
   final int? enemySkillTargetPosition;
+  final String skillMessage;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -46,6 +47,7 @@ class DragTargetWidget extends StatefulWidget {
       this.usedInterceptCardPosition,
       this.usedTriggers,
       this.enemySkillTargetPosition,
+      this.skillMessage,
       this.r);
 
   @override
@@ -89,37 +91,17 @@ class DragTargetState extends State<DragTargetWidget> {
 
   void attack() async {
     if (widget.actedCardPosition != null) {
-      showGameLoading();
-      var message;
-      if (widget.currentTriggerCards.isEmpty) {
-        TriggerCards triggerCards = TriggerCards(null, null, null, null);
-        message = AttackModel(
-          (widget.actedCardPosition! + 1),
-          widget.enemySkillTargetPosition, // enemy_skill_target
-          triggerCards,
-          widget.usedInterceptCardPosition,
-          widget.usedTriggers,
-        );
-      } else {
-        TriggerCards triggerCards = TriggerCards(
-            widget.currentTriggerCards[0],
-            widget.currentTriggerCards[1],
-            widget.currentTriggerCards[2],
-            widget.currentTriggerCards[3]);
-        message = AttackModel(
-          (widget.actedCardPosition! + 1),
-          null,
-          triggerCards,
-          widget.usedInterceptCardPosition,
-          widget.usedTriggers,
-        );
+      bool canBlock = false;
+      for (int i = 1; i <= 5; i++) {
+        if (widget.info!.opponentFieldUnit[i.toString()] != null) {
+          canBlock = true;
+        }
       }
-      await apiService.saveGameServerProcess(
-          'attack', jsonEncode(message), widget.info!.you.toString());
-      closeGameLoading();
-      debugPrint('== attack transaction published ==');
-
-      bool canBlock = true;
+      for (int i = 1; i <= 5; i++) {
+        if (widget.info!.opponentFieldUnitAction[i.toString()] == '0') {
+          canBlock = false;
+        }
+      }
       for (var i = 0; i < widget.usedTriggers.length; i++) {
         if (widget.usedTriggers[i] == 25) {
           // Judge
@@ -136,9 +118,48 @@ class DragTargetState extends State<DragTargetWidget> {
             null) {
           var opponentBpChange = widget.info!.opponentFieldUnitBpAmountOfChange[
               widget.enemySkillTargetPosition.toString()];
-          // if
+          // if TODO
         }
       }
+      if (widget.info!
+              .yourFieldUnit[(widget.actedCardPosition! + 1).toString()] ==
+          '6') {
+        // Valkyrie
+        canBlock = false;
+      }
+      showGameLoading();
+      var message;
+      if (widget.currentTriggerCards.isEmpty) {
+        TriggerCards triggerCards = TriggerCards(null, null, null, null);
+        message = AttackModel(
+          (widget.actedCardPosition! + 1),
+          widget.enemySkillTargetPosition, // enemy_skill_target
+          triggerCards,
+          widget.usedInterceptCardPosition,
+          widget.usedTriggers,
+          canBlock,
+          widget.skillMessage,
+        );
+      } else {
+        TriggerCards triggerCards = TriggerCards(
+            widget.currentTriggerCards[0],
+            widget.currentTriggerCards[1],
+            widget.currentTriggerCards[2],
+            widget.currentTriggerCards[3]);
+        message = AttackModel(
+          (widget.actedCardPosition! + 1),
+          null,
+          triggerCards,
+          widget.usedInterceptCardPosition,
+          widget.usedTriggers,
+          canBlock,
+          widget.skillMessage,
+        );
+      }
+      await apiService.saveGameServerProcess(
+          'attack', jsonEncode(message), widget.info!.you.toString());
+      closeGameLoading();
+      debugPrint('== attack transaction published ==');
 
       if (widget.info!.opponentDefendableUnitLength == 0 || canBlock == false) {
         // 敵ユニットがいない場合、そのままダメージへ
@@ -156,7 +177,8 @@ class DragTargetState extends State<DragTargetWidget> {
         var ret2 = await apiService.saveGameServerProcess('defence_action',
             jsonEncode(message2), widget.info!.you.toString());
         closeGameLoading();
-        debugPrint('== NO GARD defence_action transaction published ==');
+        debugPrint(
+            '== No card can gard, so defence_action transaction published ==');
         debugPrint('== ${ret2.toString()} ==');
         if (ret2 != null) {
           debugPrint(ret2.message);

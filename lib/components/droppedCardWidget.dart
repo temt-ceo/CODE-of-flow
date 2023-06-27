@@ -67,6 +67,16 @@ class DroppedCardState extends State<DroppedCardWidget> {
             canUseInterept2 = false;
             canUseInterept3 = false;
             canUseInterept4 = false;
+          } else if (snapshot.data == 20) {
+            isTapped = false;
+          } else if (snapshot.data == 21) {
+            canUseInterept1 = false;
+          } else if (snapshot.data == 22) {
+            canUseInterept2 = false;
+          } else if (snapshot.data == 23) {
+            canUseInterept3 = false;
+          } else if (snapshot.data == 24) {
+            canUseInterept4 = false;
           }
           return Positioned(
               left: widget.left,

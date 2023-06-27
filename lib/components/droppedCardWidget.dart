@@ -38,16 +38,16 @@ class DroppedCardState extends State<DroppedCardWidget> {
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   bool isTapped = false;
   bool canAttack = false;
+  bool canUseInterept1 = false;
+  bool canUseInterept2 = false;
+  bool canUseInterept3 = false;
+  bool canUseInterept4 = false;
 
   ////////////////////////////
   ///////    build     ///////
   ////////////////////////////
   @override
   Widget build(BuildContext context) {
-    bool canUseInterept1 = false;
-    bool canUseInterept2 = false;
-    bool canUseInterept3 = false;
-    bool canUseInterept4 = false;
     return StreamBuilder(
         stream: widget.attack_stream,
         initialData: 0,
@@ -60,7 +60,9 @@ class DroppedCardState extends State<DroppedCardWidget> {
             canUseInterept3 = true;
           } else if (snapshot.data == 14) {
             canUseInterept4 = true;
-          } else if (snapshot.data == 15) {
+          } else if (snapshot.data == 15 ||
+              snapshot.data == 3 ||
+              snapshot.data == 4) {
             canUseInterept1 = false;
             canUseInterept2 = false;
             canUseInterept3 = false;

@@ -1088,11 +1088,8 @@ class HomePageState extends State<HomePage> {
       int cardId = onChainYourTriggerCards[reviewingTriggerCardPosition - 1]!;
       var skill = getCardSkill(cardId.toString());
       if (skill != null) {
-        print(1);
         if (skill['trigger_1'] == cardTriggerAbilityCase.toString()) {
-          print(2);
           if (getCardCategory(cardId.toString()) == '2') {
-            print(3);
             /////////////////////////////
             // インターセプト (Breaker,Imperiale,Photon,Signal for assault)
             /////////////////////////////
@@ -1101,7 +1098,6 @@ class HomePageState extends State<HomePage> {
                     getCardType(cardId.toString()) == '4')) {
               canUseIntercept = true;
             } else {
-              print(4);
               for (String position in ['1', '2', '3', '4', '5']) {
                 if (gameObject!.yourFieldUnit[position] != null) {
                   if (getCardType(gameObject!.yourFieldUnit[position]) ==
@@ -1115,9 +1111,7 @@ class HomePageState extends State<HomePage> {
                 int.parse(getCardCost(cardId.toString()))) {
               canUseIntercept = false;
             }
-            print(5);
             if (canUseIntercept) {
-              print(6);
               // 同色のカードがフィールドにあるので選択可能
               if (reviewingTriggerCardPosition == 1) {
                 attackStatusBloc.canAttackEventSink
@@ -1387,6 +1381,12 @@ class HomePageState extends State<HomePage> {
       }
     } else if (message == 'use') {
       print('isEnemyAttack $isEnemyAttack');
+      // インターセプトで使用したCPを減らす
+      setState(() {
+        gameObject!.yourCp = gameObject!.yourCp -
+            int.parse(cardInfos[cardId.toString()]['cost']);
+      });
+
       if (isEnemyAttack == true || isEnemyAttack == false) {
         useInterceptCardForBattle(cardId, index);
       } else {

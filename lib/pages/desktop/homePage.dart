@@ -566,15 +566,23 @@ class HomePageState extends State<HomePage> {
     // 攻撃時もしくは防御時
     if (isEnemyAttack != null) {
       if (isEnemyAttack == true) {
-        setState(() {
-          defenderUsedInterceptCard!.add(activeIndex);
-          defenderUsedCardIds.add(cardId);
-        });
+        // ２度押ししていないかチェック
+        if (!defenderUsedInterceptCard!
+            .any((element) => element == activeIndex)) {
+          setState(() {
+            defenderUsedInterceptCard!.add(activeIndex);
+            defenderUsedCardIds.add(cardId);
+          });
+        }
       } else {
-        setState(() {
-          attackerUsedInterceptCard!.add(activeIndex);
-          attackerUsedCardIds.add(cardId);
-        });
+        // ２度押ししていないかチェック
+        if (!attackerUsedInterceptCard!
+            .any((element) => element == activeIndex)) {
+          setState(() {
+            attackerUsedInterceptCard!.add(activeIndex);
+            attackerUsedCardIds.add(cardId);
+          });
+        }
       }
       // Battle Reaction
       showGameLoading();
@@ -961,7 +969,7 @@ class HomePageState extends State<HomePage> {
               }
             }
           }
-        } else if (skill['ask_2'] == '2') {
+        } else if (skill['ask_1'] == '2') {
           // 行動ずみユニットの対象を選ぶ
           if (cardTriggerAbilityCase == 1) {
             // Rairyu
@@ -1066,6 +1074,7 @@ class HomePageState extends State<HomePage> {
     reviewingTriggerCardPosition++;
     if (reviewingTriggerCardPosition > 4) {
       reviewInterceptCards();
+      return;
     }
     // When put the card on FIELD:
     // trigger: 18,19 intercept: 20,21,23,27
@@ -1079,8 +1088,11 @@ class HomePageState extends State<HomePage> {
       int cardId = onChainYourTriggerCards[reviewingTriggerCardPosition - 1]!;
       var skill = getCardSkill(cardId.toString());
       if (skill != null) {
+        print(1);
         if (skill['trigger_1'] == cardTriggerAbilityCase.toString()) {
+          print(2);
           if (getCardCategory(cardId.toString()) == '2') {
+            print(3);
             /////////////////////////////
             // インターセプト (Breaker,Imperiale,Photon,Signal for assault)
             /////////////////////////////
@@ -1089,7 +1101,8 @@ class HomePageState extends State<HomePage> {
                     getCardType(cardId.toString()) == '4')) {
               canUseIntercept = true;
             } else {
-              for (String position in ['1', '2', '3', '4']) {
+              print(4);
+              for (String position in ['1', '2', '3', '4', '5']) {
                 if (gameObject!.yourFieldUnit[position] != null) {
                   if (getCardType(gameObject!.yourFieldUnit[position]) ==
                       getCardType(cardId.toString())) {
@@ -1098,7 +1111,13 @@ class HomePageState extends State<HomePage> {
                 }
               }
             }
+            if (gameObject!.yourCp <
+                int.parse(getCardCost(cardId.toString()))) {
+              canUseIntercept = false;
+            }
+            print(5);
             if (canUseIntercept) {
+              print(6);
               // 同色のカードがフィールドにあるので選択可能
               if (reviewingTriggerCardPosition == 1) {
                 attackStatusBloc.canAttackEventSink
@@ -1260,9 +1279,13 @@ class HomePageState extends State<HomePage> {
   */
   void useInterceptCardForField(int cardId, int activeIndex) async {
     // (Breaker,Imperiale,Photon,Signal for assault)
-    usedTriggers.add(cardId);
-    usedInterceptCardPosition.add(activeIndex + 1);
-    onChainYourTriggerCardsDisplay[activeIndex] = null;
+    // ２度押ししていないかチェック
+    if (!usedInterceptCardPosition
+        .any((element) => element == activeIndex + 1)) {
+      usedTriggers.add(cardId);
+      usedInterceptCardPosition.add(activeIndex + 1);
+      onChainYourTriggerCardsDisplay[activeIndex] = null;
+    }
   }
 
   // ユニットカードをフィールドに置くトランザクション実行処理
@@ -1341,11 +1364,29 @@ class HomePageState extends State<HomePage> {
         canUseIntercept = false;
         reviewingTriggerCardPosition = 0;
         calledFieldUnitActionTrans = null;
-        cardTriggerAbilityCase = 2; // カードが攻撃に出た時の能力
         tapCardIndex = index;
+        // 初期化
+        enemySkillTarget = 0;
+        triggerCards = TriggerCards(
+            onChainYourTriggerCards[0],
+            onChainYourTriggerCards[1],
+            onChainYourTriggerCards[2],
+            onChainYourTriggerCards[3]);
+        usedInterceptCardPosition = [];
+        skillMessage = '';
+        usedTriggers = [];
+        cannotDefendUnitPositions = [];
+        selectTargetFlg = false;
+        // 使用可能なインターセプトを初期化
+        canUseIntercept = false;
+        reviewingTriggerCardPosition = 0;
+        calledFieldUnitActionTrans = null;
+        putCardOnFieldType = null;
+        cardTriggerAbilityCase = 2; // カードが攻撃に出た時の能力
         reviewFieldUnitAbility(cardId);
       }
     } else if (message == 'use') {
+      print('isEnemyAttack $isEnemyAttack');
       if (isEnemyAttack == true || isEnemyAttack == false) {
         useInterceptCardForBattle(cardId, index);
       } else {
@@ -1415,6 +1456,16 @@ class HomePageState extends State<HomePage> {
     if (cardInfos != null) {
       var cardInfo = cardInfos[cardId];
       return cardInfo['name'];
+    } else {
+      return '';
+    }
+  }
+
+  // カードコスト
+  String getCardCost(String cardId) {
+    if (cardInfos != null) {
+      var cardInfo = cardInfos[cardId];
+      return cardInfo['cost'];
     } else {
       return '';
     }

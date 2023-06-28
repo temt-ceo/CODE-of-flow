@@ -48,6 +48,8 @@ class AttackStatusBloc {
       _attack_status = 14;
     } else if (event is CanNotUseTriggerEvent) {
       _attack_status = 15;
+    } else if (event is ButtonTapepingEvent) {
+      _attack_status = 19;
     } else if (event is ButtonTapedEvent) {
       _attack_status = 20;
     } else if (event is DisableTriggerIndex1Event) {

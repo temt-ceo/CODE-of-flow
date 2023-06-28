@@ -74,6 +74,7 @@ class DeckEditPageState extends State<DeckEditPage> {
 
   void tapCard(message, cardId, index) {
     if (message == 'tapped') {
+      attackStatusBloc.canAttackEventSink.add(ButtonTapepingEvent());
       setState(() {
         tappedCardId = cardId;
       });
@@ -168,6 +169,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                               const [],
                               null,
                               '',
+                              true,
                               r),
                         ),
                       ])),

@@ -69,8 +69,8 @@ class HomePageState extends State<HomePage> {
   bool showDefenceUnitsCarousel = false;
   bool showUnitTargetCarousel = false;
   int? opponentDefendPosition;
-  List<int>? attackerUsedInterceptCard;
-  List<int>? defenderUsedInterceptCard;
+  List<int> attackerUsedInterceptCard = [];
+  List<int> defenderUsedInterceptCard = [];
   List<int> attackerUsedCardIds = [];
   List<int> defenderUsedCardIds = [];
   VideoPlayerController? vController;
@@ -88,6 +88,7 @@ class HomePageState extends State<HomePage> {
   String skillMessage = '';
   List<int> usedTriggers = [];
   List<int> cannotDefendUnitPositions = [];
+  List<int> opponentFieldUnitPositions = [];
   bool selectTargetFlg = false;
   int reviewingTriggerCardPosition = 0;
   int? cardTriggerAbilityCase;
@@ -114,9 +115,14 @@ class HomePageState extends State<HomePage> {
         var ret = event.data;
         if (ret != null && savedGraphQLId != ret.id) {
           savedGraphQLId = ret.id;
-          print('Player No. ${ret.playerId} => ${ret.type}');
-          print(
-              '*** Subscription event data received: (${ret.id}) ${event.data}');
+          if (ret.type == 'attack' ||
+              ret.type == 'battle_reaction' ||
+              ret.type == 'defence_action' ||
+              ret.type == 'put_card_on_the_field') {
+            print('Player No. ${ret.playerId} => ${ret.type}');
+            print(
+                '*** Subscription event data received: (${ret.id}) ${event.data}');
+          }
           if (ret.type == 'player_matching' && playerId == ret.playerId) {
             String transactionId = ret.message.split(',TransactionID:')[1];
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -330,7 +336,6 @@ class HomePageState extends State<HomePage> {
                       );
                     });
               });
-              return;
             }
             var usedCardIds = msg['usedCardIds'];
             // used_intercept_position
@@ -359,7 +364,6 @@ class HomePageState extends State<HomePage> {
                         );
                       });
                 });
-                return;
               }
             }
             var skillTarget = msg['arg2'];
@@ -384,18 +388,19 @@ class HomePageState extends State<HomePage> {
 
             var usedInterceptPositions = msg['arg4'];
             // 攻撃時に使用したトリガーカード
-            List<int> _defenderUsedInterceptCard = [];
+            List<int> _attackerUsedInterceptCard = [];
             for (var i in usedInterceptPositions) {
-              _defenderUsedInterceptCard.add(i);
+              _attackerUsedInterceptCard.add(i);
             }
-            setState(
-                () => defenderUsedInterceptCard = _defenderUsedInterceptCard);
+            setState(() {
+              attackerUsedInterceptCard = _attackerUsedInterceptCard;
+            });
             isEnemyAttack = true;
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
             String toastMsg = L10n.of(context)!.opponentAttack;
-            if (defenderUsedInterceptCard!.isNotEmpty) {
+            if (defenderUsedInterceptCard.isNotEmpty) {
               toastMsg =
-                  '$toastMsg ${L10n.of(context)!.opponentAttackTrigger(defenderUsedInterceptCard!.length)}';
+                  '$toastMsg ${L10n.of(context)!.opponentAttackTrigger(defenderUsedInterceptCard.length)}';
             }
             WidgetsBinding.instance.addPostFrameCallback((_) {
               showFlash(
@@ -447,13 +452,15 @@ class HomePageState extends State<HomePage> {
             for (var i in msg['attackerUsedCardIds']) {
               _attackerUsedCardIds.add(i);
             }
-            setState(() => attackerUsedCardIds = _attackerUsedCardIds);
             // 防御側が使用中のトリガー/インターセプトカードをセット
             List<int> _defenderUsedCardIds = [];
             for (var i in msg['defenderUsedCardIds']) {
               _defenderUsedCardIds.add(i);
             }
-            setState(() => defenderUsedCardIds = _defenderUsedCardIds);
+            setState(() {
+              attackerUsedCardIds = _attackerUsedCardIds;
+              defenderUsedCardIds = _defenderUsedCardIds;
+            });
 
             /////////////////
             //// Ability ////
@@ -555,15 +562,16 @@ class HomePageState extends State<HomePage> {
               gameObject != null &&
               (gameObject!.you.toString() == ret.playerId ||
                   gameObject!.opponent.toString() == ret.playerId)) {
+            print('##########DEFENCE ACTION Returned##########');
             isBattling = false;
-            // バトルパラメータをnullにする
+            // バトル終結のため、パラメータをnullにする
             setState(() {
               onBattlePosition = null;
               isEnemyAttack = null;
               showDefenceUnitsCarousel = false;
               opponentDefendPosition = null;
-              attackerUsedInterceptCard = null;
-              defenderUsedInterceptCard = null;
+              attackerUsedInterceptCard = [];
+              defenderUsedInterceptCard = [];
               attackerUsedCardIds = [];
               defenderUsedCardIds = [];
               actedCardPosition = null;
@@ -607,18 +615,14 @@ class HomePageState extends State<HomePage> {
     setState(() {
       showDefenceUnitsCarousel = false;
       opponentDefendPosition = activeIndex + 1;
-      defenderUsedInterceptCard = [];
       canUseIntercept = false;
-      attackerUsedCardIds =
-          []; // これはブロックチェーンから取ってくるしかない。相手のトリガーゾーンに何が入っているかは相手の攻撃アクション時にはわからない。
-      defenderUsedCardIds = [];
     });
     // Battle Reaction
     showGameLoading();
     var message = DefenceActionModel(
         opponentDefendPosition!,
-        attackerUsedInterceptCard == null ? [] : attackerUsedInterceptCard!,
-        defenderUsedInterceptCard == null ? [] : defenderUsedInterceptCard!,
+        attackerUsedInterceptCard,
+        defenderUsedInterceptCard,
         attackerUsedCardIds,
         defenderUsedCardIds);
     await apiService.saveGameServerProcess(
@@ -646,7 +650,6 @@ class HomePageState extends State<HomePage> {
   */
   void useInterceptCardForAttack(int cardId, int activeIndex) async {
     // (Titan's lock, Dainsleif, Judge)
-    attackerUsedInterceptCard ??= [];
     // ２度押ししていないかチェック
     if (!usedInterceptCardPosition
         .any((element) => element == activeIndex + 1)) {
@@ -654,7 +657,7 @@ class HomePageState extends State<HomePage> {
       usedInterceptCardPosition.add(activeIndex + 1);
       onChainYourTriggerCardsDisplay[activeIndex] = null;
       setState(() {
-        attackerUsedInterceptCard!.add(activeIndex);
+        attackerUsedInterceptCard.add(activeIndex);
         attackerUsedCardIds.add(cardId);
       });
     }
@@ -668,34 +671,34 @@ class HomePageState extends State<HomePage> {
     if (isEnemyAttack != null) {
       if (isEnemyAttack == true) {
         // ２度押ししていないかチェック
-        if (!defenderUsedInterceptCard!
+        if (!defenderUsedInterceptCard
             .any((element) => element == activeIndex)) {
           setState(() {
-            defenderUsedInterceptCard!.add(activeIndex);
+            defenderUsedInterceptCard.add(activeIndex);
             defenderUsedCardIds.add(cardId);
           });
         }
       } else {
         // ２度押ししていないかチェック
-        if (!attackerUsedInterceptCard!
+        if (!attackerUsedInterceptCard
             .any((element) => element == activeIndex)) {
           setState(() {
-            attackerUsedInterceptCard!.add(activeIndex);
+            attackerUsedInterceptCard.add(activeIndex);
             attackerUsedCardIds.add(cardId);
           });
         }
       }
       // Battle Reaction
-      showGameLoading();
+      // showGameLoading();
       var message = DefenceActionModel(
           opponentDefendPosition!,
-          attackerUsedInterceptCard == null ? [] : attackerUsedInterceptCard!,
-          defenderUsedInterceptCard == null ? [] : defenderUsedInterceptCard!,
+          attackerUsedInterceptCard,
+          defenderUsedInterceptCard,
           attackerUsedCardIds,
           defenderUsedCardIds);
       await apiService.saveGameServerProcess(
           'battle_reaction', jsonEncode(message), gameObject!.you.toString());
-      closeGameLoading();
+      // closeGameLoading();
       onChainYourTriggerCards[activeIndex] = null;
       onChainYourTriggerCardsDisplay[activeIndex] = null;
       debugPrint('== transaction published ==');
@@ -807,7 +810,6 @@ class HomePageState extends State<HomePage> {
               _triggerCards.add(null);
             }
           }
-          print(_triggerCards);
           setState(() {
             onChainYourFieldUnit = _units;
             defaultDropedList = _units.isEmpty ? [null] : _units;
@@ -902,6 +904,13 @@ class HomePageState extends State<HomePage> {
         });
       }
 
+      opponentFieldUnitPositions = [];
+      for (var i = 1; i <= 5; i++) {
+        if (gameObject!.opponentFieldUnit[i.toString()] != null) {
+          opponentFieldUnitPositions.add(i);
+        }
+      }
+
       // 攻撃可能かどうかをコンポーネントに通知
       if (gameObject!.isFirst == gameObject!.isFirstTurn) {
         if (gameObject!.lastTimeTurnend != null) {
@@ -914,29 +923,22 @@ class HomePageState extends State<HomePage> {
             for (var i = 1; i <= 5; i++) {
               // 攻撃可能なユニット
               if (gameObject!.yourFieldUnitAction[i.toString()] == '2') {
-                switch (i) {
-                  case 1:
-                    attackStatusBloc.canAttackEventSink
-                        .add(Index1AttackAllowedEvent());
-                    break;
-                  case 2:
-                    attackStatusBloc.canAttackEventSink
-                        .add(Index2AttackAllowedEvent());
-                    break;
-                  case 3:
-                    attackStatusBloc.canAttackEventSink
-                        .add(Index3AttackAllowedEvent());
-                    break;
-                  case 4:
-                    attackStatusBloc.canAttackEventSink
-                        .add(Index4AttackAllowedEvent());
-                    break;
-                  case 5:
-                    attackStatusBloc.canAttackEventSink
-                        .add(Index5AttackAllowedEvent());
-                    break;
+                if (tapCardIndex == 0 && i == 1) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index1AttackAllowedEvent());
+                } else if (tapCardIndex == 1 && i == 2) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index2AttackAllowedEvent());
+                } else if (tapCardIndex == 2 && i == 3) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index3AttackAllowedEvent());
+                } else if (tapCardIndex == 3 && i == 4) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index4AttackAllowedEvent());
+                } else if (tapCardIndex == 4 && i == 5) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index5AttackAllowedEvent());
                 }
-                cannotDefendUnitPositions.add(i);
               }
             }
           } else {
@@ -1508,6 +1510,7 @@ class HomePageState extends State<HomePage> {
   // カードのタップ時処理 //
   ///////////////////////
   void tapCard(message, cardId, index) {
+    tapCardIndex = index;
     if (message == 'tapped') {
       if (gameObject != null) {
         if (gameObject!.yourAttackingCard == null) {
@@ -1527,7 +1530,6 @@ class HomePageState extends State<HomePage> {
         canUseIntercept = false;
         reviewingTriggerCardPosition = 0;
         calledFieldUnitActionTrans = null;
-        tapCardIndex = index;
         // 初期化
         enemySkillTarget = 0;
         triggerCards = TriggerCards(
@@ -1823,7 +1825,8 @@ class HomePageState extends State<HomePage> {
                     cardInfos,
                     onChainYourTriggerCards,
                     isEnemyAttack,
-                    canOperateTmp,
+                    attackerUsedCardIds,
+        defenderUsedCardIds,
                     r)
                 : Container(),
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
@@ -1853,6 +1856,7 @@ class HomePageState extends State<HomePage> {
                             const [],
                             null,
                             '',
+                            canOperateTmp,
                             r),
                       ),
                       Padding(
@@ -1873,6 +1877,7 @@ class HomePageState extends State<HomePage> {
                             usedTriggers,
                             enemySkillTargetPosition,
                             skillMessage,
+                            canOperateTmp,
                             r),
                       ),
                     ])),
@@ -2595,7 +2600,7 @@ class HomePageState extends State<HomePage> {
                         ? 0
                         : (cannotDefendUnitPositions.isNotEmpty
                             ? cannotDefendUnitPositions.length
-                            : gameObject!.opponentFieldUnitLength),
+                            : opponentFieldUnitPositions.length),
                     itemBuilder: (context, index, realIndex) {
                       // 行動済みのみ
                       if (cannotDefendUnitPositions.isNotEmpty) {
@@ -2608,8 +2613,9 @@ class HomePageState extends State<HomePage> {
                         );
                       } else {
                         // 全体から
-                        var cardId = gameObject!
-                            .opponentFieldUnit[(index + 1).toString()];
+                        var target = opponentFieldUnitPositions[index];
+                        var cardId =
+                            gameObject!.opponentFieldUnit[(target).toString()];
                         return Image.asset(
                           '${imagePath}unit/card_$cardId.jpeg',
                           fit: BoxFit.cover,
@@ -2751,8 +2757,8 @@ class HomePageState extends State<HomePage> {
                       children: [
                         for (var cardId in attackerUsedCardIds)
                           GFImageOverlay(
-                            width: r(67.0),
-                            height: r(100.0),
+                            width: r(80.0),
+                            height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
                                 : '${imagePath}trigger/card_${cardId.toString()}.jpeg'),
@@ -2769,8 +2775,8 @@ class HomePageState extends State<HomePage> {
                       children: [
                         for (var cardId in defenderUsedCardIds)
                           GFImageOverlay(
-                            width: r(67.0),
-                            height: r(100.0),
+                            width: r(80.0),
+                            height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
                                 : '${imagePath}trigger/card_${cardId.toString()}.jpeg'),

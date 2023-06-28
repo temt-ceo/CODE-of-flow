@@ -22,7 +22,7 @@ class DragTargetWidget extends StatefulWidget {
   final GameObject? info;
   final dynamic cardInfos;
   final StringCallback tapCardCallback;
-  int? actedCardPosition;
+  final int? actedCardPosition;
   final bool canOperate;
   final Stream<int> attack_stream;
   final List<dynamic> defaultDropedList;
@@ -31,6 +31,7 @@ class DragTargetWidget extends StatefulWidget {
   final List<int> usedTriggers;
   final int? enemySkillTargetPosition;
   final String skillMessage;
+  final bool tmpCanOperate;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -48,6 +49,7 @@ class DragTargetWidget extends StatefulWidget {
       this.usedTriggers,
       this.enemySkillTargetPosition,
       this.skillMessage,
+      this.tmpCanOperate,
       this.r);
 
   @override
@@ -64,6 +66,7 @@ class DragTargetState extends State<DragTargetWidget> {
   final DropAllowBloc _dropBloc = DropAllowBloc();
   bool canAttack = false;
   int? attackSignalPosition;
+  bool attackAPICalled = false;
 
   void showGameLoading() {
     showDialog(
@@ -90,7 +93,8 @@ class DragTargetState extends State<DragTargetWidget> {
   }
 
   void attack() async {
-    if (widget.actedCardPosition != null) {
+    if (widget.actedCardPosition != null && attackAPICalled == false) {
+      attackAPICalled = true;
       bool canBlock = false;
       for (int i = 1; i <= 5; i++) {
         if (widget.info!.opponentFieldUnit[i.toString()] != null) {
@@ -127,7 +131,7 @@ class DragTargetState extends State<DragTargetWidget> {
         // Valkyrie
         canBlock = false;
       }
-      showGameLoading();
+      // showGameLoading();
       var message;
       if (widget.currentTriggerCards.isEmpty) {
         TriggerCards triggerCards = TriggerCards(null, null, null, null);
@@ -158,12 +162,12 @@ class DragTargetState extends State<DragTargetWidget> {
       }
       await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
-      closeGameLoading();
+      // closeGameLoading();
       debugPrint('== attack transaction published ==');
 
       if (widget.info!.opponentDefendableUnitLength == 0 || canBlock == false) {
         // 敵ユニットがいない場合、そのままダメージへ
-        showGameLoading();
+        // showGameLoading();
         List<int> yourUsedInterceptCard = [];
         List<int> opponentUsedInterceptCard = [];
         List<int> attackerUsedCardIds = [];
@@ -176,7 +180,7 @@ class DragTargetState extends State<DragTargetWidget> {
             defenderUsedCardIds);
         var ret2 = await apiService.saveGameServerProcess('defence_action',
             jsonEncode(message2), widget.info!.you.toString());
-        closeGameLoading();
+        // closeGameLoading();
         debugPrint(
             '== No card can gard, so defence_action transaction published ==');
         debugPrint('== ${ret2.toString()} ==');
@@ -327,11 +331,8 @@ class DragTargetState extends State<DragTargetWidget> {
           builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
             // バトル終了検知
             if (snapshot.data == 4) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                setState(() {
-                  attackSignalPosition = null;
-                });
-              });
+              attackSignalPosition = null;
+              attackAPICalled = false;
             }
             return DragTarget<String>(
                 // onAccept
@@ -426,7 +427,8 @@ class DragTargetState extends State<DragTargetWidget> {
                 return true;
                 // フィールド, Triggerゾーン
               } else {
-                if (widget.canOperate == false) {
+                if (widget.canOperate == false ||
+                    widget.tmpCanOperate == false) {
                   _dropBloc.counterEventSink.add(DropDeniedEvent());
                   return false;
                 }
@@ -542,7 +544,7 @@ class DragTargetState extends State<DragTargetWidget> {
                                     left: widget.r((attackSignalPosition !=
                                                     null &&
                                                 attackSignalPosition! >= 2
-                                            ? widget.r(-110.0)
+                                            ? widget.r(-100.0)
                                             : widget.r(50.0)) +
                                         (attackSignalPosition != null
                                             ? widget.r(

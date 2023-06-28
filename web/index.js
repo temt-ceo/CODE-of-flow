@@ -99,6 +99,7 @@ window.isRegistered = async function (address) {
   })
   return result;
 };
+var counter = 0;
 window.getCurrentStatus = async function (address) {
   const result = await fcl.query({
     cadence: `
@@ -114,7 +115,10 @@ window.getCurrentStatus = async function (address) {
       arg(address, t.Address)
     ]
   });
-  // console.log(result);
+  if (counter % 10 == 0) {
+    console.log(result);
+  }
+  counter++;
   return result;
 };
 window.getMariganCards = async function (address, playerId) {

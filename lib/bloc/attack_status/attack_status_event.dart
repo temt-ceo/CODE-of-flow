@@ -30,6 +30,8 @@ class CanNotUseTriggerEvent extends AttackEvent {}
 
 class ButtonTapedEvent extends AttackEvent {}
 
+class ButtonTapepingEvent extends AttackEvent {}
+
 class DisableTriggerIndex1Event extends AttackEvent {}
 
 class DisableTriggerIndex2Event extends AttackEvent {}

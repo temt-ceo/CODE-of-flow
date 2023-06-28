@@ -20,14 +20,15 @@ class OnGoingGameInfo extends StatefulWidget {
   final String cardText;
   final TimeupCallback setCanOperate;
   final Stream<int> attack_stream;
-  int? opponentDefendPosition;
-  List<int>? attackerUsedInterceptCard;
-  List<int>? defenderUsedInterceptCard;
-  int? actedCardPosition;
+  final int? opponentDefendPosition;
+  final List<int> attackerUsedInterceptCard;
+  final List<int> defenderUsedInterceptCard;
+  final int? actedCardPosition;
   final dynamic cardInfos;
   final List<int?> currentTriggerCards;
   final bool? isEnemyAttack;
-  final bool canOperate;
+  final List<int> attackerUsedCardIds;
+  final List<int> defenderUsedCardIds;
   final ResponsiveSizeChangeFunction r;
 
   OnGoingGameInfo(
@@ -42,7 +43,8 @@ class OnGoingGameInfo extends StatefulWidget {
       this.cardInfos,
       this.currentTriggerCards,
       this.isEnemyAttack,
-      this.canOperate,
+      this.attackerUsedCardIds,
+      this.defenderUsedCardIds,
       this.r);
 
   @override
@@ -124,28 +126,18 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   }
 
   void battleResultDecided() async {
-    // if (apiCalled == false && widget.isEnemyAttack != null) {
     if (apiCalled == false) {
-      debugPrint('battleResultDecided');
-
       apiCalled = true;
+      debugPrint('===↓↓↓ defence_action ↓↓↓===');
+
       var message = DefenceActionModel(
           widget.opponentDefendPosition,
-          widget.attackerUsedInterceptCard == null
-              ? []
-              : widget.attackerUsedInterceptCard!,
-          widget.defenderUsedInterceptCard == null
-              ? []
-              : widget.defenderUsedInterceptCard!,
-          [],
-          []);
-      widget.actedCardPosition = null;
-      widget.opponentDefendPosition = null;
-      widget.attackerUsedInterceptCard = null;
-      widget.defenderUsedInterceptCard = null;
+          widget.attackerUsedInterceptCard,
+          widget.defenderUsedInterceptCard,
+          widget.attackerUsedCardIds,
+          widget.defenderUsedCardIds);
       await apiService.saveGameServerProcess(
           'defence_action', jsonEncode(message), widget.info!.you.toString());
-      debugPrint('===↓↓↓ defence_action ↓↓↓===');
     }
   }
 
@@ -197,8 +189,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               );
             });
       }
-      // 25秒経過時も判定処理へ
-    } else if (now.difference(battleStartTime).inSeconds > 25) {
+      // 15秒経過時も判定処理へ
+    } else if (now.difference(battleStartTime).inSeconds > 15) {
       battleResultDecided();
       battleReactionUpdateTime = null;
     }
@@ -266,8 +258,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
         // ０になった後、50秒経過してもターンが終わっていない場合も実施
-        if (turnEndTime.difference(now).inSeconds == 0 ||
-            turnEndTime.difference(now).inSeconds % 50 == 0) {
+        if (turnEndTime.difference(now).inSeconds == -6 ||
+            turnEndTime.difference(now).inSeconds % 15 == 0) {
           // 対戦相手側の画面で実施(こちら側はターン終了ボタンがあるので)
           if (widget.info!.isFirst != widget.info!.isFirstTurn) {
             if (canTurnEnd == true) {
@@ -317,16 +309,14 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
         builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
           // バトルリアクション時間更新
           if (snapshot.data == 2) {
-            apiCalled = false;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              setState(() {
-                battleReactionUpdateTime = DateTime.now();
-              });
-            });
+            battleReactionUpdateTime = DateTime.now();
           }
           // バトル終了時刻検知
           if (snapshot.data == 3) {
             battleResultDecided();
+          }
+          if (snapshot.data == 4) {
+            apiCalled = false;
           }
 
           return Stack(children: <Widget>[
@@ -552,10 +542,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             Positioned(
-                left: widget.r(1050.0),
-                top: widget.r(0.0),
+                left: widget.r(900.0),
+                top: widget.r(-8.0),
                 child: Text(
-                    'Roound $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
+                    'Round $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,

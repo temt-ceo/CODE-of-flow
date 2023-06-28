@@ -646,6 +646,7 @@ class HomePageState extends State<HomePage> {
   */
   void useInterceptCardForAttack(int cardId, int activeIndex) async {
     // (Titan's lock, Dainsleif, Judge)
+    attackerUsedInterceptCard ??= [];
     // ２度押ししていないかチェック
     if (!usedInterceptCardPosition
         .any((element) => element == activeIndex + 1)) {
@@ -910,7 +911,34 @@ class HomePageState extends State<HomePage> {
           final now = DateTime.now();
 
           if (turnEndTime.difference(now).inSeconds > 0) {
-            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+            for (var i = 1; i <= 5; i++) {
+              // 攻撃可能なユニット
+              if (gameObject!.yourFieldUnitAction[i.toString()] == '2') {
+                switch (i) {
+                  case 1:
+                    attackStatusBloc.canAttackEventSink
+                        .add(Index1AttackAllowedEvent());
+                    break;
+                  case 2:
+                    attackStatusBloc.canAttackEventSink
+                        .add(Index2AttackAllowedEvent());
+                    break;
+                  case 3:
+                    attackStatusBloc.canAttackEventSink
+                        .add(Index3AttackAllowedEvent());
+                    break;
+                  case 4:
+                    attackStatusBloc.canAttackEventSink
+                        .add(Index4AttackAllowedEvent());
+                    break;
+                  case 5:
+                    attackStatusBloc.canAttackEventSink
+                        .add(Index5AttackAllowedEvent());
+                    break;
+                }
+                cannotDefendUnitPositions.add(i);
+              }
+            }
           } else {
             attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
           }

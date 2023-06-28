@@ -22,8 +22,16 @@ class AttackStatusBloc {
   // business logic
 
   void _mapEventToState(AttackEvent event) {
-    if (event is AttackAllowedEvent) {
-      _attack_status = 1;
+    if (event is Index1AttackAllowedEvent) {
+      _attack_status = 31;
+    } else if (event is Index2AttackAllowedEvent) {
+      _attack_status = 32;
+    } else if (event is Index3AttackAllowedEvent) {
+      _attack_status = 33;
+    } else if (event is Index4AttackAllowedEvent) {
+      _attack_status = 34;
+    } else if (event is Index5AttackAllowedEvent) {
+      _attack_status = 35;
     } else if (event is BattlingEvent) {
       _attack_status = 2;
     } else if (event is BattleFinishingEvent) {

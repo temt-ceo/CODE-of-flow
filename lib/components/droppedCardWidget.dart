@@ -42,6 +42,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
   bool canUseInterept2 = false;
   bool canUseInterept3 = false;
   bool canUseInterept4 = false;
+  bool canAttack1 = false;
+  bool canAttack2 = false;
+  bool canAttack3 = false;
+  bool canAttack4 = false;
+  bool canAttack5 = false;
 
   ////////////////////////////
   ///////    build     ///////
@@ -77,7 +82,24 @@ class DroppedCardState extends State<DroppedCardWidget> {
             canUseInterept3 = false;
           } else if (snapshot.data == 24) {
             canUseInterept4 = false;
+          } else if (snapshot.data == 31) {
+            canAttack1 = true;
+          } else if (snapshot.data == 32) {
+            canAttack2 = true;
+          } else if (snapshot.data == 33) {
+            canAttack3 = true;
+          } else if (snapshot.data == 34) {
+            canAttack4 = true;
+          } else if (snapshot.data == 35) {
+            canAttack5 = true;
+          } else {
+            canAttack1 = false;
+            canAttack2 = false;
+            canAttack3 = false;
+            canAttack4 = false;
+            canAttack5 = false;
           }
+
           return Positioned(
               left: widget.left,
               bottom: widget.label == 'deck'
@@ -231,7 +253,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
                             ))
                         : widget.label == 'unit' &&
                                 widget.isSecondRow == false &&
-                                snapshot.data == 1
+                                ((canAttack1 == true && widget.index == 0) ||
+                                    (canAttack2 == true && widget.index == 1) ||
+                                    (canAttack3 == true && widget.index == 2) ||
+                                    (canAttack4 == true && widget.index == 3) ||
+                                    (canAttack5 == true && widget.index == 4))
                             ? Positioned(
                                 left: widget.r(23.0),
                                 top: widget.r(60.0),

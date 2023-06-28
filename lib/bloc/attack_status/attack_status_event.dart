@@ -1,6 +1,14 @@
 abstract class AttackEvent {}
 
-class AttackAllowedEvent extends AttackEvent {}
+class Index1AttackAllowedEvent extends AttackEvent {}
+
+class Index2AttackAllowedEvent extends AttackEvent {}
+
+class Index3AttackAllowedEvent extends AttackEvent {}
+
+class Index4AttackAllowedEvent extends AttackEvent {}
+
+class Index5AttackAllowedEvent extends AttackEvent {}
 
 class BattlingEvent extends AttackEvent {}
 

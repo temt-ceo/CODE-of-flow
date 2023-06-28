@@ -646,6 +646,7 @@ class HomePageState extends State<HomePage> {
   */
   void useInterceptCardForAttack(int cardId, int activeIndex) async {
     // (Titan's lock, Dainsleif, Judge)
+    attackerUsedInterceptCard ??= [];
     // ２度押ししていないかチェック
     if (!usedInterceptCardPosition
         .any((element) => element == activeIndex + 1)) {
@@ -910,7 +911,28 @@ class HomePageState extends State<HomePage> {
           final now = DateTime.now();
 
           if (turnEndTime.difference(now).inSeconds > 0) {
-            attackStatusBloc.canAttackEventSink.add(AttackAllowedEvent());
+            for (var i = 1; i <= 5; i++) {
+              // 攻撃可能なユニット
+              if (gameObject!.yourFieldUnitAction[i.toString()] == '2') {
+                if (tapCardIndex == 0 && i == 1) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index1AttackAllowedEvent());
+                } else if (tapCardIndex == 1 && i == 2) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index2AttackAllowedEvent());
+                } else if (tapCardIndex == 2 && i == 3) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index3AttackAllowedEvent());
+                } else if (tapCardIndex == 3 && i == 4) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index4AttackAllowedEvent());
+                } else if (tapCardIndex == 4 && i == 5) {
+                  attackStatusBloc.canAttackEventSink
+                      .add(Index5AttackAllowedEvent());
+                }
+                cannotDefendUnitPositions.add(i);
+              }
+            }
           } else {
             attackStatusBloc.canAttackEventSink.add(AttackNotAllowedEvent());
           }
@@ -1480,6 +1502,7 @@ class HomePageState extends State<HomePage> {
   // カードのタップ時処理 //
   ///////////////////////
   void tapCard(message, cardId, index) {
+    tapCardIndex = index;
     if (message == 'tapped') {
       if (gameObject != null) {
         if (gameObject!.yourAttackingCard == null) {
@@ -1499,7 +1522,6 @@ class HomePageState extends State<HomePage> {
         canUseIntercept = false;
         reviewingTriggerCardPosition = 0;
         calledFieldUnitActionTrans = null;
-        tapCardIndex = index;
         // 初期化
         enemySkillTarget = 0;
         triggerCards = TriggerCards(

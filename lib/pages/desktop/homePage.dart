@@ -88,6 +88,7 @@ class HomePageState extends State<HomePage> {
   String skillMessage = '';
   List<int> usedTriggers = [];
   List<int> cannotDefendUnitPositions = [];
+  List<int> opponentFieldUnitPositions = [];
   bool selectTargetFlg = false;
   int reviewingTriggerCardPosition = 0;
   int? cardTriggerAbilityCase;
@@ -902,6 +903,13 @@ class HomePageState extends State<HomePage> {
         });
       }
 
+      opponentFieldUnitPositions = [];
+      for (var i = 1; i <= 5; i++) {
+        if (gameObject!.opponentFieldUnit[i.toString()] != null) {
+          opponentFieldUnitPositions.add(i);
+        }
+      }
+
       // 攻撃可能かどうかをコンポーネントに通知
       if (gameObject!.isFirst == gameObject!.isFirstTurn) {
         if (gameObject!.lastTimeTurnend != null) {
@@ -930,7 +938,6 @@ class HomePageState extends State<HomePage> {
                   attackStatusBloc.canAttackEventSink
                       .add(Index5AttackAllowedEvent());
                 }
-                cannotDefendUnitPositions.add(i);
               }
             }
           } else {
@@ -2602,8 +2609,9 @@ class HomePageState extends State<HomePage> {
                         );
                       } else {
                         // 全体から
-                        var cardId = gameObject!
-                            .opponentFieldUnit[(index + 1).toString()];
+                        var target = opponentFieldUnitPositions[index];
+                        var cardId =
+                            gameObject!.opponentFieldUnit[(target).toString()];
                         return Image.asset(
                           '${imagePath}unit/card_$cardId.jpeg',
                           fit: BoxFit.cover,

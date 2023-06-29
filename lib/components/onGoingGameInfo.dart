@@ -23,7 +23,8 @@ class OnGoingGameInfo extends StatefulWidget {
   final int? opponentDefendPosition;
   final List<int> attackerUsedInterceptCard;
   final List<int> defenderUsedInterceptCard;
-  final int? actedCardPosition;
+  final String yourBattleCardId;
+  final String opponentBattleCardId;
   final dynamic cardInfos;
   final List<int?> currentTriggerCards;
   final bool? isEnemyAttack;
@@ -39,7 +40,8 @@ class OnGoingGameInfo extends StatefulWidget {
       this.opponentDefendPosition,
       this.attackerUsedInterceptCard,
       this.defenderUsedInterceptCard,
-      this.actedCardPosition,
+      this.yourBattleCardId,
+      this.opponentBattleCardId,
       this.cardInfos,
       this.currentTriggerCards,
       this.isEnemyAttack,
@@ -65,6 +67,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
   DateTime? battleReactionUpdateTime;
   int? reactionLimitTime;
   bool apiCalled = false;
+  String flashMsg = '';
 
   ////////////////////////////
   ///////  initState   ///////
@@ -97,12 +100,14 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
       if (loadingContext != null) {
         Navigator.of(loadingContext!, rootNavigator: true).pop();
       }
-    } catch (e) {}
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   // Turn End
   void turnEnd(fromOpponent) async {
-    showGameLoading();
+    // showGameLoading();
     var message;
     if (widget.currentTriggerCards.isEmpty || fromOpponent) {
       TriggerCards triggerCards = TriggerCards(null, null, null, null);
@@ -115,84 +120,92 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           widget.currentTriggerCards[3]);
       message = TurnEndModel(fromOpponent, triggerCards);
     }
+    if (fromOpponent == false) {
+      showMessage(3, 'ok, the turn will soon change.', null);
+    }
     await apiService.saveGameServerProcess(
         'turn_change',
         jsonEncode(message),
         fromOpponent
             ? widget.info!.opponent.toString()
             : widget.info!.you.toString());
-    closeGameLoading();
-    debugPrint('transaction published');
+    // closeGameLoading();
   }
 
-  void battleResultDecided() async {
-    if (apiCalled == false) {
-      apiCalled = true;
-      debugPrint('===↓↓↓ defence_action ↓↓↓===');
-
-      var message = DefenceActionModel(
-          widget.opponentDefendPosition,
-          widget.attackerUsedInterceptCard,
-          widget.defenderUsedInterceptCard,
-          widget.attackerUsedCardIds,
-          widget.defenderUsedCardIds);
-      await apiService.saveGameServerProcess(
-          'defence_action', jsonEncode(message), widget.info!.you.toString());
+  void showMessage(int second, String content, String? title) {
+    try {
+      showFlash(
+          context: context,
+          duration: Duration(seconds: second),
+          builder: (context, controller) {
+            return Flash(
+              controller: controller,
+              position: FlashPosition.bottom,
+              child: FlashBar(
+                controller: controller,
+                content:
+                    Text(content, style: TextStyle(fontSize: widget.r(20.0))),
+                indicatorColor: Colors.blue,
+                icon: const Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.blue,
+                ),
+              ),
+            );
+          });
+    } catch (e) {
+      debugPrint(e.toString());
     }
   }
 
   // Defence Action
-  void defenceActionDecision(DateTime battleStartTime, DateTime now) {
-    if (battleReactionUpdateTime != null &&
+  void defenceActionDecision(DateTime? battleStartTime, DateTime now) {
+    flashMsg = '';
+    if (widget.opponentBattleCardId != '' && widget.yourBattleCardId != '') {
+      flashMsg = widget.cardInfos[widget.yourBattleCardId]['name'] +
+          ' VS ' +
+          widget.cardInfos[widget.opponentBattleCardId]['name'];
+    }
+    // 15秒経過時は判定処理へ
+    if (battleStartTime != null &&
+        now.difference(battleStartTime).inSeconds > 15) {
+      battleResultDecided();
+      battleReactionUpdateTime = null;
+    } else if (battleReactionUpdateTime != null &&
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        setState(() {
-          reactionLimitTime =
-              7 - now.difference(battleReactionUpdateTime!).inSeconds;
-        });
-      });
+      reactionLimitTime =
+          7 - now.difference(battleReactionUpdateTime!).inSeconds;
       if (reactionLimitTime != null && reactionLimitTime! < 0) {
-        String flashMsg = '';
-        if (widget.opponentDefendPosition != null) {
-          String y_card_id =
-              widget.info!.yourFieldUnit[widget.actedCardPosition.toString()];
-          String o_card_id = widget
-              .info!.opponentFieldUnit[widget.actedCardPosition.toString()];
-          flashMsg = widget.cardInfos[y_card_id]['name'] +
-              ' VS ' +
-              widget.cardInfos[o_card_id]['name'];
-        }
-
         // 時間制限を超えた場合、バトル判定処理実行へ
         battleResultDecided();
         battleReactionUpdateTime = null;
-        showFlash(
-            context: context,
-            duration: const Duration(seconds: 5),
-            builder: (context, controller) {
-              return Flash(
-                controller: controller,
-                position: FlashPosition.bottom,
-                child: FlashBar(
-                  controller: controller,
-                  title: Text(widget.opponentDefendPosition == null
-                      ? 'Player Damage!'
-                      : 'Battle!!'),
-                  content: Text(
-                      widget.opponentDefendPosition == null ? '' : flashMsg),
-                  indicatorColor: Colors.blue,
-                  icon: const Icon(
-                    Icons.info_outline_rounded,
-                    color: Colors.blue,
-                  ),
-                ),
-              );
-            });
       }
-      // 15秒経過時も判定処理へ
-    } else if (now.difference(battleStartTime).inSeconds > 15) {
-      battleResultDecided();
-      battleReactionUpdateTime = null;
+    }
+  }
+
+  void battleResultDecided() async {
+    // 攻められる側またはリロードの跡がなければ実行
+    if (widget.isEnemyAttack != null ||
+        widget.info!.isFirst != widget.info!.isFirstTurn) {
+      if (apiCalled == false) {
+        apiCalled = true;
+        debugPrint('===↓↓↓ defence_action ↓↓↓===');
+
+        var message = DefenceActionModel(
+            widget.opponentDefendPosition,
+            widget.attackerUsedInterceptCard,
+            widget.defenderUsedInterceptCard,
+            widget.attackerUsedCardIds,
+            widget.defenderUsedCardIds);
+        await apiService.saveGameServerProcess(
+            'defence_action', jsonEncode(message), widget.info!.you.toString());
+        showMessage(
+            7,
+            widget.opponentDefendPosition == null
+                ? 'Player Damage!'
+                : 'Battle!! $flashMsg',
+            'Please wait until the transaction is complete.');
+      }
     }
   }
 
@@ -227,39 +240,29 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
           double.parse(widget.info!.lastTimeTurnend!).toInt() * 1000);
       var turnEndTime = lastTurnEndTime.add(const Duration(seconds: 65));
       final now = DateTime.now();
-      late DateTime battleStartTime;
+      DateTime? battleStartTime;
 
       // バトル中ならそれ以前の時間まで止める
-      if (widget.info!.yourAttackingCard != null &&
-          widget.info!.isFirst == widget.info!.isFirstTurn) {
-        var attackedTime = widget.info!.yourAttackingCard['attacked_time'];
-        if (attackedTime != null) {
-          battleStartTime = DateTime.fromMillisecondsSinceEpoch(
-              double.parse(attackedTime).toInt() * 1000);
-          if (now.difference(battleStartTime).inSeconds > 0) {
-            turnEndTime = turnEndTime.add(
-                Duration(seconds: now.difference(battleStartTime).inSeconds));
-          }
-        }
-        defenceActionDecision(battleStartTime, now);
-      } else if (widget.info!.enemyAttackingCard != null &&
-          widget.info!.isFirst != widget.info!.isFirstTurn) {
-        var attackedTime = widget.info!.enemyAttackingCard['attacked_time'];
-        if (attackedTime != null) {
-          battleStartTime = DateTime.fromMillisecondsSinceEpoch(
-              double.parse(attackedTime).toInt() * 1000);
-          if (now.difference(battleStartTime).inSeconds > 0) {
-            turnEndTime = turnEndTime.add(
-                Duration(seconds: now.difference(battleStartTime).inSeconds));
-          }
-        }
-        defenceActionDecision(battleStartTime, now);
+      var attackedTime;
+      if (widget.info!.yourAttackingCard != null) {
+        attackedTime = widget.info!.yourAttackingCard['attacked_time'];
+      } else if (widget.info!.enemyAttackingCard != null) {
+        attackedTime = widget.info!.enemyAttackingCard['attacked_time'];
       }
+      if (attackedTime != null) {
+        battleStartTime = DateTime.fromMillisecondsSinceEpoch(
+            double.parse(attackedTime).toInt() * 1000);
+        if (now.difference(battleStartTime).inSeconds > 0) {
+          turnEndTime = turnEndTime.add(
+              Duration(seconds: now.difference(battleStartTime).inSeconds));
+        }
+      }
+      defenceActionDecision(battleStartTime, now);
 
       if (turnEndTime.difference(now).inSeconds <= 0) {
-        // ０になった後、50秒経過してもターンが終わっていない場合も実施
+        // ０になった後、6秒経過して10秒おきにターンが終わっていない場合も実施
         if (turnEndTime.difference(now).inSeconds == -6 ||
-            turnEndTime.difference(now).inSeconds % 15 == 0) {
+            turnEndTime.difference(now).inSeconds % 10 == 6) {
           // 対戦相手側の画面で実施(こちら側はターン終了ボタンがあるので)
           if (widget.info!.isFirst != widget.info!.isFirstTurn) {
             if (canTurnEnd == true) {
@@ -586,6 +589,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     progressColor: const Color.fromARGB(255, 1, 247, 42),
                   )),
             ),
+            // ターンチェンジボタン
             Positioned(
                 left: widget.r(1120.0),
                 top: widget.r(465.0),
@@ -627,19 +631,20 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     progressColor: const Color.fromARGB(255, 1, 247, 42),
                   ),
                 )),
-            Visibility(
-                visible: reactionLimitTime != null && reactionLimitTime! > 0,
-                child: Positioned(
-                    left: widget.r(900),
-                    top: widget.r(300),
-                    child: SizedBox(
-                        width: widget.r(100.0),
-                        child: Center(
-                            child: Text(
-                          '0:0${reactionLimitTime.toString()}',
-                          style: TextStyle(
-                              color: Colors.white, fontSize: widget.r(42.0)),
-                        ))))),
+            // ReactionLimitTime
+            // Visibility(
+            //     visible: reactionLimitTime != null && reactionLimitTime! > 0,
+            //     child: Positioned(
+            //         left: widget.r(900),
+            //         top: widget.r(300),
+            //         child: SizedBox(
+            //             width: widget.r(100.0),
+            //             child: Center(
+            //                 child: Text(
+            //               '0:0${reactionLimitTime.toString()}',
+            //               style: TextStyle(
+            //                   color: Colors.white, fontSize: widget.r(42.0)),
+            //             ))))),
           ]);
         });
   }

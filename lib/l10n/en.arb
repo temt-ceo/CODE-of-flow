@@ -45,5 +45,6 @@
   "activatedAbility": "'s ability is activated!",
   "activatedEffect": "'s effect is activated!",
   "interceptAbailable": "Intercept card is available (limit:5 seconds)",
-  "tooEarly": "Oops, no rush, Speed Move is not reflected in the blockchain yet."
+  "tooEarly": "Oops, no rush, Speed Move is not reflected in the blockchain yet.",
+  "cannotMove": " cannot move!"
 }

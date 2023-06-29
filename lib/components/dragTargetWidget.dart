@@ -32,6 +32,7 @@ class DragTargetWidget extends StatefulWidget {
   final int? enemySkillTargetPosition;
   final String skillMessage;
   final bool tmpCanOperate;
+  final bool attackIsReady;
   final ResponsiveSizeChangeFunction r;
 
   DragTargetWidget(
@@ -50,6 +51,7 @@ class DragTargetWidget extends StatefulWidget {
       this.enemySkillTargetPosition,
       this.skillMessage,
       this.tmpCanOperate,
+      this.attackIsReady,
       this.r);
 
   @override
@@ -115,15 +117,8 @@ class DragTargetState extends State<DragTargetWidget> {
           // Titan's Lock
           canBlock = false;
         }
-      }
-      if (widget.enemySkillTargetPosition != null) {
-        if (widget.info!.opponentFieldUnitBpAmountOfChange[
-                widget.enemySkillTargetPosition.toString()] !=
-            null) {
-          var opponentBpChange = widget.info!.opponentFieldUnitBpAmountOfChange[
-              widget.enemySkillTargetPosition.toString()];
-          // if TODO
-        }
+        print(
+            'widget.info!.opponentDefendableUnitLength ${widget.info!.opponentDefendableUnitLength}');
       }
       if (widget.info!
               .yourFieldUnit[(widget.actedCardPosition! + 1).toString()] ==
@@ -152,7 +147,7 @@ class DragTargetState extends State<DragTargetWidget> {
             widget.currentTriggerCards[3]);
         message = AttackModel(
           (widget.actedCardPosition! + 1),
-          null,
+          widget.enemySkillTargetPosition, // enemy_skill_target
           triggerCards,
           widget.usedInterceptCardPosition,
           widget.usedTriggers,
@@ -160,10 +155,11 @@ class DragTargetState extends State<DragTargetWidget> {
           widget.skillMessage,
         );
       }
+      print(
+          'widget.info!.opponentDefendableUnitLength ${widget.info!.opponentDefendableUnitLength}');
       await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
       // closeGameLoading();
-      debugPrint('== attack transaction published ==');
 
       if (widget.info!.opponentDefendableUnitLength == 0 || canBlock == false) {
         // 敵ユニットがいない場合、そのままダメージへ
@@ -178,15 +174,9 @@ class DragTargetState extends State<DragTargetWidget> {
             opponentUsedInterceptCard,
             attackerUsedCardIds,
             defenderUsedCardIds);
-        var ret2 = await apiService.saveGameServerProcess('defence_action',
+        await apiService.saveGameServerProcess('defence_action',
             jsonEncode(message2), widget.info!.you.toString());
         // closeGameLoading();
-        debugPrint(
-            '== No card can gard, so defence_action transaction published ==');
-        debugPrint('== ${ret2.toString()} ==');
-        if (ret2 != null) {
-          debugPrint(ret2.message);
-        }
       }
     }
   }
@@ -317,7 +307,8 @@ class DragTargetState extends State<DragTargetWidget> {
     // Attack card.
     if (widget.label == 'unit' &&
         widget.actedCardPosition != null &&
-        attackSignalPosition == null) {
+        attackSignalPosition == null &&
+        widget.attackIsReady == true) {
       attackSignalPosition = widget.actedCardPosition;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         attack();
@@ -798,7 +789,7 @@ class DragTargetState extends State<DragTargetWidget> {
                             child: Positioned(
                               left: widget.r((attackSignalPosition != null &&
                                           attackSignalPosition! >= 2
-                                      ? widget.r(-120.0)
+                                      ? widget.r(-130.0)
                                       : widget.r(50.0)) +
                                   (attackSignalPosition != null
                                       ? widget.r(attackSignalPosition! * 140.0)

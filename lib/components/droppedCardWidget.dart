@@ -75,6 +75,11 @@ class DroppedCardState extends State<DroppedCardWidget> {
           } else if (snapshot.data == 19) {
           } else if (snapshot.data == 20) {
             isTapped = false;
+            canAttack1 = false;
+            canAttack2 = false;
+            canAttack3 = false;
+            canAttack4 = false;
+            canAttack5 = false;
           } else if (snapshot.data == 21) {
             canUseInterept1 = false;
           } else if (snapshot.data == 22) {

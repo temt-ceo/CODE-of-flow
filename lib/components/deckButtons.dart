@@ -213,7 +213,6 @@ class DeckButtonsState extends State<DeckButtons> {
       // Call GraphQL method.
       var ret = await apiService.saveGameServerProcess(
           'save_deck', jsonEncode(widget.savedDeck), player.playerId);
-      debugPrint('transaction published');
       if (ret != null) {
         // debugPrint(ret.message);
       }

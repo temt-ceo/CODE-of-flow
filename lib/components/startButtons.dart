@@ -146,7 +146,6 @@ class StartButtonsState extends State<StartButtons> {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       timerObj = timer;
       if (walletUser.addr == '') {
-        print('Not Login.');
         // widget.callback('other-game-info', player.playerId,
         //     GameObject.getOtherGameInfo(), null, null);
       } else {
@@ -284,6 +283,7 @@ class StartButtonsState extends State<StartButtons> {
           } else if (objJs['game_started'] == true ||
               objJs['game_started'] == false) {
             if (objJs['game_started'] == false && gameStarted == false) {
+              getBalanceFlg = true;
               dynamic data = await promiseToFuture(
                   getMariganCards(walletUser.addr, int.parse(player.playerId)));
               widget.callback('matching-success', player.playerId,
@@ -292,7 +292,7 @@ class StartButtonsState extends State<StartButtons> {
                 try {
                   Navigator.pop(dcontext1!);
                 } catch (e) {
-                  print(e);
+                  debugPrint(e.toString());
                 }
               }
               battleStartAnimation();
@@ -841,6 +841,7 @@ class StartButtonsState extends State<StartButtons> {
                   fontSize: widget.r(16.0)),
             ),
           ),
+          // PlayerName
           Positioned(
               left: 0.0,
               top: widget.r(232.0),

@@ -169,7 +169,7 @@ window.getStarterDeck = async function () {
     args: (arg, t) => [
     ]
   });
-  console.log(result);
+  // console.log(result);
   return result
 };
 window.getCardInfo = async function () {
@@ -183,7 +183,7 @@ window.getCardInfo = async function () {
     args: (arg, t) => [
     ]
   });
-  console.log(result);
+  // console.log(result);
   return result
 };
 

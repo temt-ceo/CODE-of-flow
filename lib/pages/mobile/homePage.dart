@@ -241,12 +241,17 @@ class HomePageState extends State<HomePage> {
                 messageAlreadyShown = true;
               }
               if (usedCardIds[0] == 24) {
-                var target = gameObject!.yourFieldUnit[skillTarget];
                 // Titan's Lock
-                toastMsg =
-                    "$toastMsg Titan's Lock${L10n.of(context)!.activatedEffect} ${getCardName(target)}${L10n.of(context)!.cannotMove}";
-                yourDefendableUnitPositions.removeWhere(
-                    (element) => element == int.parse(skillTarget));
+                var target = gameObject!.yourFieldUnit[skillTarget.toString()];
+                if (target != null) {
+                  toastMsg =
+                      "$toastMsg Titan's Lock${L10n.of(context)!.activatedEffect} ${getCardName(target)}${L10n.of(context)!.cannotMove}";
+                  yourDefendableUnitPositions.removeWhere((element) {
+                    print(
+                        'element == skillTarget: ${element == skillTarget} element: $element skillTarget: $skillTarget');
+                    return element == skillTarget;
+                  });
+                }
               }
             }
             bool canBlock = msg['canBlock'];
@@ -427,11 +432,13 @@ class HomePageState extends State<HomePage> {
   **  ブロック処理
   */
   void block(int activeIndex) async {
-    setState(() {
-      showDefenceUnitsCarousel = false;
-      opponentDefendPosition = activeIndex + 1;
-      canUseIntercept = false;
-    });
+    if (mounted) {
+      setState(() {
+        showDefenceUnitsCarousel = false;
+        opponentDefendPosition = activeIndex + 1;
+        canUseIntercept = false;
+      });
+    }
     // Battle Reaction
     // showGameLoading();
     var message = DefenceActionModel(
@@ -666,7 +673,6 @@ class HomePageState extends State<HomePage> {
               _triggerCards.add(null);
             }
           }
-          print('_units $_units');
           setState(() {
             onChainYourFieldUnit = _units;
             defaultDropedList = _units.isEmpty ? [null] : _units;
@@ -1314,7 +1320,6 @@ class HomePageState extends State<HomePage> {
     } else {
       // カードが攻撃に出た時の能力の場合
       if (cardTriggerAbilityCase == 2) {
-        print('enemySkillTargetPosition $enemySkillTargetPosition');
         setState(() {
           enemySkillTargetPosition = enemySkillTarget;
           attackIsReady = true;

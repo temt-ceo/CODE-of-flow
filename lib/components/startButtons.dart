@@ -896,29 +896,30 @@ class StartButtonsState extends State<StartButtons> {
                     player.uuid != '' &&
                     gameStarted == false,
                 child: SizedBox(
-                    width: widget.r(130.0),
-                    child: FloatingActionButton(
-                        backgroundColor: Colors.transparent,
-                        onPressed: () async {
-                          if (gameStarted == true || cyberEnergy == null) {
-                          } else {
-                            if (cyberEnergy! < 30) {
-                              buyCyberEnergy();
-                            } else {
-                              //GraphQL:player_matching
-                              await gameStart();
-                              countdown();
-                            }
-                          }
-                        },
-                        tooltip: 'Play',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
-                          child: Image.asset(
-                            '${imagePath}button/playButton.png',
-                            fit: BoxFit.cover,
-                          ),
-                        )))),
+                    width: widget.r(120.0),
+                    child: FittedBox(
+                        child: FloatingActionButton(
+                            backgroundColor: Colors.transparent,
+                            onPressed: () async {
+                              if (gameStarted == true || cyberEnergy == null) {
+                              } else {
+                                if (cyberEnergy! < 30) {
+                                  buyCyberEnergy();
+                                } else {
+                                  //GraphQL:player_matching
+                                  await gameStart();
+                                  countdown();
+                                }
+                              }
+                            },
+                            tooltip: 'Play',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(20.0),
+                              child: Image.asset(
+                                '${imagePath}button/playButton.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ))))),
             Visibility(
                 visible: walletUser.addr != '' &&
                     player.uuid != '' &&
@@ -928,19 +929,24 @@ class StartButtonsState extends State<StartButtons> {
                 visible: walletUser.addr != '' &&
                     player.uuid != '' &&
                     gameStarted == false,
-                child: FloatingActionButton(
-                    backgroundColor: Colors.transparent,
-                    onPressed: () {
-                      html.window.location.href = 'deck_edit';
-                    },
-                    tooltip: 'Edit your card deck',
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(widget.r(40.0)),
-                      child: Image.asset(
-                        '${imagePath}button/editDeck.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ))),
+                child: SizedBox(
+                    width: widget.r(50.0),
+                    height: widget.r(50.0),
+                    child: FittedBox(
+                        child: FloatingActionButton(
+                            backgroundColor: Colors.transparent,
+                            onPressed: () {
+                              html.window.location.href = 'deck_edit';
+                            },
+                            tooltip: 'Edit your card deck',
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(widget.r(40.0)),
+                              child: Image.asset(
+                                '${imagePath}button/editDeck.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ))))),
             const SizedBox(width: 5),
             Visibility(
                 visible: walletUser.addr != '',

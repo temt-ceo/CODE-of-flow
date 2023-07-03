@@ -526,7 +526,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             Positioned(
                 left: widget.r(1255.0),
-                top: widget.r(530.0),
+                bottom: widget.r(40.0),
                 child: Text(
                     'Deck ${widget.info != null ? (widget.info!.gameStarted ? widget.info!.yourRemainDeck.length : 30) : '--'}',
                     style: TextStyle(
@@ -536,7 +536,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             Positioned(
                 left: widget.r(1255.0),
-                top: widget.r(490.0),
+                bottom: widget.r(80.0),
                 child: Text(
                     'Dead ${widget.info != null ? widget.info!.yourDeadCount : '--'}',
                     style: TextStyle(

@@ -2722,7 +2722,7 @@ class HomePageState extends State<HomePage> {
                                       )));
                                 }))))),
           ]),
-          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+          floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           floatingActionButton: SizedBox(
               child: StartButtons(gameProgressStatus,
                   (status, _playerId, data, mariganCardIds, cardInfo) {

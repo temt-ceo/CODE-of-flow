@@ -62,8 +62,8 @@ class ExpandableFABState extends State<ExpandableFAB>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        width: widget.r(300.0),
-        height: widget.r(300.0),
+        width: widget.r(350.0),
+        height: widget.r(350.0),
         child: Stack(alignment: Alignment.topLeft, children: [
           // この３つこのファイルの下に書かれている
           _tapToClose(),

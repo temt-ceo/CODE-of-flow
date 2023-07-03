@@ -2723,9 +2723,8 @@ class HomePageState extends State<HomePage> {
                                 }))))),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-          floatingActionButton: SizedBox(
-              child: StartButtons(gameProgressStatus,
-                  (status, _playerId, data, mariganCardIds, cardInfo) {
+          floatingActionButton: StartButtons(gameProgressStatus,
+              (status, _playerId, data, mariganCardIds, cardInfo) {
             if (playerId != _playerId) {
               setState(() {
                 playerId = _playerId;
@@ -2778,7 +2777,7 @@ class HomePageState extends State<HomePage> {
                 setCardInfo(cardInfo);
                 break;
             }
-          }, widget.enLocale, r)));
+          }, widget.enLocale, r));
     });
   }
 

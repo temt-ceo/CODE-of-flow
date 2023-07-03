@@ -758,6 +758,112 @@ class StartButtonsState extends State<StartButtons> {
   @override
   Widget build(BuildContext context) {
     return Stack(children: <Widget>[
+      Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Visibility(
+                visible: gameStarted == false,
+                child: Text(
+                  walletUser.addr == ''
+                      ? 'connect to wallet→'
+                      : (player.uuid == ''
+                          ? 'Address: ${walletUser.addr} '
+                          : 'Hello ${player.nickname}! start the game→'),
+                  style:
+                      TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
+                )),
+            Visibility(
+                visible: walletUser.addr == '',
+                child: SizedBox(width: widget.r(10.0))),
+            Visibility(
+                visible: walletUser.addr == '',
+                child: SizedBox(
+                    width: widget.r(50.0),
+                    height: widget.r(50.0),
+                    child: const FittedBox(
+                        child: FloatingActionButton(
+                      onPressed: authenticate,
+                      tooltip: 'Authenticate',
+                      child: Icon(Icons.key_outlined),
+                    )))),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
+                child: SizedBox(
+                    width: widget.r(120.0),
+                    height: widget.r(50.0),
+                    child: FloatingActionButton(
+                        backgroundColor: Colors.transparent,
+                        onPressed: () async {
+                          if (gameStarted == true || cyberEnergy == null) {
+                          } else {
+                            if (cyberEnergy! < 30) {
+                              buyCyberEnergy();
+                            } else {
+                              //GraphQL:player_matching
+                              await gameStart();
+                              countdown();
+                            }
+                          }
+                        },
+                        tooltip: 'Play',
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.0),
+                          child: Image.asset(
+                            width: widget.r(120.0),
+                            height: widget.r(50.0),
+                            '${imagePath}button/playButton.png',
+                          ),
+                        )))),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
+                child: const SizedBox(width: 8)),
+            Visibility(
+                visible: walletUser.addr != '' &&
+                    player.uuid != '' &&
+                    gameStarted == false,
+                child: SizedBox(
+                    width: widget.r(50.0),
+                    height: widget.r(50.0),
+                    child: FittedBox(
+                        child: FloatingActionButton(
+                            backgroundColor: Colors.transparent,
+                            onPressed: () {
+                              html.window.location.href = 'deck_edit';
+                            },
+                            tooltip: 'Edit your card deck',
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.circular(widget.r(40.0)),
+                              child: Image.asset(
+                                '${imagePath}button/editDeck.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ))))),
+            const SizedBox(width: 5),
+            Visibility(
+                visible: walletUser.addr != '',
+                child: Padding(
+                    padding: EdgeInsets.only(top: widget.r(5.0)),
+                    child: SizedBox(
+                        width: widget.r(40.0),
+                        height: widget.r(40.0),
+                        child: FittedBox(
+                            child: FloatingActionButton(
+                          onPressed: signout,
+                          tooltip:
+                              gameStarted == true ? 'Surrender' : 'Sign Out',
+                          child: Icon(Icons.logout,
+                              color: gameStarted == true
+                                  ? Colors.amber
+                                  : Colors.grey),
+                        ))))),
+            SizedBox(width: widget.r(90)),
+          ]),
       Visibility(
           visible: balance != null && walletUser.addr != '',
           child: Positioned(
@@ -862,107 +968,6 @@ class StartButtonsState extends State<StartButtons> {
           ),
         ]),
       ),
-      Padding(
-          padding: EdgeInsets.only(top: widget.r(5.0)),
-          child:
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-            Visibility(
-                visible: gameStarted == false,
-                child: Text(
-                  walletUser.addr == ''
-                      ? 'connect to wallet→'
-                      : (player.uuid == ''
-                          ? 'Address: ${walletUser.addr} '
-                          : 'Hello ${player.nickname}! start the game→'),
-                  style:
-                      TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
-                )),
-            Visibility(
-                visible: walletUser.addr == '',
-                child: SizedBox(width: widget.r(10.0))),
-            Visibility(
-                visible: walletUser.addr == '',
-                child: SizedBox(
-                    width: widget.r(50.0),
-                    height: widget.r(50.0),
-                    child: const FittedBox(
-                        child: FloatingActionButton(
-                      onPressed: authenticate,
-                      tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined),
-                    )))),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
-                child: SizedBox(
-                    width: widget.r(120.0),
-                    child: FittedBox(
-                        child: FloatingActionButton(
-                            backgroundColor: Colors.transparent,
-                            onPressed: () async {
-                              if (gameStarted == true || cyberEnergy == null) {
-                              } else {
-                                if (cyberEnergy! < 30) {
-                                  buyCyberEnergy();
-                                } else {
-                                  //GraphQL:player_matching
-                                  await gameStart();
-                                  countdown();
-                                }
-                              }
-                            },
-                            tooltip: 'Play',
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(20.0),
-                              child: Image.asset(
-                                '${imagePath}button/playButton.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ))))),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
-                child: const SizedBox(width: 8)),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
-                child: SizedBox(
-                    width: widget.r(50.0),
-                    height: widget.r(50.0),
-                    child: FittedBox(
-                        child: FloatingActionButton(
-                            backgroundColor: Colors.transparent,
-                            onPressed: () {
-                              html.window.location.href = 'deck_edit';
-                            },
-                            tooltip: 'Edit your card deck',
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(widget.r(40.0)),
-                              child: Image.asset(
-                                '${imagePath}button/editDeck.png',
-                                fit: BoxFit.cover,
-                              ),
-                            ))))),
-            const SizedBox(width: 5),
-            Visibility(
-                visible: walletUser.addr != '',
-                child: SizedBox(
-                    width: widget.r(40.0),
-                    height: widget.r(40.0),
-                    child: FittedBox(
-                        child: FloatingActionButton(
-                      onPressed: signout,
-                      tooltip: gameStarted == true ? 'Surrender' : 'Sign Out',
-                      child: Icon(Icons.logout,
-                          color:
-                              gameStarted == true ? Colors.amber : Colors.grey),
-                    )))),
-            SizedBox(width: widget.r(80)),
-          ])),
       Visibility(
           visible: walletUser.addr == '',
           child: Stack(children: <Widget>[

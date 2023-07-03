@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:ui' as ui;
 
-import 'package:CodeOfFlow/pages/mobile/homePage.dart';
-import 'package:CodeOfFlow/pages/mobile/deckEditPage.dart';
+import 'package:CodeOfFlow/pages/desktop/homePage.dart';
+import 'package:CodeOfFlow/pages/desktop/deckEditPage.dart';
 import 'package:CodeOfFlow/pages/desktop/rankingPage.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
@@ -50,8 +50,8 @@ class MobileBodyState extends State<MobileBody> {
                   style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: r(7.0),
-                    right: r(50.0),
+                    top: r(22.0),
+                    left: r(40.0),
                     child: SizedBox(
                         width: r(50),
                         height: r(35),
@@ -66,14 +66,32 @@ class MobileBodyState extends State<MobileBody> {
                               onChanged: changeSwitch,
                             )))),
                 Positioned(
-                  top: r(10.0),
-                  right: r(100.0),
+                  top: r(25.0),
+                  left: r(90.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: r(20.0),
                       )),
-                )
+                ),
+                Positioned(
+                  top: r(105.0),
+                  left: r(240.0),
+                  child: Text(L10n.of(context)!.rollScreen,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: r(36.0),
+                      )),
+                ),
+                Positioned(
+                  top: r(140.0),
+                  left: r(120.0),
+                  child: Text(L10n.of(context)!.crashHappen,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: r(32.0),
+                      )),
+                ),
               ]),
             )
           : AppBar(
@@ -88,14 +106,19 @@ class MobileBodyState extends State<MobileBody> {
                 Positioned(
                     top: r(4.0),
                     right: r(40.0),
-                    child: Switch(
-                      value: activeLocale,
-                      activeColor: Colors.black,
-                      activeTrackColor: Colors.blueGrey,
-                      inactiveThumbColor: Colors.black,
-                      inactiveTrackColor: Colors.blueGrey,
-                      onChanged: changeSwitch,
-                    )),
+                    child: SizedBox(
+                        width: r(50),
+                        height: r(35),
+                        child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: Switch(
+                              value: activeLocale,
+                              activeColor: Colors.black,
+                              activeTrackColor: Colors.blueGrey,
+                              inactiveThumbColor: Colors.black,
+                              inactiveTrackColor: Colors.blueGrey,
+                              onChanged: changeSwitch,
+                            )))),
                 Positioned(
                   top: r(10.0),
                   right: r(100.0),

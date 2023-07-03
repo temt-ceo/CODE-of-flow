@@ -17,7 +17,6 @@ typedef double ResponsiveSizeChangeFunction(double data);
 
 class OnGoingGameInfo extends StatefulWidget {
   final GameObject? info;
-  final String cardText;
   final TimeupCallback setCanOperate;
   final Stream<int> attack_stream;
   final int? opponentDefendPosition;
@@ -34,7 +33,6 @@ class OnGoingGameInfo extends StatefulWidget {
 
   OnGoingGameInfo(
       this.info,
-      this.cardText,
       this.setCanOperate,
       this.attack_stream,
       this.opponentDefendPosition,
@@ -324,8 +322,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
 
           return Stack(children: <Widget>[
             Positioned(
-                left: widget.r(152.0),
-                top: widget.r(50.0),
+                left: widget.r(172.0),
+                top: widget.r(70.0),
                 child: Text(
                     '(Life ${widget.info != null ? (widget.info!.opponentLife < 10 ? '0${widget.info!.opponentLife}' : widget.info!.opponentLife) : '--'})',
                     style: TextStyle(
@@ -335,11 +333,11 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.opponentLife; i++)
               Positioned(
-                left: widget.r(150.0 + i * 21),
-                top: widget.r(70.0),
+                left: widget.r(170.0 + i * 19),
+                top: widget.r(90.0),
                 child: Container(
-                  width: widget.r(20.0),
-                  height: widget.r(20.0),
+                  width: widget.r(18.0),
+                  height: widget.r(18.0),
                   decoration: BoxDecoration(
                     image: DecorationImage(
                         image: AssetImage('${imagePath}button/enemyLife.png'),
@@ -356,8 +354,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(80.0),
-                top: widget.r(100.0),
+                left: widget.r(85.0),
+                top: widget.r(120.0),
                 child: Text(
                     'CP ${widget.info != null ? (widget.info!.opponentCp < 10 ? '0${widget.info!.opponentCp}' : widget.info!.opponentCp) : '--'}',
                     style: TextStyle(
@@ -367,8 +365,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.opponentCp; i++)
               Positioned(
-                left: widget.r(152.0 + i * 16),
-                top: widget.r(108.0),
+                left: widget.r(172.0 + i * 16),
+                top: widget.r(128.0),
                 child: Container(
                   width: widget.r(15.0),
                   height: widget.r(15.0),
@@ -388,8 +386,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(335.0),
-                top: widget.r(110.0),
+                left: widget.r(360.0),
+                top: widget.r(130.0),
                 child: Text(
                     'Dead ${widget.info != null ? widget.info!.opponentDeadCount : '--'}',
                     style: TextStyle(
@@ -398,8 +396,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(16.0),
                     ))),
             Positioned(
-                left: widget.r(335.0),
-                top: widget.r(130.0),
+                left: widget.r(360.0),
+                top: widget.r(160.0),
                 child: Text(
                     'Deck ${widget.info != null ? widget.info!.opponentRemainDeck : '--'}',
                     style: TextStyle(
@@ -408,8 +406,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(16.0),
                     ))),
             Positioned(
-                left: widget.r(80.0),
-                top: widget.r(130.0),
+                left: widget.r(85.0),
+                top: widget.r(155.0),
                 child: Text('Hand',
                     style: TextStyle(
                       color: Colors.white,
@@ -418,8 +416,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.opponentHand; i++)
               Positioned(
-                left: widget.r(150.0 + i * 21),
-                top: widget.r(133.0),
+                left: widget.r(170.0 + i * 21),
+                top: widget.r(158.0),
                 child: Container(
                   width: widget.r(20.0),
                   height: widget.r(20.0),
@@ -440,8 +438,8 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
               Positioned(
-                left: widget.r(473.0 + i * 31),
-                top: widget.r(90.0),
+                left: widget.r(471.0 + i * 31),
+                top: widget.r(93.0),
                 child: Container(
                   width: widget.r(27.0),
                   height: widget.r(27.0),
@@ -461,7 +459,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(152.0),
+                left: widget.r(172.0),
                 top: widget.r(196.0),
                 child: Text(
                     '(Life ${widget.info != null ? (widget.info!.yourLife < 10 ? '0${widget.info!.yourLife}' : widget.info!.yourLife) : '--'})',
@@ -472,7 +470,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             for (var i = 0; i < widget.info!.yourLife; i++)
               Positioned(
-                left: widget.r(150.0 + i * 24),
+                left: widget.r(170.0 + i * 24),
                 top: widget.r(220.0),
                 child: Container(
                   width: widget.r(23.0),
@@ -493,19 +491,19 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                 ),
               ),
             Positioned(
-                left: widget.r(90.0),
-                top: widget.r(272.0),
+                left: widget.r(95.0),
+                top: widget.r(248.0),
                 child: Text(
                     'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
-                      fontSize: widget.r(28.0),
+                      fontSize: widget.r(24.0),
                     ))),
             for (var i = 0; i < widget.info!.yourCp; i++)
               Positioned(
-                left: widget.r(180.0 + i * 26),
-                top: widget.r(280.0),
+                left: widget.r(184.0 + i * 26),
+                top: widget.r(252.0),
                 child: Container(
                   width: widget.r(25.0),
                   height: widget.r(25.0),
@@ -526,7 +524,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               ),
             Positioned(
                 left: widget.r(1255.0),
-                bottom: widget.r(40.0),
+                top: widget.r(450.0),
                 child: Text(
                     'Deck ${widget.info != null ? (widget.info!.gameStarted ? widget.info!.yourRemainDeck.length : 30) : '--'}',
                     style: TextStyle(
@@ -536,7 +534,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     ))),
             Positioned(
                 left: widget.r(1255.0),
-                bottom: widget.r(80.0),
+                top: widget.r(490.0),
                 child: Text(
                     'Dead ${widget.info != null ? widget.info!.yourDeadCount : '--'}',
                     style: TextStyle(
@@ -545,20 +543,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             Positioned(
-                left: widget.r(900.0),
-                top: widget.r(-8.0),
+                right: widget.r(60.0),
+                top: widget.r(-3.0),
                 child: Text(
                     'Round $turn : ${isFirstTurn ? L10n.of(context)!.isFirst : L10n.of(context)!.isNotFirst}',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: widget.r(28.0),
-                    ))),
-            Positioned(
-                left: widget.r(30.0),
-                top: widget.r(490.0),
-                width: widget.r(270.0),
-                child: Text(widget.cardText,
                     style: TextStyle(
                       color: Colors.white,
                       decoration: TextDecoration.none,
@@ -592,7 +580,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             // ターンチェンジボタン
             Positioned(
                 left: widget.r(1120.0),
-                top: widget.r(465.0),
+                top: widget.r(435.0),
                 child: Visibility(
                   visible: widget.info != null
                       ? widget.info!.isFirst == widget.info!.isFirstTurn &&
@@ -631,20 +619,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     progressColor: const Color.fromARGB(255, 1, 247, 42),
                   ),
                 )),
-            // ReactionLimitTime
-            // Visibility(
-            //     visible: reactionLimitTime != null && reactionLimitTime! > 0,
-            //     child: Positioned(
-            //         left: widget.r(900),
-            //         top: widget.r(300),
-            //         child: SizedBox(
-            //             width: widget.r(100.0),
-            //             child: Center(
-            //                 child: Text(
-            //               '0:0${reactionLimitTime.toString()}',
-            //               style: TextStyle(
-            //                   color: Colors.white, fontSize: widget.r(42.0)),
-            //             ))))),
           ]);
         });
   }

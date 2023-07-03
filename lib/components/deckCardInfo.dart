@@ -137,7 +137,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
           visible: widget.tappedCardId != null,
           child: Positioned(
               left: widget.r(20.0),
-              top: widget.r(386.0),
+              top: widget.r(356.0),
               child: Container(
                   width: widget.r(180.0),
                   height: widget.r(80.0),
@@ -202,7 +202,7 @@ class DeckCardInfoState extends State<DeckCardInfo> {
                   ])))),
       Positioned(
           left: widget.r(20.0),
-          top: widget.r(442.0),
+          top: widget.r(412.0),
           child: Container(
             width: widget.r(320.0),
             height: widget.r(165.0),
@@ -214,14 +214,14 @@ class DeckCardInfoState extends State<DeckCardInfo> {
           )),
       Positioned(
           left: widget.r(26.0),
-          top: widget.r(450.0),
+          top: widget.r(420.0),
           width: widget.r(315.0),
           child: Text(getCardInfo(widget.tappedCardId, 'text'),
               style: TextStyle(
                 height: 1.2,
                 color: Colors.white,
                 decoration: TextDecoration.none,
-                fontSize: widget.isEnglish ? widget.r(16.0) : widget.r(14.0),
+                fontSize: widget.isEnglish ? widget.r(18.0) : widget.r(16.0),
               ))),
     ]);
   }

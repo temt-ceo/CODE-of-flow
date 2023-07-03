@@ -50,8 +50,8 @@ class DesktopBodyState extends State<DesktopBody> {
                   style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: r(7.0),
-                    right: r(50.0),
+                    top: r(22.0),
+                    left: r(40.0),
                     child: SizedBox(
                         width: r(50),
                         height: r(35),
@@ -66,8 +66,8 @@ class DesktopBodyState extends State<DesktopBody> {
                               onChanged: changeSwitch,
                             )))),
                 Positioned(
-                  top: r(10.0),
-                  right: r(100.0),
+                  top: r(25.0),
+                  left: r(90.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
                       style: TextStyle(
                         color: Colors.white,

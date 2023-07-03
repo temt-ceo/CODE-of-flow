@@ -461,11 +461,11 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   Future<void> gameStart() async {
-    showGameLoading();
+    // showGameLoading();
     // Call GraphQL method.
     await apiService.saveGameServerProcess(
         'player_matching', '', player.playerId);
-    closeGameLoading();
+    // closeGameLoading();
   }
 
   void countdown() {
@@ -729,10 +729,10 @@ class StartButtonsState extends State<StartButtons> {
           // autoCloseDuration: const Duration(seconds: 5),
           onConfirmBtnTap: () async {
             Navigator.pop(context);
-            showGameLoading();
+            // showGameLoading();
             var ret = await apiService.saveGameServerProcess(
                 'surrender', '', player.playerId);
-            closeGameLoading();
+            // closeGameLoading();
             if (ret != null) {
               QuickAlert.show(
                 context: context,
@@ -757,40 +757,37 @@ class StartButtonsState extends State<StartButtons> {
   ////////////////////////////
   @override
   Widget build(BuildContext context) {
-    return Stack(children: <Widget>[
-      Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Visibility(
-                visible: gameStarted == false,
+    return Stack(alignment: Alignment.topRight, children: <Widget>[
+      Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
+        SizedBox(width: widget.r(340.0)),
+        Visibility(
+            visible: gameStarted == false,
+            child: Padding(
+                padding: const EdgeInsets.only(top: 0.0),
                 child: Text(
                   walletUser.addr == ''
                       ? 'connect to wallet→'
-                      : (player.uuid == ''
-                          ? 'Address: ${walletUser.addr} '
-                          : 'Hello ${player.nickname}! start the game→'),
+                      : (player.uuid == '' ? '' : ''),
                   style:
-                      TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
-                )),
-            Visibility(
-                visible: walletUser.addr == '',
-                child: SizedBox(width: widget.r(10.0))),
-            Visibility(
-                visible: walletUser.addr == '',
-                child: SizedBox(
-                    width: widget.r(50.0),
-                    height: widget.r(50.0),
-                    child: const FittedBox(
-                        child: FloatingActionButton(
-                      onPressed: authenticate,
-                      tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined),
-                    )))),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
+                      TextStyle(color: Colors.white, fontSize: widget.r(23.0)),
+                ))),
+        Visibility(
+            visible: walletUser.addr == '',
+            child: SizedBox(
+                width: widget.r(40.0),
+                height: widget.r(40.0),
+                child: const FittedBox(
+                    child: FloatingActionButton(
+                  onPressed: authenticate,
+                  tooltip: 'Authenticate',
+                  child: Icon(Icons.key_outlined),
+                )))),
+        Visibility(
+            visible: walletUser.addr != '' &&
+                player.uuid != '' &&
+                gameStarted == false,
+            child: Padding(
+                padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
                     width: widget.r(120.0),
                     height: widget.r(50.0),
@@ -816,16 +813,18 @@ class StartButtonsState extends State<StartButtons> {
                             height: widget.r(50.0),
                             '${imagePath}button/playButton.png',
                           ),
-                        )))),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
-                child: const SizedBox(width: 8)),
-            Visibility(
-                visible: walletUser.addr != '' &&
-                    player.uuid != '' &&
-                    gameStarted == false,
+                        ))))),
+        Visibility(
+            visible: walletUser.addr != '' &&
+                player.uuid != '' &&
+                gameStarted == false,
+            child: const SizedBox(width: 8)),
+        Visibility(
+            visible: walletUser.addr != '' &&
+                player.uuid != '' &&
+                gameStarted == false,
+            child: Padding(
+                padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
                     width: widget.r(50.0),
                     height: widget.r(50.0),
@@ -843,27 +842,25 @@ class StartButtonsState extends State<StartButtons> {
                                 '${imagePath}button/editDeck.png',
                                 fit: BoxFit.cover,
                               ),
-                            ))))),
-            const SizedBox(width: 5),
-            Visibility(
-                visible: walletUser.addr != '',
-                child: Padding(
-                    padding: EdgeInsets.only(top: widget.r(5.0)),
-                    child: SizedBox(
-                        width: widget.r(40.0),
-                        height: widget.r(40.0),
-                        child: FittedBox(
-                            child: FloatingActionButton(
-                          onPressed: signout,
-                          tooltip:
-                              gameStarted == true ? 'Surrender' : 'Sign Out',
-                          child: Icon(Icons.logout,
-                              color: gameStarted == true
-                                  ? Colors.amber
-                                  : Colors.grey),
-                        ))))),
-            SizedBox(width: widget.r(90)),
-          ]),
+                            )))))),
+        const SizedBox(width: 10),
+        Visibility(
+            visible: walletUser.addr != '',
+            child: Padding(
+                padding: EdgeInsets.only(top: widget.r(23.0)),
+                child: SizedBox(
+                    width: widget.r(30.0),
+                    height: widget.r(30.0),
+                    child: FittedBox(
+                        child: FloatingActionButton(
+                      onPressed: signout,
+                      tooltip: gameStarted == true ? 'Surrender' : 'Sign Out',
+                      child: Icon(Icons.logout,
+                          color:
+                              gameStarted == true ? Colors.amber : Colors.grey),
+                    ))))),
+        SizedBox(width: widget.r(85)),
+      ]),
       Visibility(
           visible: balance != null && walletUser.addr != '',
           child: Positioned(
@@ -871,7 +868,7 @@ class StartButtonsState extends State<StartButtons> {
               top: 0,
               child: Stack(children: <Widget>[
                 SizedBox(
-                    width: widget.r(340.0),
+                    width: widget.r(280.0),
                     child: Text(
                       '${L10n.of(context)!.balance} ${widget.isEnglish ? "　" : "　"}${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
                       style: TextStyle(
@@ -881,11 +878,11 @@ class StartButtonsState extends State<StartButtons> {
                           fontSize: widget.r(26.0)),
                     )),
                 Positioned(
-                    left: widget.isEnglish ? widget.r(115.0) : widget.r(75.0),
-                    top: widget.isEnglish ? widget.r(8.0) : widget.r(10.0),
+                    left: widget.isEnglish ? widget.r(110.0) : widget.r(66.0),
+                    top: widget.isEnglish ? widget.r(6.0) : widget.r(7.0),
                     child: Container(
-                        width: widget.r(22.0),
-                        height: widget.r(22.0),
+                        width: widget.r(20.0),
+                        height: widget.r(20.0),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                               image:
@@ -900,36 +897,38 @@ class StartButtonsState extends State<StartButtons> {
             top: widget.r(32.0),
             child: SizedBox(
                 width: 300.0,
-                child: Row(children: <Widget>[
-                  Text(
-                    'EN:  ',
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: widget.r(16.0)),
-                  ),
-                  Text(
-                    '${cyberEnergy.toString()} / 200',
-                    style: TextStyle(
-                        color: Color.fromARGB(255, 32, 243, 102),
-                        fontSize: widget.r(18.0)),
-                  ),
-                  SizedBox(width: widget.r(20.0)),
-                  Visibility(
-                      visible: gameStarted != true,
-                      child: Text(
-                        yourScore,
+                child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'EN:  ',
                         style: TextStyle(
-                            color: const Color.fromARGB(255, 247, 245, 245),
-                            fontSize: widget.r(18.0)),
-                      )),
-                ])),
+                            color: Color.fromARGB(255, 32, 243, 102),
+                            fontSize: widget.r(16.0)),
+                      ),
+                      Text(
+                        '${cyberEnergy.toString()} / 200',
+                        style: TextStyle(
+                            color: Color.fromARGB(255, 32, 243, 102),
+                            fontSize: widget.r(16.0)),
+                      ),
+                      SizedBox(width: widget.r(20.0)),
+                      Visibility(
+                          visible: gameStarted != true,
+                          child: Text(
+                            yourScore,
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 247, 245, 245),
+                                fontSize: widget.r(16.0)),
+                          )),
+                    ])),
           )),
       Visibility(
         visible: gameStarted == true,
         child: Stack(children: [
           Positioned(
               left: 0.0,
-              top: widget.r(78.0),
+              top: widget.r(85.0),
               child: Text(
                 '$enemyName :',
                 style: TextStyle(
@@ -937,8 +936,8 @@ class StartButtonsState extends State<StartButtons> {
                     fontSize: widget.r(20.0)),
               )),
           Positioned(
-            left: widget.r(320.0),
-            top: widget.r(83.0),
+            left: widget.r(295.0),
+            top: widget.r(87.0),
             child: Text(
               enemyScore,
               style: TextStyle(
@@ -949,7 +948,7 @@ class StartButtonsState extends State<StartButtons> {
           // PlayerName
           Positioned(
               left: 0.0,
-              top: widget.r(232.0),
+              top: widget.r(218.0),
               child: Text(
                 '$yourName :',
                 style: TextStyle(
@@ -957,8 +956,8 @@ class StartButtonsState extends State<StartButtons> {
                     fontSize: widget.r(20.0)),
               )),
           Positioned(
-            left: widget.r(320.0),
-            top: widget.r(235.0),
+            left: widget.r(340.0),
+            top: widget.r(220.0),
             child: Text(
               yourScore,
               style: TextStyle(
@@ -968,133 +967,42 @@ class StartButtonsState extends State<StartButtons> {
           ),
         ]),
       ),
-      Visibility(
-          visible: walletUser.addr == '',
-          child: Stack(children: <Widget>[
-            Positioned(
-                left: widget.r(40),
-                top: widget.r(30),
-                child: CircularPercentIndicator(
-                  radius: widget.r(45.0),
-                  lineWidth: widget.r(10.0),
-                  percent: 0.0,
-                  backgroundWidth: 0.0,
-                  center: Column(children: <Widget>[
-                    SizedBox(height: widget.r(30.0)),
-                    Text('${0.0.toString()}%',
-                        style: TextStyle(
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                          fontSize: widget.r(22.0),
-                        )),
-                  ]),
-                  progressColor: const Color.fromARGB(255, 6, 178, 246),
-                )),
-            Positioned(
-                left: widget.r(50),
-                top: widget.r(220),
-                child: ExpandableFAB(distance: widget.r(120), children: [
-                  FABActionButton(
-                    icon: const Icon(Icons.create, color: Colors.white),
-                    onPressed: () {
-                      showToast('EN is successfully charged.');
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.settings, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        showCarousel2 = true;
-                      });
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.add, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        showCarousel = true;
-                      });
-                      ;
-                    },
-                  ),
-                ])),
-            Positioned(
-              left: widget.r(168),
-              top: widget.r(148),
-              child: ExpandableFAB(
-                distance: widget.r(120),
-                children: [
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text(L10n.of(context)!.tutorial1),
-                              content: Text(L10n.of(context)!.tutorial2)));
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text(L10n.of(context)!.tutorial3),
-                              content: Text(L10n.of(context)!.tutorial4)));
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                              title: Text(L10n.of(context)!.tutorial5),
-                              content: Text(L10n.of(context)!.tutorial6)));
-                    },
-                  ),
-                ],
+      Stack(children: <Widget>[
+        Positioned(
+            left: widget.r(5),
+            top: widget.r(3),
+            child:
+                ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
+              FABActionButton(
+                icon: Icon(Icons.create,
+                    size: widget.r(20.0), color: Colors.white),
+                onPressed: () {
+                  showToast('EN is successfully charged.');
+                },
               ),
-            ),
-            Positioned(
-                left: widget.r(240),
-                top: widget.r(30),
-                child: ExpandableFAB(distance: widget.r(120), children: [
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => const AlertDialog(
-                              title: Text('My Title'),
-                              content: Text('jdlskfldsjaldjksdfdslfksa')));
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => const AlertDialog(
-                              title: Text('My Title'),
-                              content: Text('jdlskfldsjaldjksdfdslfksa')));
-                    },
-                  ),
-                  FABActionButton(
-                    icon: const Icon(Icons.person, color: Colors.white),
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) => const AlertDialog(
-                              title: Text('My Title'),
-                              content: Text('jdlskfldsjaldjksdfdslfksa')));
-                    },
-                  ),
-                ])),
-          ])),
+              FABActionButton(
+                icon: Icon(Icons.settings,
+                    size: widget.r(20.0), color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    showCarousel2 = true;
+                  });
+                },
+              ),
+              FABActionButton(
+                icon:
+                    Icon(Icons.add, size: widget.r(20.0), color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    showCarousel = true;
+                  });
+                  ;
+                },
+              ),
+            ])),
+      ]),
       Visibility(
-          visible: walletUser.addr == '' && showCarousel == true,
+          visible: showCarousel == true,
           child: Stack(children: <Widget>[
             CarouselSlider.builder(
               options: CarouselOptions(
@@ -1129,7 +1037,7 @@ class StartButtonsState extends State<StartButtons> {
                 )),
           ])),
       Visibility(
-          visible: walletUser.addr == '' && showCarousel2 == true,
+          visible: showCarousel2 == true,
           child: Column(children: <Widget>[
             CarouselSlider.builder(
               carouselController: cController,
@@ -1153,9 +1061,21 @@ class StartButtonsState extends State<StartButtons> {
             ),
             SizedBox(height: widget.r(32.0)),
             buildIndicator(),
+            SizedBox(height: widget.r(20.0)),
             ElevatedButton(
-              onPressed: () => cController.animateToPage(2),
-              child: const Text('jump->'),
+              onPressed: () => cController.animateToPage(activeIndex + 1),
+              child: const Text('Next->'),
+            ),
+            SizedBox(height: widget.r(20.0)),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showCarousel2 = false;
+                });
+              },
+              child: Text('Close',
+                  style:
+                      TextStyle(color: Colors.black, fontSize: widget.r(28.0))),
             ),
           ]))
     ]);

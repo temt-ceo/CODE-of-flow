@@ -10,10 +10,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:js/js.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
 import 'package:CodeOfFlow/components/timerComponent.dart';
+import 'package:CodeOfFlow/components/expandableFAB.dart';
+import 'package:CodeOfFlow/components/fabActionButton.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
@@ -115,6 +119,11 @@ class DeckButtonsState extends State<DeckButtons> {
   BuildContext? dcontext1;
   BuildContext? dcontext2;
   BuildContext? loadingContext;
+  bool showCarousel = false;
+  bool showCarousel2 = false;
+  int activeIndex = 0;
+  dynamic cardList;
+  final cController = CarouselController();
 
   late StreamController<bool> _wait;
 
@@ -211,15 +220,10 @@ class DeckButtonsState extends State<DeckButtons> {
     if (widget.savedDeck.length == 30) {
       showGameLoading();
       // Call GraphQL method.
-      var ret = await apiService.saveGameServerProcess(
+      await apiService.saveGameServerProcess(
           'save_deck', jsonEncode(widget.savedDeck), player.playerId);
-      if (ret != null) {
-        // debugPrint(ret.message);
-      }
-      Future.delayed(const Duration(seconds: 4), () async {
-        closeGameLoading();
-        showAlertWindow('success');
-      });
+      closeGameLoading();
+      showAlertWindow('success');
     } else {
       showAlertWindow('error');
     }
@@ -303,19 +307,13 @@ class DeckButtonsState extends State<DeckButtons> {
 
     return Stack(children: <Widget>[
       Positioned(
-          left: widget.r(75),
-          top: 0,
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                SizedBox(
-                    width: widget.r(220.0),
-                    child: Text(
-                      'Deck Editor',
-                      style: TextStyle(
-                          color: Colors.lightGreen, fontSize: widget.r(36.0)),
-                    )),
-              ])),
+        left: 18.0,
+        top: 0,
+        child: Text(
+          'Deck Editor',
+          style: TextStyle(color: Colors.lightGreen, fontSize: widget.r(32.0)),
+        ),
+      ),
       Visibility(
           visible: cyberEnergy != null,
           child: Positioned(
@@ -351,9 +349,20 @@ class DeckButtonsState extends State<DeckButtons> {
               Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
             Visibility(
                 visible: walletUser.addr == '',
-                child: SizedBox(width: widget.r(20))),
+                child: Padding(
+                    padding: EdgeInsets.only(top: widget.r(5.0)),
+                    child: Text(
+                      walletUser.addr == ''
+                          ? 'connect to wallet→'
+                          : (player.uuid == ''
+                              ? 'Address: ${walletUser.addr} '
+                              : ''),
+                      style: TextStyle(
+                          color: Colors.white, fontSize: widget.r(26.0)),
+                    ))),
             SizedBox(
                 width: widget.r(65.0),
+                height: widget.r(40.0),
                 child: Visibility(
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
@@ -361,16 +370,20 @@ class DeckButtonsState extends State<DeckButtons> {
                         onPressed: () {
                           widget.callback('sort', List.empty(), null);
                         },
-                        tooltip: 'SAVE',
+                        tooltip: 'SORT',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(widget.r(20.0)),
+                          borderRadius: BorderRadius.circular(widget.r(7.0)),
                           child: Image.asset(
+                            width: widget.r(65.0),
+                            height: widget.r(25.0),
                             '${imagePath}button/sort.png',
                             fit: BoxFit.cover,
                           ),
                         )))),
+            SizedBox(width: widget.r(10.0)),
             SizedBox(
                 width: widget.r(65.0),
+                height: widget.r(40.0),
                 child: Visibility(
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
@@ -380,14 +393,18 @@ class DeckButtonsState extends State<DeckButtons> {
                         },
                         tooltip: 'SAVE',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(widget.r(20.0)),
+                          borderRadius: BorderRadius.circular(widget.r(7.0)),
                           child: Image.asset(
+                            width: widget.r(65.0),
+                            height: widget.r(25.0),
                             '${imagePath}button/save.png',
                             fit: BoxFit.cover,
                           ),
                         )))),
+            SizedBox(width: widget.r(10.0)),
             SizedBox(
                 width: widget.r(65.0),
+                height: widget.r(40.0),
                 child: Visibility(
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
@@ -397,8 +414,10 @@ class DeckButtonsState extends State<DeckButtons> {
                         },
                         tooltip: 'Reset',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(widget.r(40.0)),
+                          borderRadius: BorderRadius.circular(widget.r(7.0)),
                           child: Image.asset(
+                            width: widget.r(65.0),
+                            height: widget.r(25.0),
                             '${imagePath}button/reset.png',
                             fit: BoxFit.cover,
                           ),
@@ -406,15 +425,207 @@ class DeckButtonsState extends State<DeckButtons> {
             Visibility(
                 visible: walletUser.addr == '',
                 child: SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
-                  child: const FloatingActionButton(
-                      onPressed: authenticate,
-                      tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined)),
+                    width: widget.r(40.0),
+                    height: widget.r(40.0),
+                    child: const FittedBox(
+                      child: FloatingActionButton(
+                          onPressed: authenticate,
+                          tooltip: 'Authenticate',
+                          child: Icon(Icons.key_outlined)),
+                    ))),
+            SizedBox(width: widget.r(55)),
+          ])),
+      Stack(children: <Widget>[
+        Positioned(
+            left: widget.r(200),
+            top: 0.0,
+            child:
+                ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
+              FABActionButton(
+                icon: Icon(Icons.create,
+                    size: widget.r(20.0), color: Colors.white),
+                onPressed: () {},
+              ),
+              FABActionButton(
+                icon: Icon(Icons.settings,
+                    size: widget.r(20.0), color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    showCarousel2 = true;
+                  });
+                },
+              ),
+              FABActionButton(
+                icon:
+                    Icon(Icons.add, size: widget.r(20.0), color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    showCarousel = true;
+                  });
+                  ;
+                },
+              ),
+            ])),
+      ]),
+      Visibility(
+          visible: showCarousel == true,
+          child: Stack(children: <Widget>[
+            CarouselSlider.builder(
+              options: CarouselOptions(
+                  height: widget.r(700),
+                  aspectRatio: 14 / 9,
+                  viewportFraction: 0.75, // 1.0:1つが全体に出る
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  enlargeCenterPage: true,
+                  scrollDirection: Axis.vertical),
+              itemCount: 25,
+              itemBuilder: (context, index, realIndex) {
+                dynamic card = cardList != null
+                    ? cardList[index >= 11
+                        ? (index + 2).toString()
+                        : (index + 1).toString()]
+                    : null;
+                return buildCarouselImage(index, card);
+              },
+            ),
+            Positioned(
+                top: widget.r(15.0),
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      showCarousel = false;
+                    });
+                  },
+                  child: Text('Close',
+                      style: TextStyle(
+                          color: Colors.black, fontSize: widget.r(28.0))),
                 )),
-            SizedBox(width: widget.r(25)),
+          ])),
+      Visibility(
+          visible: showCarousel2 == true,
+          child: Column(children: <Widget>[
+            CarouselSlider.builder(
+              carouselController: cController,
+              options: CarouselOptions(
+                  height: widget.r(300),
+                  // aspectRatio: 9 / 9,
+                  viewportFraction: 0.4, // 1.0:1つが全体に出る
+                  initialPage: 0,
+                  enableInfiniteScroll: true,
+                  enlargeCenterPage: true,
+                  scrollDirection: Axis.horizontal,
+                  onPageChanged: (index, reason) {
+                    setState(() {
+                      activeIndex = index;
+                    });
+                  }),
+              itemCount: 4,
+              itemBuilder: (context, index, realIndex) {
+                return buildCarouselImage2(index);
+              },
+            ),
+            SizedBox(height: widget.r(32.0)),
+            buildIndicator(),
+            SizedBox(height: widget.r(20.0)),
+            ElevatedButton(
+              onPressed: () => cController.animateToPage(activeIndex + 1),
+              child: const Text('Next->'),
+            ),
+            SizedBox(height: widget.r(20.0)),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  showCarousel2 = false;
+                });
+              },
+              child: Text('Close',
+                  style:
+                      TextStyle(color: Colors.black, fontSize: widget.r(28.0))),
+            ),
           ]))
     ]);
   }
+
+  Widget buildCarouselImage(int index, dynamic card) => Padding(
+        padding: EdgeInsets.only(left: widget.r(80.0)),
+        child: Row(children: <Widget>[
+          card == null
+              ? Container()
+              : Image.asset(
+                  '$imagePath${card['category'] == '0' ? 'unit' : 'trigger'}/card_${card['card_id']}.jpeg',
+                  fit: BoxFit.cover,
+                ),
+          Container(
+              color: card == null ? Colors.grey : Colors.white,
+              child: card == null
+                  ? Container()
+                  : Table(
+                      border: TableBorder.all(),
+                      defaultVerticalAlignment: TableCellVerticalAlignment.top,
+                      defaultColumnWidth: IntrinsicColumnWidth(),
+                      children: [
+                          buildTableRow(['Name', card['name']], false),
+                          buildTableRow([
+                            'Card Type',
+                            card['category'] == '0'
+                                ? 'Unit'
+                                : (card['category'] == '1'
+                                    ? 'Trigger'
+                                    : 'Intercept')
+                          ], false),
+                          buildTableRow([
+                            'BP(Power)',
+                            card['bp'] == '0' ? '-' : card['bp']
+                          ], false),
+                          buildTableRow(['CP(Cost)', card['cost']], false),
+                          buildTableRow([
+                            'Attribute',
+                            card['type'] == '0'
+                                ? 'Red'
+                                : (card['type'] == '1' ? 'Yellow' : '-')
+                          ], false),
+                          buildTableRow([
+                            'Ability',
+                            L10n.of(context)!
+                                .cardDescription
+                                .split('|')[index >= 11 ? index + 1 : index]
+                          ], true),
+                        ]))
+        ]),
+      );
+  TableRow buildTableRow(List<String> cells, bool high) => TableRow(
+          children: cells.map((cell) {
+        return TableCell(
+            child: high && cell != 'Ability'
+                ? Center(
+                    child: SizedBox(
+                        height: widget.r(165.0),
+                        width: widget.r(750.0),
+                        child: Text(cell,
+                            style: TextStyle(fontSize: widget.r(28.0)))))
+                : Padding(
+                    padding: EdgeInsets.all(widget.r(12)),
+                    child: Text(cell,
+                        style: TextStyle(fontSize: widget.r(28.0)))));
+      }).toList());
+  Widget buildCarouselImage2(int index) => Container(
+        width: MediaQuery.of(context).size.width,
+        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
+        color: Colors.grey,
+        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
+      );
+
+  Widget buildIndicator() => AnimatedSmoothIndicator(
+        activeIndex: activeIndex,
+        count: 4,
+        onDotClicked: (index) {
+          cController.animateToPage(index);
+        },
+        effect: JumpingDotEffect(
+          verticalOffset: widget.r(5.0),
+          activeDotColor: Colors.orange,
+          // dotColor: Colors.black12,
+        ),
+      );
 }

@@ -1241,7 +1241,7 @@ class HomePageState extends State<HomePage> {
         }
       }
     }
-    Future.delayed(const Duration(milliseconds: 20), () async {
+    Future.delayed(const Duration(milliseconds: 20), () {
       reviewTriggerCards();
     });
   }
@@ -1623,7 +1623,7 @@ class HomePageState extends State<HomePage> {
             // デッキカード
             Positioned(
                 left: r(340.0),
-                top: r(440.0),
+                top: r(403.0),
                 child: Row(children: <Widget>[
                   gameProgressStatus >= 1 && gameStarted
                       ? AnimatedContainer(
@@ -1669,10 +1669,24 @@ class HomePageState extends State<HomePage> {
                           ),
                         ),
                 ])),
+            Positioned(
+              left: r(470.0),
+              top: r(90.0),
+              child: Container(
+                width: r(125.0),
+                height: r(45.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  image: DecorationImage(
+                      opacity: 0.5,
+                      image: AssetImage('${imagePath}trigger/trigger.png'),
+                      fit: BoxFit.cover),
+                ),
+              ),
+            ),
             gameObject != null && gameStarted == true
                 ? OnGoingGameInfo(
                     gameObject,
-                    getCardInfo(tappedCardId),
                     setCanOperate,
                     attackStatusBloc.attack_stream,
                     opponentDefendPosition,
@@ -1719,7 +1733,7 @@ class HomePageState extends State<HomePage> {
             // DragTargetWidget
             Positioned(
                 left: r(35.0),
-                top: r(36.0),
+                top: 0.0,
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -1774,7 +1788,7 @@ class HomePageState extends State<HomePage> {
                 visible: gameProgressStatus == 1,
                 child: Positioned(
                     left: r(800),
-                    top: r(500),
+                    top: r(480),
                     child: SizedBox(
                         width: r(100.0),
                         child: StreamBuilder<int>(
@@ -1805,6 +1819,7 @@ class HomePageState extends State<HomePage> {
                               visible: snapshot.data != 0,
                               child: SizedBox(
                                   width: snapshot.data != 0 ? r(100.0) : 0.0,
+                                  height: r(25.0),
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
                                       onPressed: () {
@@ -1825,6 +1840,8 @@ class HomePageState extends State<HomePage> {
                                         borderRadius:
                                             BorderRadius.circular(20.0),
                                         child: Image.asset(
+                                          width: r(65.0),
+                                          height: r(25.0),
                                           '${imagePath}button/redo.png',
                                           fit: BoxFit
                                               .cover, //prefer cover over fill
@@ -1855,23 +1872,8 @@ class HomePageState extends State<HomePage> {
                   ),
                 )),
             Positioned(
-              left: r(470.0),
-              top: r(90.0),
-              child: Container(
-                width: r(125.0),
-                height: r(45.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}trigger/trigger.png'),
-                      fit: BoxFit.cover),
-                ),
-              ),
-            ),
-            Positioned(
               left: r(648.0),
-              top: r(160.0),
+              top: r(122.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -1887,7 +1889,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 1st Unit Name
             Positioned(
                 left: r(650.0),
-                top: r(163.0),
+                top: r(125.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -1905,7 +1907,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 1st Unit BP
             Positioned(
                 left: r(650.0),
-                top: r(185.0),
+                top: r(147.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -1933,7 +1935,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(783.0),
-              top: r(160.0),
+              top: r(122.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -1949,7 +1951,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 2st Unit Name
             Positioned(
                 left: r(785.0),
-                top: r(163.0),
+                top: r(125.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -1967,7 +1969,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 2st Unit BP
             Positioned(
                 left: r(785.0),
-                top: r(185.0),
+                top: r(147.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -1995,7 +1997,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(918.0),
-              top: r(160.0),
+              top: r(122.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2011,7 +2013,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 3st Unit Name
             Positioned(
                 left: r(920.0),
-                top: r(163.0),
+                top: r(125.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2029,7 +2031,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 3st Unit BP
             Positioned(
                 left: r(920.0),
-                top: r(185.0),
+                top: r(147.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2057,7 +2059,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(1053.0),
-              top: r(160.0),
+              top: r(122.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2073,7 +2075,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 4st Unit Name
             Positioned(
                 left: r(1055.0),
-                top: r(163.0),
+                top: r(125.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2091,7 +2093,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 4st Unit BP
             Positioned(
                 left: r(1055.0),
-                top: r(185.0),
+                top: r(147.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2119,7 +2121,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(1188.0),
-              top: r(160.0),
+              top: r(122.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2135,7 +2137,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 5st Unit Name
             Positioned(
                 left: r(1190.0),
-                top: r(163.0),
+                top: r(125.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2153,7 +2155,7 @@ class HomePageState extends State<HomePage> {
             // Enemy's 5st Unit BP
             Positioned(
                 left: r(1190.0),
-                top: r(185.0),
+                top: r(147.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null &&
@@ -2181,7 +2183,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(648.0),
-              top: r(386.0),
+              top: r(348.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2197,7 +2199,7 @@ class HomePageState extends State<HomePage> {
             // Your 1st Unit Name
             Positioned(
                 left: r(650.0),
-                top: r(389.0),
+                top: r(351.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
@@ -2214,7 +2216,7 @@ class HomePageState extends State<HomePage> {
             // Your 1st Unit BP
             Positioned(
                 left: r(650.0),
-                top: r(411.0),
+                top: r(373.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
@@ -2239,7 +2241,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(783.0),
-              top: r(386.0),
+              top: r(348.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2255,7 +2257,7 @@ class HomePageState extends State<HomePage> {
             // Your 2st Unit Name
             Positioned(
                 left: r(785.0),
-                top: r(389.0),
+                top: r(351.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
@@ -2272,7 +2274,7 @@ class HomePageState extends State<HomePage> {
             // Your 2st Unit BP
             Positioned(
                 left: r(785.0),
-                top: r(411.0),
+                top: r(373.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
@@ -2297,7 +2299,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(918.0),
-              top: r(386.0),
+              top: r(348.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2313,7 +2315,7 @@ class HomePageState extends State<HomePage> {
             // Your 3st Unit Name
             Positioned(
                 left: r(920.0),
-                top: r(389.0),
+                top: r(351.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
@@ -2330,7 +2332,7 @@ class HomePageState extends State<HomePage> {
             // Your 3st Unit BP
             Positioned(
                 left: r(920.0),
-                top: r(411.0),
+                top: r(373.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
@@ -2355,7 +2357,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(1053.0),
-              top: r(386.0),
+              top: r(348.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2371,7 +2373,7 @@ class HomePageState extends State<HomePage> {
             // Your 4st Unit Name
             Positioned(
                 left: r(1055.0),
-                top: r(389.0),
+                top: r(351.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
@@ -2388,7 +2390,7 @@ class HomePageState extends State<HomePage> {
             // Your 4st Unit BP
             Positioned(
                 left: r(1055.0),
-                top: r(411.0),
+                top: r(373.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
@@ -2413,7 +2415,7 @@ class HomePageState extends State<HomePage> {
                     ))),
             Positioned(
               left: r(1188.0),
-              top: r(386.0),
+              top: r(348.0),
               child: Container(
                 width: r(90.0),
                 height: r(50.0),
@@ -2429,7 +2431,7 @@ class HomePageState extends State<HomePage> {
             // Your 5st Unit Name
             Positioned(
                 left: r(1190.0),
-                top: r(389.0),
+                top: r(351.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['5'] != null
@@ -2446,7 +2448,7 @@ class HomePageState extends State<HomePage> {
             // Your 5st Unit BP
             Positioned(
                 left: r(1190.0),
-                top: r(411.0),
+                top: r(373.0),
                 width: r(100.0),
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['5'] != null
@@ -2519,9 +2521,15 @@ class HomePageState extends State<HomePage> {
                   buildIndicator(cannotDefendUnitPositions.isNotEmpty
                       ? cannotDefendUnitPositions.length
                       : opponentFieldUnitPositions.length),
+                  SizedBox(height: r(20.0)),
+                  ElevatedButton(
+                    onPressed: () => cController.animateToPage(activeIndex + 1),
+                    child: const Text('Next->'),
+                  ),
+                  SizedBox(height: r(20.0)),
                   SizedBox(
-                      width: r(240.0),
-                      height: r(100.0),
+                      width: r(220.0),
+                      height: r(90.0),
                       child: ElevatedButton(
                         onPressed: () {
                           showUnitTargetCarousel = false;
@@ -2563,9 +2571,15 @@ class HomePageState extends State<HomePage> {
                   ),
                   SizedBox(height: r(20.0)),
                   buildIndicator(yourDefendableUnitPositions.length),
+                  SizedBox(height: r(20.0)),
+                  ElevatedButton(
+                    onPressed: () => cController.animateToPage(activeIndex + 1),
+                    child: const Text('Next->'),
+                  ),
+                  SizedBox(height: r(20.0)),
                   SizedBox(
-                      width: r(240.0),
-                      height: r(100.0),
+                      width: r(220.0),
+                      height: r(90.0),
                       child: ElevatedButton(
                         onPressed: () => block(activeIndex),
                         child: const Text('Block',

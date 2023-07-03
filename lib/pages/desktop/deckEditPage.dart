@@ -115,38 +115,45 @@ class DeckEditPageState extends State<DeckEditPage> {
           backgroundColor: Colors.transparent,
           body: Stack(children: <Widget>[
             Stack(fit: StackFit.expand, children: <Widget>[
+              // カード含むスクロールビュー
               Positioned(
-                  left: r(330.0),
-                  top: r(450.0),
+                  left: r(340.0),
+                  top: r(360.0),
                   child: Row(children: <Widget>[
                     SizedBox(
                         width: r(1040.0),
                         child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            padding: EdgeInsets.all(r(5)),
+                            padding: EdgeInsets.only(top: r(5.0)),
                             child: Row(
                               children: [
                                 for (int cardId = 1; cardId <= 27; cardId++)
                                   cardInfos == null || cardId == 12
                                       ? Container()
-                                      : GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              tappedCardId = cardId;
-                                            });
-                                          },
-                                          child: DragBoxForDeckEditor(
-                                              cardId,
-                                              putCard,
-                                              cardInfos[cardId.toString()],
-                                              playerDeck,
-                                              r)),
+                                      : Row(children: [
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  tappedCardId = cardId;
+                                                });
+                                              },
+                                              child: DragBoxForDeckEditor(
+                                                  cardId,
+                                                  putCard,
+                                                  cardInfos[cardId.toString()],
+                                                  playerDeck,
+                                                  r)),
+                                          Container(
+                                            width: 8.0,
+                                          ),
+                                        ]),
                               ],
                             ))),
                   ])),
+              // ドラッグ先
               Positioned(
                   left: r(20.0),
-                  top: r(40.0),
+                  top: r(25.0),
                   child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -175,10 +182,11 @@ class DeckEditPageState extends State<DeckEditPage> {
                         ),
                       ])),
             ]),
+            // カード情報
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'deckEditor',
                 widget.enLocale, r),
           ]),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           floatingActionButton: DeckButtons(gameProgressStatus, playerDeck, r,
               (status, userDeck, cardInfo) {
             switch (status) {

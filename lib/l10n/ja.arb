@@ -46,5 +46,7 @@
   "activatedEffect": "の効果が発動!",
   "interceptAbailable": "インターセプトカード利用できます (limit:5秒)",
   "tooEarly": "おっと、焦らないで、Speed Moveはまだブロックチェーンに反映されていないよ。",
-  "cannotMove": "は動けない!"
+  "cannotMove": "は動けない!",
+  "rollScreen": "ゲームがスタートしたら画面を横に倒して遊んでね!",
+  "crashHappen": "スマホはクラッシュが発生しやすいのでMacやPCがおすすめです。"
 }

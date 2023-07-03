@@ -3,13 +3,19 @@ import 'dart:math' as math;
 
 const envFlavor = String.fromEnvironment('flavor');
 
+typedef double ResponsiveSizeChangeFunction(double data);
+
 class ExpandableFAB extends StatefulWidget {
   const ExpandableFAB(
-      {Key? key, required this.children, required this.distance})
+      {Key? key,
+      required this.children,
+      required this.distance,
+      required this.r})
       : super(key: key);
 
   final List<Widget> children;
   final double distance;
+  final ResponsiveSizeChangeFunction r;
 
   @override
   ExpandableFABState createState() => ExpandableFABState();
@@ -56,8 +62,8 @@ class ExpandableFABState extends State<ExpandableFAB>
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-        width: 200.0,
-        height: 200.0,
+        width: widget.r(300.0),
+        height: widget.r(300.0),
         child: Stack(alignment: Alignment.topLeft, children: [
           // この３つこのファイルの下に書かれている
           _tapToClose(),
@@ -69,8 +75,8 @@ class ExpandableFABState extends State<ExpandableFAB>
   // FAB(Floating Animation Button)を再度クリックした時
   Widget _tapToClose() {
     return SizedBox(
-        height: 55,
-        width: 55,
+        height: widget.r(40.0),
+        width: widget.r(40.0),
         child: Center(
             child: Material(
                 shape: const CircleBorder(),
@@ -79,8 +85,9 @@ class ExpandableFABState extends State<ExpandableFAB>
                 child: InkWell(
                     onTap: _toggle,
                     child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: EdgeInsets.all(widget.r(8.0)),
                         child: Icon(Icons.close,
+                            size: widget.r(20.0),
                             color: Theme.of(context).primaryColor))))));
   }
 
@@ -100,20 +107,17 @@ class ExpandableFABState extends State<ExpandableFAB>
             opacity: _open ? 0.0 : 1.0,
             curve: Curves.easeInOut,
             duration: const Duration(milliseconds: 250),
-            child: Padding(
-                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
-                child: SizedBox(
-                    height: 40.0,
-                    width: 40.0,
-                    child: FittedBox(
-                        child: FloatingActionButton(
-                      shape: const CircleBorder(),
-                      onPressed: _toggle,
-                      child: const Icon(
-                        Icons.import_contacts,
-                        size: 20.0,
-                      ),
-                    ))))));
+            child: SizedBox(
+                height: widget.r(40.0),
+                width: widget.r(40.0),
+                child: FittedBox(
+                    child: FloatingActionButton(
+                  shape: const CircleBorder(),
+                  onPressed: _toggle,
+                  child: const Icon(
+                    Icons.import_contacts,
+                  ),
+                )))));
   }
 
   List<Widget> _buildExpandableFABButton() {

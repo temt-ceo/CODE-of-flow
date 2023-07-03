@@ -46,5 +46,7 @@
   "activatedEffect": "'s effect is activated!",
   "interceptAbailable": "Intercept card is available (limit:5 seconds)",
   "tooEarly": "Oops, no rush, Speed Move is not reflected in the blockchain yet.",
-  "cannotMove": " cannot move!"
+  "cannotMove": " cannot move!",
+  "rollScreen": "When the game starts, roll the screen sideways to play!",
+  "crashHappen": "Macs and PCs are recommended because smartphones are prone to crashes."
 }

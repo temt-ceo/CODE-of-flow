@@ -357,7 +357,8 @@ class DragTargetState extends State<DragTargetWidget> {
                     widget.r));
               } else if (widget.label == 'unit') {
                 for (int i = 0; i < 5; i++) {
-                  if (dropedList[i].runtimeType.toString() == 'Container') {
+                  if (dropedList[i].runtimeType.toString() ==
+                      Container().runtimeType.toString()) {
                     dropedList[i] = DroppedCardWidget(
                         widget.r(132.0 * i + 20), // TODO 380 / 440
                         imageUrl,
@@ -373,7 +374,8 @@ class DragTargetState extends State<DragTargetWidget> {
                 }
               } else if (widget.label == 'trigger') {
                 for (int i = 0; i < 4; i++) {
-                  if (dropedList[i].runtimeType.toString() == 'Container') {
+                  if (dropedList[i].runtimeType.toString() ==
+                      Container().runtimeType.toString()) {
                     dropedList[i] = DroppedCardWidget(
                         widget.r(93.0 * i + 17), // TODO 380 / 440
                         imageUrl,
@@ -429,7 +431,6 @@ class DragTargetState extends State<DragTargetWidget> {
                   return false;
                 }
                 if (dropedList.isEmpty) {
-                  // print('dropedList.isEmpty');
                   _dropBloc.counterEventSink.add(DropDeniedEvent());
                   return false;
                 }
@@ -459,7 +460,8 @@ class DragTargetState extends State<DragTargetWidget> {
                   }
                   bool noSpace = true;
                   for (int i = 0; i < 5; i++) {
-                    if (dropedList[i].runtimeType.toString() == 'Container') {
+                    if (dropedList[i].runtimeType.toString() ==
+                        Container().runtimeType.toString()) {
                       noSpace = false;
                     }
                   }
@@ -473,7 +475,8 @@ class DragTargetState extends State<DragTargetWidget> {
                     imageUrl.startsWith('${imagePath}trigger')) {
                   bool noSpace = true;
                   for (int i = 0; i < 4; i++) {
-                    if (dropedList[i].runtimeType.toString() == 'Container') {
+                    if (dropedList[i].runtimeType.toString() ==
+                        Container().runtimeType.toString()) {
                       noSpace = false;
                     }
                   }
@@ -613,7 +616,8 @@ class DragTargetState extends State<DragTargetWidget> {
               widget.r));
         } else if (widget.label == 'unit') {
           for (int i = 0; i < 5; i++) {
-            if (dropedList[i].runtimeType.toString() == 'Container') {
+            if (dropedList[i].runtimeType.toString() ==
+                Container().runtimeType.toString()) {
               dropedList[i] = DroppedCardWidget(
                   widget.r(132.0 * i + 20), // TODO 380 / 440
                   imageUrl,
@@ -629,7 +633,8 @@ class DragTargetState extends State<DragTargetWidget> {
           }
         } else if (widget.label == 'trigger') {
           for (int i = 0; i < 4; i++) {
-            if (dropedList[i].runtimeType.toString() == 'Container') {
+            if (dropedList[i].runtimeType.toString() ==
+                Container().runtimeType.toString()) {
               dropedList[i] = DroppedCardWidget(
                   widget.r(93.0 * i + 17), // TODO 380 / 440
                   imageUrl,
@@ -684,7 +689,6 @@ class DragTargetState extends State<DragTargetWidget> {
             return false;
           }
           if (dropedList.isEmpty) {
-            // print('dropedList.isEmpty');
             _dropBloc.counterEventSink.add(DropDeniedEvent());
             return false;
           }
@@ -714,7 +718,8 @@ class DragTargetState extends State<DragTargetWidget> {
             }
             bool noSpace = true;
             for (int i = 0; i < 5; i++) {
-              if (dropedList[i].runtimeType.toString() == 'Container') {
+              if (dropedList[i].runtimeType.toString() ==
+                  Container().runtimeType.toString()) {
                 noSpace = false;
               }
             }
@@ -728,7 +733,8 @@ class DragTargetState extends State<DragTargetWidget> {
               imageUrl.startsWith('${imagePath}trigger')) {
             bool noSpace = true;
             for (int i = 0; i < 4; i++) {
-              if (dropedList[i].runtimeType.toString() == 'Container') {
+              if (dropedList[i].runtimeType.toString() ==
+                  Container().runtimeType.toString()) {
                 noSpace = false;
               }
             }

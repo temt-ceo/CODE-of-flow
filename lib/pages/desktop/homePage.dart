@@ -432,11 +432,13 @@ class HomePageState extends State<HomePage> {
   **  ブロック処理
   */
   void block(int activeIndex) async {
-    setState(() {
-      showDefenceUnitsCarousel = false;
-      opponentDefendPosition = activeIndex + 1;
-      canUseIntercept = false;
-    });
+    if (mounted) {
+      setState(() {
+        showDefenceUnitsCarousel = false;
+        opponentDefendPosition = activeIndex + 1;
+        canUseIntercept = false;
+      });
+    }
     // Battle Reaction
     // showGameLoading();
     var message = DefenceActionModel(

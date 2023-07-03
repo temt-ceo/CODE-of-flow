@@ -681,7 +681,6 @@ class StartButtonsState extends State<StartButtons> {
       objJs['your_field_unit'],
       yourDefendableUnitLength,
       opponentDefendableUnitLength,
-      int.parse(objJs['opponent_field_unit_length']),
       objJs['your_field_unit_action'],
       objJs['your_field_unit_bp_amount_of_change'],
       objJs['your_hand'],

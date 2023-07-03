@@ -2724,64 +2724,61 @@ class HomePageState extends State<HomePage> {
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
           floatingActionButton: SizedBox(
-              height: r(1000),
               child: StartButtons(gameProgressStatus,
                   (status, _playerId, data, mariganCardIds, cardInfo) {
-                if (playerId != _playerId) {
-                  setState(() {
-                    playerId = _playerId;
-                  });
-                }
-                switch (status) {
-                  case 'game-is-ready':
-                    doAnimation();
-                    break;
-                  case 'matching-success':
-                    setState(() => gameStarted = true);
-                    debugPrint('playerId: $playerId $status');
-                    setDataAndMarigan(data, mariganCardIds);
-                    break;
-                  case 'started-game-info':
-                    setState(() => gameStarted = true);
-                    setDataAndMarigan(data, null);
-                    break;
-                  case 'not-game-starting':
-                    // バトルデータなし
-                    if (gameObject != null) {
-                      // データがない = 10ターンが終わった可能性
-                      if (gameObject!.turn == 10 &&
-                          gameObject!.isFirstTurn == false) {
-                        if (gameObject!.yourLife < gameObject!.opponentLife ||
-                            (gameObject!.isFirst &&
-                                gameObject!.yourLife ==
-                                    gameObject!.opponentLife)) {
-                          QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.error,
-                            title: 'You Lose...',
-                            text: 'Try Again!',
-                          );
-                        }
-                      }
+            if (playerId != _playerId) {
+              setState(() {
+                playerId = _playerId;
+              });
+            }
+            switch (status) {
+              case 'game-is-ready':
+                doAnimation();
+                break;
+              case 'matching-success':
+                setState(() => gameStarted = true);
+                debugPrint('playerId: $playerId $status');
+                setDataAndMarigan(data, mariganCardIds);
+                break;
+              case 'started-game-info':
+                setState(() => gameStarted = true);
+                setDataAndMarigan(data, null);
+                break;
+              case 'not-game-starting':
+                // バトルデータなし
+                if (gameObject != null) {
+                  // データがない = 10ターンが終わった可能性
+                  if (gameObject!.turn == 10 &&
+                      gameObject!.isFirstTurn == false) {
+                    if (gameObject!.yourLife < gameObject!.opponentLife ||
+                        (gameObject!.isFirst &&
+                            gameObject!.yourLife == gameObject!.opponentLife)) {
+                      QuickAlert.show(
+                        context: context,
+                        type: QuickAlertType.error,
+                        title: 'You Lose...',
+                        text: 'Try Again!',
+                      );
                     }
-                    // 内部データ初期化
-                    setState(() {
-                      onChainYourFieldUnit = [];
-                      onChainYourTriggerCards = [];
-                      onChainYourTriggerCardsDisplay = [];
-                      canOperate = true;
-                      gameStarted = false;
-                      gameObject = null;
-                    });
-                    attackStatusBloc.canAttackEventSink
-                        .add(BattleFinishedEvent());
-                    // setDataAndMarigan(data, null);
-                    break;
-                  case 'card-info':
-                    setCardInfo(cardInfo);
-                    break;
+                  }
                 }
-              }, widget.enLocale, r)));
+                // 内部データ初期化
+                setState(() {
+                  onChainYourFieldUnit = [];
+                  onChainYourTriggerCards = [];
+                  onChainYourTriggerCardsDisplay = [];
+                  canOperate = true;
+                  gameStarted = false;
+                  gameObject = null;
+                });
+                attackStatusBloc.canAttackEventSink.add(BattleFinishedEvent());
+                // setDataAndMarigan(data, null);
+                break;
+              case 'card-info':
+                setCardInfo(cardInfo);
+                break;
+            }
+          }, widget.enLocale, r)));
     });
   }
 

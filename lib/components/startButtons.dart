@@ -947,14 +947,15 @@ class StartButtonsState extends State<StartButtons> {
                 child: SizedBox(
                     width: widget.r(40.0),
                     height: widget.r(40.0),
-                    child: FloatingActionButton(
+                    child: FittedBox(
+                        child: FloatingActionButton(
                       onPressed: signout,
                       tooltip: gameStarted == true ? 'Surrender' : 'Sign Out',
                       child: Icon(Icons.logout,
                           color:
                               gameStarted == true ? Colors.amber : Colors.grey),
-                    ))),
-            SizedBox(width: widget.r(70)),
+                    )))),
+            SizedBox(width: widget.r(80)),
           ])),
       Visibility(
           visible: walletUser.addr == '',

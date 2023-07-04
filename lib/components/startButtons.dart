@@ -470,7 +470,7 @@ class StartButtonsState extends State<StartButtons> {
 
   void countdown() {
     var timerComponent = TimerComponent();
-    timerComponent.countdownStart(60, null);
+    timerComponent.countdownStart(70, null);
     showDialog(
         context: context,
         barrierDismissible: false,

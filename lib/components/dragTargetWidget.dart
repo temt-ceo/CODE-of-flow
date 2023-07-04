@@ -34,6 +34,7 @@ class DragTargetWidget extends StatefulWidget {
   final bool tmpCanOperate;
   final bool attackIsReady;
   final ResponsiveSizeChangeFunction r;
+  final bool isMobile;
 
   DragTargetWidget(
       this.label,
@@ -52,7 +53,8 @@ class DragTargetWidget extends StatefulWidget {
       this.skillMessage,
       this.tmpCanOperate,
       this.attackIsReady,
-      this.r);
+      this.r,
+      this.isMobile);
 
   @override
   DragTargetState createState() => DragTargetState();
@@ -163,20 +165,38 @@ class DragTargetState extends State<DragTargetWidget> {
 
       if (widget.info!.opponentDefendableUnitLength == 0 || canBlock == false) {
         // 敵ユニットがいない場合、そのままダメージへ
-        // showGameLoading();
-        List<int> yourUsedInterceptCard = [];
-        List<int> opponentUsedInterceptCard = [];
-        List<int> attackerUsedCardIds = [];
-        List<int> defenderUsedCardIds = [];
-        var message2 = DefenceActionModel(
-            null,
-            yourUsedInterceptCard,
-            opponentUsedInterceptCard,
-            attackerUsedCardIds,
-            defenderUsedCardIds);
-        await apiService.saveGameServerProcess('defence_action',
-            jsonEncode(message2), widget.info!.you.toString());
-        // closeGameLoading();
+        if (widget.isMobile == true) {
+          showGameLoading();
+          List<int> yourUsedInterceptCard = [];
+          List<int> opponentUsedInterceptCard = [];
+          List<int> attackerUsedCardIds = [];
+          List<int> defenderUsedCardIds = [];
+          var message2 = DefenceActionModel(
+              null,
+              yourUsedInterceptCard,
+              opponentUsedInterceptCard,
+              attackerUsedCardIds,
+              defenderUsedCardIds);
+          apiService.saveGameServerProcess('defence_action',
+              jsonEncode(message2), widget.info!.you.toString());
+          await Future.delayed(const Duration(seconds: 2));
+          closeGameLoading();
+        } else {
+          showGameLoading();
+          List<int> yourUsedInterceptCard = [];
+          List<int> opponentUsedInterceptCard = [];
+          List<int> attackerUsedCardIds = [];
+          List<int> defenderUsedCardIds = [];
+          var message2 = DefenceActionModel(
+              null,
+              yourUsedInterceptCard,
+              opponentUsedInterceptCard,
+              attackerUsedCardIds,
+              defenderUsedCardIds);
+          await apiService.saveGameServerProcess('defence_action',
+              jsonEncode(message2), widget.info!.you.toString());
+          closeGameLoading();
+        }
       }
     }
   }
@@ -202,9 +222,11 @@ class DragTargetState extends State<DragTargetWidget> {
           String cardIdStr = widget.defaultDropedList[i];
           var imageUrl = '';
           if (int.parse(cardIdStr) >= 17) {
-            imageUrl = '${imagePath}trigger/card_${cardIdStr}.jpeg';
+            imageUrl =
+                '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardIdStr}.jpeg';
           } else {
-            imageUrl = '${imagePath}unit/card_${cardIdStr}.jpeg';
+            imageUrl =
+                '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardIdStr}.jpeg';
           }
           if (i < 15) {
             dropedList.add(DroppedCardWidget(
@@ -241,7 +263,8 @@ class DragTargetState extends State<DragTargetWidget> {
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
           if (widget.defaultDropedList[i] != null) {
             String cardIdStr = widget.defaultDropedList[i];
-            var imageUrl = '${imagePath}unit/card_$cardIdStr.jpeg';
+            var imageUrl =
+                '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardIdStr.jpeg';
             dropedList[i] = DroppedCardWidget(
                 widget.r(132.0 * i + 20), // TODO 690 / 700
                 imageUrl,
@@ -259,7 +282,8 @@ class DragTargetState extends State<DragTargetWidget> {
         for (int i = 0; i < widget.defaultDropedList.length; i++) {
           if (widget.defaultDropedList[i] != null) {
             int cardId = widget.defaultDropedList[i];
-            var imageUrl = '${imagePath}trigger/card_${cardId.toString()}.jpeg';
+            var imageUrl =
+                '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
             dropedList[i] = DroppedCardWidget(
                 widget.r(93.0 * i + 17), // TODO 380 / 440
                 imageUrl,
@@ -282,7 +306,8 @@ class DragTargetState extends State<DragTargetWidget> {
         if (widget.info!.opponentFieldUnit[i.toString()] != null) {
           var cardIdStr = widget.info!.opponentFieldUnit[i.toString()];
           var cardId = int.parse(cardIdStr);
-          var imageUrl = '${imagePath}unit/card_${cardId.toString()}.jpeg';
+          var imageUrl =
+              '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
           dropedListEnemy.add(DroppedCardWidget(
               widget.r(135.0 * dropedListEnemy.length + 20), // TODO 690 / 700
               imageUrl,
@@ -330,8 +355,8 @@ class DragTargetState extends State<DragTargetWidget> {
                 onAccept: (String cardIdStr) {
               var cardId = int.parse(cardIdStr);
               var imageUrl = cardId > 16
-                  ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-                  : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+                  ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
+                  : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}${cardId.toString()}.jpeg';
               if (widget.label == 'deck' && dropedList.length >= 15) {
                 dropedListSecond.add(DroppedCardWidget(
                     widget.r(86.0 * dropedListSecond.length - 1 + 10),
@@ -440,8 +465,8 @@ class DragTargetState extends State<DragTargetWidget> {
                 }
                 var cardId = int.parse(cardIdStr!);
                 var imageUrl = cardId > 16
-                    ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-                    : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+                    ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
+                    : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}${cardId.toString()}.jpeg';
 
                 if (widget.label == 'unit' &&
                     imageUrl.startsWith('${imagePath}unit')) {
@@ -590,8 +615,8 @@ class DragTargetState extends State<DragTargetWidget> {
           onAccept: (String cardIdStr) {
         var cardId = int.parse(cardIdStr);
         var imageUrl = cardId > 16
-            ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-            : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+            ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
+            : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
         if (widget.label == 'deck' && dropedList.length >= 15) {
           dropedListSecond.add(DroppedCardWidget(
               widget.r(86.0 * dropedListSecond.length - 1 + 10),
@@ -698,8 +723,8 @@ class DragTargetState extends State<DragTargetWidget> {
           }
           var cardId = int.parse(cardIdStr!);
           var imageUrl = cardId > 16
-              ? '${imagePath}trigger/card_${cardId.toString()}.jpeg'
-              : '${imagePath}unit/card_${cardId.toString()}.jpeg';
+              ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
+              : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
 
           if (widget.label == 'unit' &&
               imageUrl.startsWith('${imagePath}unit')) {

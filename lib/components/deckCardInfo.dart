@@ -180,11 +180,11 @@ class DeckCardInfoState extends State<DeckCardInfo> {
                                   backgroundColor: getCardInfo(
                                               widget.tappedCardId, 'rarity') ==
                                           'VR'
-                                      ? const Color.fromARGB(255, 218, 209, 209)
+                                      ? const Color.fromARGB(255, 215, 215, 215)
                                       : (getCardInfo(widget.tappedCardId, 'rarity') ==
                                               'SR'
                                           ? const Color.fromARGB(
-                                              255, 248, 224, 9)
+                                              255, 175, 149, 0)
                                           : (getCardInfo(widget.tappedCardId, 'rarity') == 'R'
                                               ? const Color.fromARGB(
                                                   255, 174, 8, 8)

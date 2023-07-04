@@ -11,9 +11,10 @@ class DragBox extends StatefulWidget {
   final StringCallback putCardCallback;
   final dynamic cardInfo;
   final ResponsiveSizeChangeFunction r;
+  final bool isMobile;
 
-  const DragBox(
-      this.index, this.cardId, this.putCardCallback, this.cardInfo, this.r);
+  const DragBox(this.index, this.cardId, this.putCardCallback, this.cardInfo,
+      this.r, this.isMobile);
 
   @override
   DragBoxState createState() => DragBoxState();
@@ -31,8 +32,8 @@ class DragBoxState extends State<DragBox> {
   @override
   Widget build(BuildContext context) {
     var imageUrl = widget.cardId > 16
-        ? '${imagePath}trigger/card_${widget.cardId.toString()}.jpeg'
-        : '${imagePath}unit/card_${widget.cardId.toString()}.jpeg';
+        ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${widget.cardId.toString()}.jpeg'
+        : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${widget.cardId.toString()}.jpeg';
     if (widget.index != null) {
       if (currentIndex == -1) {
         currentIndex = widget.index!;

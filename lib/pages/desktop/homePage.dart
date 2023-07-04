@@ -7,10 +7,12 @@ import 'package:amplify_api/amplify_api.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flash/flash.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:video_player/video_player.dart';
 import 'package:getwidget/getwidget.dart';
 import 'package:quickalert/quickalert.dart';
+import 'dart:html' as html;
 
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_bloc.dart';
 import 'package:CodeOfFlow/bloc/attack_status/attack_status_event.dart';
@@ -31,7 +33,8 @@ const envFlavor = String.fromEnvironment('flavor');
 
 class HomePage extends StatefulWidget {
   final bool enLocale;
-  const HomePage({super.key, required this.enLocale});
+  final bool isMobile;
+  const HomePage({super.key, required this.enLocale, required this.isMobile});
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -135,7 +138,9 @@ class HomePageState extends State<HomePage> {
               ret.playerId != playerId) {
             showToast("No. ${ret.playerId} has entered in Alcana.");
           } else if (ret.type == 'put_card_on_the_field' &&
-              gameObject != null) {
+              gameObject != null &&
+              (gameObject!.you.toString() == ret.playerId ||
+                  gameObject!.opponent.toString() == ret.playerId)) {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             if (gameObject != null &&
                 gameObject!.you.toString() == ret.playerId) {
@@ -440,16 +445,30 @@ class HomePageState extends State<HomePage> {
       });
     }
     // Battle Reaction
-    // showGameLoading();
-    var message = DefenceActionModel(
-        opponentDefendPosition!,
-        attackerUsedInterceptCard,
-        defenderUsedInterceptCard,
-        attackerUsedCardIds,
-        defenderUsedCardIds);
-    await apiService.saveGameServerProcess(
-        'battle_reaction', jsonEncode(message), gameObject!.you.toString());
-    // closeGameLoading();
+    if (widget.isMobile == true) {
+      showGameLoading();
+      var message = DefenceActionModel(
+          opponentDefendPosition!,
+          attackerUsedInterceptCard,
+          defenderUsedInterceptCard,
+          attackerUsedCardIds,
+          defenderUsedCardIds);
+      apiService.saveGameServerProcess(
+          'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+      await Future.delayed(const Duration(seconds: 2));
+      closeGameLoading();
+    } else {
+      showGameLoading();
+      var message = DefenceActionModel(
+          opponentDefendPosition!,
+          attackerUsedInterceptCard,
+          defenderUsedInterceptCard,
+          attackerUsedCardIds,
+          defenderUsedCardIds);
+      await apiService.saveGameServerProcess(
+          'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+      closeGameLoading();
+    }
   }
 
   /*
@@ -514,17 +533,25 @@ class HomePageState extends State<HomePage> {
         }
       }
       // Battle Reaction
-      // showGameLoading();
+      showGameLoading();
       var message = DefenceActionModel(
           opponentDefendPosition,
           attackerUsedInterceptCard,
           defenderUsedInterceptCard,
           attackerUsedCardIds,
           defenderUsedCardIds);
-      await apiService.saveGameServerProcess(
-          'battle_reaction', jsonEncode(message), gameObject!.you.toString());
-      // closeGameLoading();
-      onChainYourTriggerCardsDisplay[activeIndex] = null;
+      if (widget.isMobile == true) {
+        apiService.saveGameServerProcess(
+            'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+        await Future.delayed(const Duration(seconds: 2));
+        closeGameLoading();
+        onChainYourTriggerCardsDisplay[activeIndex] = null;
+      } else {
+        await apiService.saveGameServerProcess(
+            'battle_reaction', jsonEncode(message), gameObject!.you.toString());
+        closeGameLoading();
+        onChainYourTriggerCardsDisplay[activeIndex] = null;
+      }
     }
   }
 
@@ -1382,17 +1409,24 @@ class HomePageState extends State<HomePage> {
     if (calledFieldUnitActionTrans == null ||
         calledFieldUnitActionTrans == false) {
       calledFieldUnitActionTrans = true;
-      // showGameLoading();
       // 使用可能なインターセプトを初期化
       canUseIntercept = false;
       // Call GraphQL method.
       var message = PutCardModel(fieldUnit, enemySkillTarget, triggerCards,
           usedInterceptCardPosition, skillMessage, usedTriggers);
-      await apiService.saveGameServerProcess('put_card_on_the_field',
-          jsonEncode(message), gameObject!.you.toString());
-      // closeGameLoading();
-      for (var i = 0; i < usedInterceptCardPosition.length; i++) {
-        onChainYourTriggerCards[usedInterceptCardPosition[i] - 1] = null;
+      if (widget.isMobile == true) {
+        apiService.saveGameServerProcess('put_card_on_the_field',
+            jsonEncode(message), gameObject!.you.toString());
+        await Future.delayed(const Duration(seconds: 1));
+        for (var i = 0; i < usedInterceptCardPosition.length; i++) {
+          onChainYourTriggerCards[usedInterceptCardPosition[i] - 1] = null;
+        }
+      } else {
+        await apiService.saveGameServerProcess('put_card_on_the_field',
+            jsonEncode(message), gameObject!.you.toString());
+        for (var i = 0; i < usedInterceptCardPosition.length; i++) {
+          onChainYourTriggerCards[usedInterceptCardPosition[i] - 1] = null;
+        }
       }
     }
   }
@@ -1591,16 +1625,30 @@ class HomePageState extends State<HomePage> {
     gameProgressStatus = 2;
     // Call GraphQL method.
     if (gameObject != null) {
-      // showGameLoading();
-      await apiService.saveGameServerProcess(
-          'game_start', jsonEncode(handCards), gameObject!.you.toString());
-      // closeGameLoading();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showMessage(
-            7,
-            'Game Start. ${gameObject!.isFirst ? 'Your Turn!' : "Opponent's Turn!"}',
-            null);
-      });
+      if (widget.isMobile == true) {
+        showGameLoading();
+        apiService.saveGameServerProcess(
+            'game_start', jsonEncode(handCards), gameObject!.you.toString());
+        await Future.delayed(const Duration(seconds: 2));
+        closeGameLoading();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showMessage(
+              7,
+              'Game Start. ${gameObject!.isFirst ? 'Your Turn!' : "Opponent's Turn!"}',
+              null);
+        });
+      } else {
+        showGameLoading();
+        await apiService.saveGameServerProcess(
+            'game_start', jsonEncode(handCards), gameObject!.you.toString());
+        closeGameLoading();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          showMessage(
+              7,
+              'Game Start. ${gameObject!.isFirst ? 'Your Turn!' : "Opponent's Turn!"}',
+              null);
+        });
+      }
     }
   }
 
@@ -1639,8 +1687,13 @@ class HomePageState extends State<HomePage> {
                                         tappedCardId = handCards[i];
                                       });
                                     },
-                                    child: DragBox(i, handCards[i], putCard,
-                                        cardInfos[handCards[i].toString()], r)),
+                                    child: DragBox(
+                                        i,
+                                        handCards[i],
+                                        putCard,
+                                        cardInfos[handCards[i].toString()],
+                                        r,
+                                        widget.isMobile)),
                             ],
                           ),
                         )
@@ -1664,23 +1717,45 @@ class HomePageState extends State<HomePage> {
                                         cardInfos != null
                                             ? cardInfos[cardId.toString()]
                                             : null,
-                                        r)),
+                                        r,
+                                        widget.isMobile)),
                             ],
                           ),
                         ),
                 ])),
-            Positioned(
-              left: r(470.0),
-              top: r(90.0),
-              child: Container(
-                width: r(125.0),
-                height: r(45.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}trigger/trigger.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(470.0),
+                top: r(90.0),
+                child: Container(
+                  width: r(125.0),
+                  height: r(45.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/trigger/trigger.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(470.0),
+                top: r(90.0),
+                child: Container(
+                  width: r(125.0),
+                  height: r(45.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/trigger/trigger.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -1726,7 +1801,8 @@ class HomePageState extends State<HomePage> {
                     isEnemyAttack,
                     attackerUsedCardIds,
                     defenderUsedCardIds,
-                    r)
+                    r,
+                    widget.isMobile)
                 : Container(),
             DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
                 widget.enLocale, r),
@@ -1758,7 +1834,8 @@ class HomePageState extends State<HomePage> {
                             '',
                             canOperateTmp,
                             attackIsReady,
-                            r),
+                            r,
+                            widget.isMobile),
                       ),
                       Padding(
                         padding: EdgeInsets.fromLTRB(
@@ -1780,7 +1857,8 @@ class HomePageState extends State<HomePage> {
                             skillMessage,
                             canOperateTmp,
                             attackIsReady,
-                            r),
+                            r,
+                            widget.isMobile),
                       ),
                     ])),
             // マリガンタイマー
@@ -1850,7 +1928,7 @@ class HomePageState extends State<HomePage> {
                         }))),
             // AttackTarget
             Visibility(
-                visible: attackSignalPosition != null,
+                visible: envFlavor == 'prod' && attackSignalPosition != null,
                 child: Positioned(
                   left: r(attackSignalPosition != null &&
                           (attackSignalPosition! == 2 ||
@@ -1861,28 +1939,72 @@ class HomePageState extends State<HomePage> {
                   child: Container(
                     width: r(75.0),
                     height: r(75.0),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.transparent,
                       image: DecorationImage(
                           opacity: 0.7,
                           image:
-                              AssetImage('${imagePath}unit/attackTarget.png'),
+                              AssetImage('assets/image/unit/attackTarget.png'),
                           fit: BoxFit.cover),
                     ),
                   ),
                 )),
-            Positioned(
-              left: r(648.0),
-              top: r(122.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            // AttackTarget
+            Visibility(
+                visible: envFlavor != 'prod' && attackSignalPosition != null,
+                child: Positioned(
+                  left: r(attackSignalPosition != null &&
+                          (attackSignalPosition! == 2 ||
+                              attackSignalPosition! == 0)
+                      ? 760.0
+                      : 850.0),
+                  top: r(-2.0),
+                  child: Container(
+                    width: r(75.0),
+                    height: r(75.0),
+                    decoration: const BoxDecoration(
+                      color: Colors.transparent,
+                      image: DecorationImage(
+                          opacity: 0.7,
+                          image: AssetImage('image/unit/attackTarget.png'),
+                          fit: BoxFit.cover),
+                    ),
+                  ),
+                )),
+            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(648.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(648.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -1933,18 +2055,40 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(783.0),
-              top: r(122.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(783.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(783.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -1995,18 +2139,40 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(918.0),
-              top: r(122.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(918.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(918.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2057,18 +2223,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(1053.0),
-              top: r(122.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(1053.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(1053.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2119,18 +2306,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(1188.0),
-              top: r(122.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(1188.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(1188.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2181,18 +2389,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(648.0),
-              top: r(348.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(648.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(648.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2239,18 +2468,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(783.0),
-              top: r(348.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(783.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(783.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2297,18 +2547,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(918.0),
-              top: r(348.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(918.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(918.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2355,22 +2626,42 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(1053.0),
-              top: r(348.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(1053.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
-            // Your 4st Unit Name
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(1053.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ), // Your 4st Unit Name
             Positioned(
                 left: r(1055.0),
                 top: r(351.0),
@@ -2413,18 +2704,39 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Positioned(
-              left: r(1188.0),
-              top: r(348.0),
-              child: Container(
-                width: r(90.0),
-                height: r(50.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  image: DecorationImage(
-                      opacity: 0.5,
-                      image: AssetImage('${imagePath}unit/status.png'),
-                      fit: BoxFit.cover),
+            Visibility(
+              visible: envFlavor == 'prod',
+              child: Positioned(
+                left: r(1188.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor != 'prod',
+              child: Positioned(
+                left: r(1188.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        opacity: 0.5,
+                        image: AssetImage('image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
                 ),
               ),
             ),
@@ -2478,7 +2790,7 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(400),
+                        height: r(300),
                         aspectRatio: 14 / 9,
                         viewportFraction: 0.6, // 1.0:1つが全体に出る
                         initialPage: 0,
@@ -2502,7 +2814,7 @@ class HomePageState extends State<HomePage> {
                         var cardId =
                             gameObject!.opponentFieldUnit[(target).toString()];
                         return Image.asset(
-                          '${imagePath}unit/card_$cardId.jpeg',
+                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
                           fit: BoxFit.cover,
                         );
                       } else {
@@ -2511,33 +2823,34 @@ class HomePageState extends State<HomePage> {
                         var cardId =
                             gameObject!.opponentFieldUnit[(target).toString()];
                         return Image.asset(
-                          '${imagePath}unit/card_$cardId.jpeg',
+                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
                           fit: BoxFit.cover,
                         );
                       }
                     },
                   ),
-                  SizedBox(height: r(20.0)),
+                  SizedBox(height: r(10.0)),
                   buildIndicator(cannotDefendUnitPositions.isNotEmpty
                       ? cannotDefendUnitPositions.length
                       : opponentFieldUnitPositions.length),
-                  SizedBox(height: r(20.0)),
-                  ElevatedButton(
-                    onPressed: () => cController.animateToPage(activeIndex + 1),
-                    child: const Text('Next->'),
-                  ),
-                  SizedBox(height: r(20.0)),
-                  SizedBox(
-                      width: r(220.0),
-                      height: r(90.0),
+                  SizedBox(height: r(10.0)),
+                  Visibility(
+                      visible: cannotDefendUnitPositions.isNotEmpty
+                          ? cannotDefendUnitPositions.length > 1
+                          : opponentFieldUnitPositions.length > 1,
                       child: ElevatedButton(
-                        onPressed: () {
-                          showUnitTargetCarousel = false;
-                          selectTarget(activeIndex);
-                        },
-                        child: const Text('Choice',
-                            style: TextStyle(fontSize: 24.0)),
+                        onPressed: () =>
+                            cController.animateToPage(activeIndex + 1),
+                        child: const Text('Next->'),
                       )),
+                  SizedBox(height: r(10.0)),
+                  ElevatedButton(
+                    onPressed: () {
+                      showUnitTargetCarousel = false;
+                      selectTarget(activeIndex);
+                    },
+                    child: const Text('Choice'),
+                  ),
                 ])),
             // 攻撃をブロック
             Visibility(
@@ -2546,7 +2859,7 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(400),
+                        height: r(300),
                         aspectRatio: 14 / 9,
                         viewportFraction: 0.6, // 1.0:1つが全体に出る
                         initialPage: 0,
@@ -2564,27 +2877,23 @@ class HomePageState extends State<HomePage> {
                       var cardId =
                           gameObject!.yourFieldUnit[(target).toString()];
                       return Image.asset(
-                        '${imagePath}unit/card_$cardId.jpeg',
+                        '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
                         fit: BoxFit.cover,
                       );
                     },
                   ),
-                  SizedBox(height: r(20.0)),
+                  SizedBox(height: r(10.0)),
                   buildIndicator(yourDefendableUnitPositions.length),
-                  SizedBox(height: r(20.0)),
+                  SizedBox(height: r(10.0)),
                   ElevatedButton(
                     onPressed: () => cController.animateToPage(activeIndex + 1),
                     child: const Text('Next->'),
                   ),
-                  SizedBox(height: r(20.0)),
-                  SizedBox(
-                      width: r(220.0),
-                      height: r(90.0),
-                      child: ElevatedButton(
-                        onPressed: () => block(activeIndex),
-                        child: const Text('Block',
-                            style: TextStyle(fontSize: 24.0)),
-                      )),
+                  SizedBox(height: r(10.0)),
+                  ElevatedButton(
+                    onPressed: () => block(activeIndex),
+                    child: const Text('Block'),
+                  ),
                 ])),
             // 敵のバトルカード
             Visibility(
@@ -2611,12 +2920,12 @@ class HomePageState extends State<HomePage> {
                           ? gameObject!.opponentFieldUnit[
                                       onBattlePosition.toString()] !=
                                   null
-                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
+                              ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
                               : '${imagePath}unit/bg-2.jpg'
                           : gameObject!.opponentFieldUnit[
                                       opponentDefendPosition.toString()] !=
                                   null
-                              ? '${imagePath}unit/card_${gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                              ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]}.jpeg'
                               : '${imagePath}unit/bg-2.jpg'),
                 ),
               ),
@@ -2650,14 +2959,14 @@ class HomePageState extends State<HomePage> {
                                             opponentDefendPosition
                                                 .toString()] !=
                                         null
-                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                                ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
                                 : '${imagePath}unit/bg-2.jpg'
                             : actedCardPosition != null &&
                                     gameObject!.yourFieldUnit[
                                             (actedCardPosition! + 1)
                                                 .toString()] !=
                                         null
-                                ? '${imagePath}unit/card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
+                                ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
                                 : '${imagePath}unit/bg-2.jpg'),
                   )),
             ),
@@ -2675,7 +2984,7 @@ class HomePageState extends State<HomePage> {
                             height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
-                                : '${imagePath}trigger/card_${cardId.toString()}.jpeg'),
+                                : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
                           ),
                       ],
                     ))),
@@ -2693,10 +3002,56 @@ class HomePageState extends State<HomePage> {
                             height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
-                                : '${imagePath}trigger/card_${cardId.toString()}.jpeg'),
+                                : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
                           ),
                       ],
                     ))),
+            Visibility(
+                visible: gameStarted == false,
+                child: Positioned(
+                    top: r(160.0),
+                    left: r(205.0),
+                    child: SizedBox(
+                        width: r(52.0),
+                        height: r(52.0),
+                        child: FittedBox(
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  html.window.location.href = 'ranking';
+                                },
+                                tooltip: 'RANKING!',
+                                // elevation: 0.0,
+                                child: const ClipRRect(
+                                  child: Icon(
+                                    Icons.receipt_long,
+                                    size: 52.0,
+                                    color: Colors.white,
+                                  ),
+                                )))))),
+            Visibility(
+                visible: gameStarted == false,
+                child: Positioned(
+                    top: r(160.0),
+                    left: r(330.0),
+                    child: SizedBox(
+                        width: r(50.0),
+                        height: r(50.0),
+                        child: FittedBox(
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  html.window.location.href = 'ranking';
+                                },
+                                tooltip: 'RANKING!',
+                                // elevation: 0.0,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(r(4.0)),
+                                  child: Image.asset(
+                                    '${imagePath}button/home_ranking.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )))))),
             // 防御側タイマー
             Visibility(
                 visible: isBattling == true &&
@@ -2707,7 +3062,7 @@ class HomePageState extends State<HomePage> {
                             '6'),
                 child: Center(
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: r(300.0)),
+                        padding: EdgeInsets.only(bottom: r(270.0)),
                         child: SizedBox(
                             width: r(180.0),
                             child: StreamBuilder<int>(
@@ -2731,7 +3086,7 @@ class HomePageState extends State<HomePage> {
                     canUseIntercept == true || showUnitTargetCarousel == true,
                 child: Center(
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: r(300.0)),
+                        padding: EdgeInsets.only(bottom: r(270.0)),
                         child: SizedBox(
                             width: r(180.0),
                             child: StreamBuilder<int>(
@@ -2805,7 +3160,7 @@ class HomePageState extends State<HomePage> {
                 setCardInfo(cardInfo);
                 break;
             }
-          }, widget.enLocale, r));
+          }, widget.enLocale, r, widget.isMobile));
     });
   }
 

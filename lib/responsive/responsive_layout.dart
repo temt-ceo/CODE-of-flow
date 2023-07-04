@@ -3,10 +3,14 @@ import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 class ResponsiveLayout extends StatelessWidget {
   final Widget mobileBody;
+  final Widget mobileBodyHorizen;
   final Widget desktopBody;
 
   const ResponsiveLayout(
-      {super.key, required this.mobileBody, required this.desktopBody});
+      {super.key,
+      required this.mobileBody,
+      required this.mobileBodyHorizen,
+      required this.desktopBody});
 
   @override
   Widget build(BuildContext context) {
@@ -14,6 +18,9 @@ class ResponsiveLayout extends StatelessWidget {
       if (constraints.maxWidth <= mobileWidth &&
           constraints.maxHeight > constraints.maxWidth) {
         return mobileBody;
+      } else if (constraints.maxWidth < mobileWidth &&
+          constraints.maxHeight < mobileHeight) {
+        return mobileBodyHorizen;
       } else {
         return desktopBody;
       }

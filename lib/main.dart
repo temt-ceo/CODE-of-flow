@@ -10,6 +10,7 @@ import 'package:amplify_api/amplify_api.dart';
 import 'amplifyconfiguration.dart';
 import 'package:CodeOfFlow/models/ModelProvider.dart';
 import 'package:CodeOfFlow/responsive/mobile_body.dart';
+import 'package:CodeOfFlow/responsive/mobile_body_horizen.dart';
 import 'package:CodeOfFlow/responsive/desktop_body.dart';
 import 'package:CodeOfFlow/responsive/responsive_layout.dart';
 
@@ -83,6 +84,10 @@ class AppState extends State<App> {
                   title: L10n.of(context)!.homePageTitle,
                   localeCallback: setLocale,
                   route: 'Home'),
+              mobileBodyHorizen: MobileBodyHorizen(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'Home'),
             )),
         '/deck_edit': (context) => Container(
             decoration: BoxDecoration(
@@ -98,6 +103,10 @@ class AppState extends State<App> {
                   title: L10n.of(context)!.homePageTitle,
                   localeCallback: setLocale,
                   route: 'DeckEditor'),
+              mobileBodyHorizen: MobileBodyHorizen(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'DeckEditor'),
             )),
         '/ranking': (context) => Container(
             decoration: BoxDecoration(
@@ -110,6 +119,10 @@ class AppState extends State<App> {
                   localeCallback: setLocale,
                   route: 'Ranking'),
               mobileBody: MobileBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'Ranking'),
+              mobileBodyHorizen: MobileBodyHorizen(
                   title: L10n.of(context)!.homePageTitle,
                   localeCallback: setLocale,
                   route: 'Ranking'),

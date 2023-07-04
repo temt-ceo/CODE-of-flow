@@ -29,14 +29,14 @@ window.createPlayer = async function (playerName) {
     cadence: `
       import FlowToken from 0x7e60df042a9c0868
       import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlow from 0x9e447fb949c3f1b6
+      import CodeOfFlowV2 from 0x9e447fb949c3f1b6
 
       transaction(nickname: String) {
         prepare(signer: AuthAccount) {
           let FlowTokenReceiver = signer.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 
-          signer.save(<- CodeOfFlow.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlow.PlayerStoragePath)
-          signer.link<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath, target: CodeOfFlow.PlayerStoragePath)
+          signer.save(<- CodeOfFlowV2.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlowV2.PlayerStoragePath)
+          signer.link<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath, target: CodeOfFlowV2.PlayerStoragePath)
           }
         execute {
           log("success")
@@ -58,13 +58,13 @@ window.buyCyberEN = async () => {
     cadence: `
       import FlowToken from 0x7e60df042a9c0868
       import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlow from 0x9e447fb949c3f1b6
+      import CodeOfFlowV2 from 0x9e447fb949c3f1b6
 
       transaction() {
         prepare(signer: AuthAccount) {
           let payment <- signer.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!.withdraw(amount: 1.0) as! @FlowToken.Vault
 
-          let player = signer.borrow<&CodeOfFlow.Player>(from: CodeOfFlow.PlayerStoragePath)
+          let player = signer.borrow<&CodeOfFlowV2.Player>(from: CodeOfFlowV2.PlayerStoragePath)
               ?? panic("Could not borrow reference to the Owner's Player Resource.")
           player.buy_en(payment: <- payment)
         }
@@ -87,10 +87,10 @@ window.buyCyberEN = async () => {
 window.isRegistered = async function (address) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
-    pub fun main(address: Address): &CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}? {
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    pub fun main(address: Address): &CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}? {
         let account = getAccount(address)
-        return account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
+        return account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
     }
     `,
     args: (arg, t) => [
@@ -103,10 +103,10 @@ var counter = 0;
 window.getCurrentStatus = async function (address) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(address: Address): AnyStruct {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_current_status()
     }
@@ -124,10 +124,10 @@ window.getCurrentStatus = async function (address) {
 window.getMariganCards = async function (address, playerId) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(address: Address, player_id: UInt): [[UInt16]] {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_marigan_cards(player_id: player_id)
     }
@@ -143,10 +143,10 @@ window.getMariganCards = async function (address, playerId) {
 window.getPlayerDeck = async function (address, playerId) {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(address: Address, player_id: UInt): [UInt16] {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_player_deck(player_id: player_id)
     }
@@ -161,9 +161,9 @@ window.getPlayerDeck = async function (address, playerId) {
 window.getStarterDeck = async function () {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(): [UInt16] {
-        return CodeOfFlow.getStarterDeck()
+        return CodeOfFlowV2.getStarterDeck()
     }
     `,
     args: (arg, t) => [
@@ -175,9 +175,9 @@ window.getStarterDeck = async function () {
 window.getCardInfo = async function () {
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlow from 0x9e447fb949c3f1b6
-    pub fun main(): {UInt16: CodeOfFlow.CardStruct} {
-        return CodeOfFlow.getCardInfo()
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    pub fun main(): {UInt16: CodeOfFlowV2.CardStruct} {
+        return CodeOfFlowV2.getCardInfo()
     }
     `,
     args: (arg, t) => [
@@ -192,16 +192,16 @@ window.getBalance = async function (address, playerId) {
     cadence: `
     import FlowToken from 0x7e60df042a9c0868
     import FungibleToken from 0x9a0766d93b6608b7
-    import CodeOfFlow from 0x9e447fb949c3f1b6
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
 
-    pub fun main(address: Address, player_id: UInt?): [CodeOfFlow.CyberScoreStruct] {
+    pub fun main(address: Address, player_id: UInt?): [CodeOfFlowV2.CyberScoreStruct] {
         let account = getAccount(address)
         let vaultRef = account.getCapability(/public/flowTokenBalance).borrow<&FlowToken.Vault{FungibleToken.Balance}>()
             ?? panic("Could not borrow Balance reference to the Vault")
 
-        var retArr: [CodeOfFlow.CyberScoreStruct] = []
+        var retArr: [CodeOfFlowV2.CyberScoreStruct] = []
         if player_id != nil {
-          let cap = getAccount(address).getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
+          let cap = getAccount(address).getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
               ?? panic("Doesn't have capability!")
 
           let player_arr = cap.get_players_score()
@@ -214,7 +214,7 @@ window.getBalance = async function (address, playerId) {
           }
           return retArr
         }
-        let guestData = CodeOfFlow.CyberScoreStruct(player_name: "Guest")
+        let guestData = CodeOfFlowV2.CyberScoreStruct(player_name: "Guest")
         guestData.balance = vaultRef.balance
         retArr.append(guestData)
         return retArr
@@ -228,6 +228,51 @@ window.getBalance = async function (address, playerId) {
   // console.log(result);
   return result
 };
+window.getRankingScores = async function () {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    pub fun main(): [CodeOfFlowV2.RankScoreStruct] {
+        return CodeOfFlowV2.getRankingScores()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
+window.getTotalScores = async function () {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    pub fun main(): [CodeOfFlowV2.RankScoreStruct] {
+        return CodeOfFlowV2.getTotalScores()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
+window.getRewardRaceBattleCount = async function () {
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    pub fun main(): UInt {
+        return CodeOfFlowV2.getRewardRaceBattleCount()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
 window.getPlayerName = function(player) {
   return player.nickname;
 };

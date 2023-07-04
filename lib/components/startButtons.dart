@@ -81,8 +81,10 @@ class StartButtons extends StatefulWidget {
   final StringCallback callback;
   final bool isEnglish;
   final ResponsiveSizeChangeFunction r;
+  final bool isMobile;
 
-  StartButtons(this.gameProgressStatus, this.callback, this.isEnglish, this.r);
+  StartButtons(this.gameProgressStatus, this.callback, this.isEnglish, this.r,
+      this.isMobile);
 
   @override
   StartButtonsState createState() => StartButtonsState();
@@ -461,11 +463,19 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   Future<void> gameStart() async {
-    // showGameLoading();
-    // Call GraphQL method.
-    await apiService.saveGameServerProcess(
-        'player_matching', '', player.playerId);
-    // closeGameLoading();
+    if (widget.isMobile == true) {
+      showGameLoading();
+      // Call GraphQL method.
+      apiService.saveGameServerProcess('player_matching', '', player.playerId);
+      await Future.delayed(const Duration(seconds: 2));
+      closeGameLoading();
+    } else {
+      showGameLoading();
+      // Call GraphQL method.
+      await apiService.saveGameServerProcess(
+          'player_matching', '', player.playerId);
+      closeGameLoading();
+    }
   }
 
   void countdown() {
@@ -729,17 +739,19 @@ class StartButtonsState extends State<StartButtons> {
           // autoCloseDuration: const Duration(seconds: 5),
           onConfirmBtnTap: () async {
             Navigator.pop(context);
-            // showGameLoading();
-            var ret = await apiService.saveGameServerProcess(
-                'surrender', '', player.playerId);
-            // closeGameLoading();
-            if (ret != null) {
-              QuickAlert.show(
-                context: context,
-                type: QuickAlertType.error,
-                title: 'You Lose...',
-                text: 'Try Again!',
-              );
+            if (widget.isMobile == true) {
+              apiService.saveGameServerProcess(
+                  'surrender', '', player.playerId);
+              await Future.delayed(const Duration(seconds: 2));
+              showSurrenderedPopup();
+            } else {
+              // showGameLoading();
+              var ret = await apiService.saveGameServerProcess(
+                  'surrender', '', player.playerId);
+              // closeGameLoading();
+              if (ret != null) {
+                showSurrenderedPopup();
+              }
             }
           });
     } else {
@@ -752,6 +764,15 @@ class StartButtonsState extends State<StartButtons> {
     }
   }
 
+  void showSurrenderedPopup() {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: 'You Lose...',
+      text: 'Try Again!',
+    );
+  }
+
   ////////////////////////////
   ///////    build     ///////
   ////////////////////////////
@@ -759,29 +780,32 @@ class StartButtonsState extends State<StartButtons> {
   Widget build(BuildContext context) {
     return Stack(alignment: Alignment.topRight, children: <Widget>[
       Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
-        SizedBox(width: widget.r(340.0)),
+        SizedBox(width: widget.r(310.0)),
         Visibility(
             visible: gameStarted == false,
             child: Padding(
-                padding: const EdgeInsets.only(top: 0.0),
+                padding:
+                    EdgeInsets.only(right: widget.r(10.0), top: widget.r(7.0)),
                 child: Text(
                   walletUser.addr == ''
-                      ? 'connect to wallet→'
+                      ? 'connect to wallet →'
                       : (player.uuid == '' ? '' : ''),
                   style:
                       TextStyle(color: Colors.white, fontSize: widget.r(23.0)),
                 ))),
         Visibility(
             visible: walletUser.addr == '',
-            child: SizedBox(
-                width: widget.r(40.0),
-                height: widget.r(40.0),
-                child: const FittedBox(
-                    child: FloatingActionButton(
-                  onPressed: authenticate,
-                  tooltip: 'Authenticate',
-                  child: Icon(Icons.key_outlined),
-                )))),
+            child: Padding(
+                padding: EdgeInsets.only(top: widget.r(7.0)),
+                child: SizedBox(
+                    width: widget.r(40.0),
+                    height: widget.r(40.0),
+                    child: const FittedBox(
+                        child: FloatingActionButton(
+                      onPressed: authenticate,
+                      tooltip: 'Authenticate',
+                      child: Icon(Icons.key_outlined),
+                    ))))),
         Visibility(
             visible: walletUser.addr != '' &&
                 player.uuid != '' &&
@@ -800,17 +824,17 @@ class StartButtonsState extends State<StartButtons> {
                               buyCyberEnergy();
                             } else {
                               //GraphQL:player_matching
-                              countdown();
                               await gameStart();
+                              countdown();
                             }
                           }
                         },
                         tooltip: 'Play',
                         child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20.0),
+                          borderRadius: BorderRadius.circular(12.0),
                           child: Image.asset(
-                            width: widget.r(120.0),
-                            height: widget.r(50.0),
+                            width: widget.r(96.0),
+                            height: widget.r(40.0),
                             '${imagePath}button/playButton.png',
                           ),
                         ))))),
@@ -818,7 +842,7 @@ class StartButtonsState extends State<StartButtons> {
             visible: walletUser.addr != '' &&
                 player.uuid != '' &&
                 gameStarted == false,
-            child: const SizedBox(width: 8)),
+            child: SizedBox(width: widget.r(2))),
         Visibility(
             visible: walletUser.addr != '' &&
                 player.uuid != '' &&
@@ -826,8 +850,8 @@ class StartButtonsState extends State<StartButtons> {
             child: Padding(
                 padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
-                    width: widget.r(50.0),
-                    height: widget.r(50.0),
+                    width: widget.r(40.0),
+                    height: widget.r(40.0),
                     child: FittedBox(
                         child: FloatingActionButton(
                             backgroundColor: Colors.transparent,
@@ -837,17 +861,17 @@ class StartButtonsState extends State<StartButtons> {
                             tooltip: 'Edit your card deck',
                             child: ClipRRect(
                               borderRadius:
-                                  BorderRadius.circular(widget.r(40.0)),
+                                  BorderRadius.circular(widget.r(10.0)),
                               child: Image.asset(
                                 '${imagePath}button/editDeck.png',
                                 fit: BoxFit.cover,
                               ),
                             )))))),
-        const SizedBox(width: 10),
+        SizedBox(width: widget.r(12)),
         Visibility(
             visible: walletUser.addr != '',
             child: Padding(
-                padding: EdgeInsets.only(top: widget.r(23.0)),
+                padding: EdgeInsets.only(top: widget.r(16.0)),
                 child: SizedBox(
                     width: widget.r(30.0),
                     height: widget.r(30.0),
@@ -969,35 +993,36 @@ class StartButtonsState extends State<StartButtons> {
       ),
       Stack(children: <Widget>[
         Positioned(
-            left: widget.r(5),
-            top: widget.r(3),
+            left: widget.r(18),
+            top: widget.r(5),
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
               FABActionButton(
-                icon: Icon(Icons.create,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {
-                  showToast('EN is successfully charged.');
-                },
-              ),
+                  icon: Icon(Icons.design_services,
+                      size: widget.r(20.0), color: Colors.white),
+                  onPressed: () {
+                    showToast('EN is successfully charged.');
+                  },
+                  tooltip: 'White Paper'),
               FABActionButton(
-                icon: Icon(Icons.settings,
+                icon: Icon(Icons.how_to_vote,
                     size: widget.r(20.0), color: Colors.white),
                 onPressed: () {
                   setState(() {
                     showCarousel2 = true;
                   });
                 },
+                tooltip: 'How to Play',
               ),
               FABActionButton(
-                icon:
-                    Icon(Icons.add, size: widget.r(20.0), color: Colors.white),
+                icon: Icon(Icons.view_carousel_outlined,
+                    size: widget.r(20.0), color: Colors.white),
                 onPressed: () {
                   setState(() {
                     showCarousel = true;
                   });
-                  ;
                 },
+                tooltip: 'Card List',
               ),
             ])),
       ]),

@@ -131,9 +131,9 @@ class MobileBodyState extends State<MobileBody> {
               ]),
             ),
       body: widget.route == 'Home'
-          ? HomePage(enLocale: activeLocale)
+          ? HomePage(enLocale: activeLocale, isMobile: true)
           : widget.route == 'DeckEditor'
-              ? DeckEditPage(enLocale: activeLocale)
+              ? DeckEditPage(enLocale: activeLocale, isMobile: true)
               : RankingPage(enLocale: activeLocale),
     );
   }

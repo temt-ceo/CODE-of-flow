@@ -79,9 +79,11 @@ class DeckButtons extends StatefulWidget {
   int gameProgressStatus;
   final List<dynamic> savedDeck;
   final ResponsiveSizeChangeFunction r;
+  final bool isMobile;
   final StringCallback callback;
 
-  DeckButtons(this.gameProgressStatus, this.savedDeck, this.r, this.callback);
+  DeckButtons(this.gameProgressStatus, this.savedDeck, this.r, this.isMobile,
+      this.callback);
 
   @override
   DeckButtonsState createState() => DeckButtonsState();
@@ -218,12 +220,23 @@ class DeckButtonsState extends State<DeckButtons> {
 
   Future<void> saveUserDeck() async {
     if (widget.savedDeck.length == 30) {
-      showGameLoading();
-      // Call GraphQL method.
-      await apiService.saveGameServerProcess(
-          'save_deck', jsonEncode(widget.savedDeck), player.playerId);
-      closeGameLoading();
-      showAlertWindow('success');
+      if (widget.isMobile == true) {
+        showGameLoading();
+        // Call GraphQL method.
+        apiService.saveGameServerProcess(
+            'save_deck', jsonEncode(widget.savedDeck), player.playerId);
+        await Future.delayed(const Duration(seconds: 3));
+        closeGameLoading();
+        showAlertWindow('success');
+      } else {
+        showGameLoading();
+        // Call GraphQL method.
+        await apiService.saveGameServerProcess(
+            'save_deck', jsonEncode(widget.savedDeck), player.playerId);
+        await Future.delayed(const Duration(seconds: 4));
+        closeGameLoading();
+        showAlertWindow('success');
+      }
     } else {
       showAlertWindow('error');
     }
@@ -307,7 +320,7 @@ class DeckButtonsState extends State<DeckButtons> {
 
     return Stack(children: <Widget>[
       Positioned(
-        left: 18.0,
+        left: 10.0,
         top: 0,
         child: Text(
           'Deck Editor',
@@ -353,7 +366,7 @@ class DeckButtonsState extends State<DeckButtons> {
                     padding: EdgeInsets.only(top: widget.r(5.0)),
                     child: Text(
                       walletUser.addr == ''
-                          ? 'connect to wallet→'
+                          ? 'connect to wallet → '
                           : (player.uuid == ''
                               ? 'Address: ${walletUser.addr} '
                               : ''),
@@ -437,7 +450,7 @@ class DeckButtonsState extends State<DeckButtons> {
           ])),
       Stack(children: <Widget>[
         Positioned(
-            left: widget.r(200),
+            left: widget.r(215),
             top: 0.0,
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
@@ -445,6 +458,7 @@ class DeckButtonsState extends State<DeckButtons> {
                 icon: Icon(Icons.create,
                     size: widget.r(20.0), color: Colors.white),
                 onPressed: () {},
+                tooltip: 'White Paper',
               ),
               FABActionButton(
                 icon: Icon(Icons.settings,
@@ -454,16 +468,18 @@ class DeckButtonsState extends State<DeckButtons> {
                     showCarousel2 = true;
                   });
                 },
+                tooltip: 'How to Play',
               ),
               FABActionButton(
-                icon:
-                    Icon(Icons.add, size: widget.r(20.0), color: Colors.white),
+                icon: Icon(Icons.view_carousel,
+                    size: widget.r(20.0), color: Colors.white),
                 onPressed: () {
                   setState(() {
                     showCarousel = true;
                   });
                   ;
                 },
+                tooltip: 'Card List',
               ),
             ])),
       ]),

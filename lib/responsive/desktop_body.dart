@@ -150,9 +150,9 @@ class DesktopBodyState extends State<DesktopBody> {
                   ]),
                 ),
       body: widget.route == 'Home'
-          ? HomePage(enLocale: activeLocale)
+          ? HomePage(enLocale: activeLocale, isMobile: false)
           : widget.route == 'DeckEditor'
-              ? DeckEditPage(enLocale: activeLocale)
+              ? DeckEditPage(enLocale: activeLocale, isMobile: false)
               : RankingPage(enLocale: activeLocale),
     );
   }

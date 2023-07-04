@@ -30,6 +30,7 @@ class OnGoingGameInfo extends StatefulWidget {
   final List<int> attackerUsedCardIds;
   final List<int> defenderUsedCardIds;
   final ResponsiveSizeChangeFunction r;
+  final bool isMobile;
 
   OnGoingGameInfo(
       this.info,
@@ -45,7 +46,8 @@ class OnGoingGameInfo extends StatefulWidget {
       this.isEnemyAttack,
       this.attackerUsedCardIds,
       this.defenderUsedCardIds,
-      this.r);
+      this.r,
+      this.isMobile);
 
   @override
   OnGoingGameInfoState createState() => OnGoingGameInfoState();
@@ -195,14 +197,26 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             widget.defenderUsedInterceptCard,
             widget.attackerUsedCardIds,
             widget.defenderUsedCardIds);
-        await apiService.saveGameServerProcess(
-            'defence_action', jsonEncode(message), widget.info!.you.toString());
-        showMessage(
-            7,
-            widget.opponentDefendPosition == null
-                ? 'Player Damage!'
-                : 'Battle!! $flashMsg',
-            'Please wait until the transaction is complete.');
+        if (widget.isMobile == true) {
+          apiService.saveGameServerProcess('defence_action',
+              jsonEncode(message), widget.info!.you.toString());
+          await Future.delayed(const Duration(seconds: 1));
+          showMessage(
+              7,
+              widget.opponentDefendPosition == null
+                  ? 'Player Damage!'
+                  : 'Battle!! $flashMsg',
+              'Please wait until the transaction is complete.');
+        } else {
+          await apiService.saveGameServerProcess('defence_action',
+              jsonEncode(message), widget.info!.you.toString());
+          showMessage(
+              7,
+              widget.opponentDefendPosition == null
+                  ? 'Player Damage!'
+                  : 'Battle!! $flashMsg',
+              'Please wait until the transaction is complete.');
+        }
       }
     }
   }

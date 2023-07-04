@@ -17,7 +17,9 @@ const envFlavor = String.fromEnvironment('flavor');
 
 class DeckEditPage extends StatefulWidget {
   final bool enLocale;
-  const DeckEditPage({super.key, required this.enLocale});
+  final bool isMobile;
+  const DeckEditPage(
+      {super.key, required this.enLocale, required this.isMobile});
 
   @override
   State<DeckEditPage> createState() => DeckEditPageState();
@@ -178,7 +180,8 @@ class DeckEditPageState extends State<DeckEditPage> {
                               '',
                               true,
                               false,
-                              r),
+                              r,
+                              widget.isMobile),
                         ),
                       ])),
             ]),
@@ -187,8 +190,9 @@ class DeckEditPageState extends State<DeckEditPage> {
                 widget.enLocale, r),
           ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
-          floatingActionButton: DeckButtons(gameProgressStatus, playerDeck, r,
-              (status, userDeck, cardInfo) {
+          floatingActionButton:
+              DeckButtons(gameProgressStatus, playerDeck, r, widget.isMobile,
+                  (status, userDeck, cardInfo) {
             switch (status) {
               case 'player-deck':
                 setPlayerDeck(userDeck);

@@ -114,6 +114,7 @@ class ExpandableFABState extends State<ExpandableFAB>
                     child: FloatingActionButton(
                   shape: const CircleBorder(),
                   onPressed: _toggle,
+                  tooltip: 'MANUAL',
                   child: const Icon(
                     Icons.import_contacts,
                   ),

@@ -3,4 +3,5 @@
 const desktopWidth = 1380;
 const desktopHeight = 650;
 
-const mobileWidth = 780;
+const mobileWidth = 900;
+const mobileHeight = 420;

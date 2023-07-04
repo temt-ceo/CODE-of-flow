@@ -48,5 +48,6 @@
   "tooEarly": "おっと、焦らないで、Speed Moveはまだブロックチェーンに反映されていないよ。",
   "cannotMove": "は動けない!",
   "rollScreen": "ゲームがスタートしたら画面を横に倒して遊んでね!",
-  "crashHappen": "スマホはクラッシュが発生しやすいのでMacやPCがおすすめです。"
+  "crashHappen": "スマホはクラッシュが発生しやすいのでMacやPCがおすすめです。",
+  "rewardRace": "リワード ランキング レース (残り {count} games)"
 }

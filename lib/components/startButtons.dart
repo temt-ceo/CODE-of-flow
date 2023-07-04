@@ -800,8 +800,8 @@ class StartButtonsState extends State<StartButtons> {
                               buyCyberEnergy();
                             } else {
                               //GraphQL:player_matching
-                              await gameStart();
                               countdown();
+                              await gameStart();
                             }
                           }
                         },

@@ -2589,9 +2589,16 @@ class HomePageState extends State<HomePage> {
             // 敵のバトルカード
             Visibility(
               visible: gameObject != null &&
-                  ((isEnemyAttack == true && onBattlePosition != null) ||
+                  ((isEnemyAttack == true &&
+                          onBattlePosition != null &&
+                          gameObject!.opponentFieldUnit[
+                                  onBattlePosition.toString()] !=
+                              null) ||
                       (isEnemyAttack == false &&
-                          opponentDefendPosition != null)),
+                          opponentDefendPosition != null &&
+                          gameObject!.opponentFieldUnit[
+                                  opponentDefendPosition.toString()] !=
+                              null)),
               child: Positioned(
                 right: r(80.0),
                 top: r(90.0),
@@ -2617,10 +2624,17 @@ class HomePageState extends State<HomePage> {
             // あなたのバトルカード
             Visibility(
               visible: gameObject != null &&
-                  ((isEnemyAttack == true && opponentDefendPosition != null) ||
+                  ((isEnemyAttack == true &&
+                          opponentDefendPosition != null &&
+                          gameObject!.yourFieldUnit[
+                                  opponentDefendPosition.toString()] !=
+                              null) ||
                       (isEnemyAttack == false &&
                           actedCardPosition != null &&
-                          attackerUsedCardIds.isNotEmpty)),
+                          attackerUsedCardIds.isNotEmpty &&
+                          gameObject!.yourFieldUnit[
+                                  (actedCardPosition! + 1).toString()] !=
+                              null)),
               child: Positioned(
                   right: r(400.0),
                   top: r(90.0),

@@ -52,6 +52,7 @@ flutter:
 
   assets:
     - assets/image/unit/
+    - assets/image/unit/mobile/
     - assets/image/trigger/
+    - assets/image/trigger/mobile/
     - assets/image/button/
-    - assets/video/

@@ -388,8 +388,8 @@ class DeckButtonsState extends State<DeckButtons> {
                     visible: walletUser.addr != '',
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
-                        onPressed: () async {
-                          await saveUserDeck();
+                        onPressed: () {
+                          saveUserDeck();
                         },
                         tooltip: 'SAVE',
                         child: ClipRRect(

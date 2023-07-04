@@ -1592,7 +1592,7 @@ class HomePageState extends State<HomePage> {
     // Call GraphQL method.
     if (gameObject != null) {
       // showGameLoading();
-      var ret = await apiService.saveGameServerProcess(
+      await apiService.saveGameServerProcess(
           'game_start', jsonEncode(handCards), gameObject!.you.toString());
       // closeGameLoading();
       WidgetsBinding.instance.addPostFrameCallback((_) {

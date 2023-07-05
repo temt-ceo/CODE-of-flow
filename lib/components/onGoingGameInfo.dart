@@ -77,6 +77,18 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
     super.initState();
   }
 
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   void showGameLoading() {
     showDialog(
       context: context,

@@ -209,6 +209,19 @@ class DragTargetState extends State<DragTargetWidget> {
     super.initState();
   }
 
+  @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
+  void dispose() {
+    // _dropBloc.dispose();
+    super.dispose();
+  }
+
   ////////////////////////////
   ///////    build     ///////
   ////////////////////////////

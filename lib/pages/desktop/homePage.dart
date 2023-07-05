@@ -430,13 +430,12 @@ class HomePageState extends State<HomePage> {
   **  ブロック処理
   */
   void block(int activeIndex) async {
-    if (mounted) {
-      setState(() {
-        showDefenceUnitsCarousel = false;
-        opponentDefendPosition = activeIndex + 1;
-        canUseIntercept = false;
-      });
-    }
+    setState(() {
+      showDefenceUnitsCarousel = false;
+      opponentDefendPosition = activeIndex + 1;
+      canUseIntercept = false;
+    });
+
     // Battle Reaction
     if (widget.isMobile == true) {
       showGameLoading();
@@ -878,12 +877,10 @@ class HomePageState extends State<HomePage> {
         break;
       }
     }
-    if (mounted) {
-      setState(() {
-        gameObject!.yourCp = gameObject!.yourCp -
-            int.parse(cardInfos[cardId.toString()]['cost']);
-      });
-    }
+    setState(() {
+      gameObject!.yourCp =
+          gameObject!.yourCp - int.parse(cardInfos[cardId.toString()]['cost']);
+    });
 
     // 初期化
     unitPositions = [null, null, null, null, null];
@@ -3158,8 +3155,16 @@ class HomePageState extends State<HomePage> {
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void dispose() {
     // cController.dispose();
+    // attackStatusBloc.dispose();
     super.dispose();
   }
 

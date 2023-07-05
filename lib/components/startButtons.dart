@@ -348,46 +348,54 @@ class StartButtonsState extends State<StartButtons> {
       var objStr = jsonToString(ret);
       var objJs = jsonDecode(objStr);
       var yourInfo = objJs[0];
-      if (mounted) {
-        if (balance != null &&
-            balance != double.parse(yourInfo['balance']) &&
-            balance! + 0.499 <= double.parse(yourInfo['balance']) &&
-            balance! + 0.501 >= double.parse(yourInfo['balance'])) {
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.success,
-            title: 'Congrats!',
-            text: 'You won 0.5FLOW!',
-          );
-          setState(() {
-            wonFlow = true;
-            balance = double.parse(yourInfo['balance']);
-          });
-        } else {
-          setState(() {
-            balance = double.parse(yourInfo['balance']);
-          });
-        }
-        if (cyberEnergy != null &&
-            cyberEnergy! < int.parse(yourInfo['cyber_energy'])) {
-          showToast('EN is successfully charged.');
-        }
-        setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
-        setState(() => yourScore =
-            '${yourInfo['score'].length} games ${yourInfo['win_count']} win');
-        setState(() => yourName = yourInfo['player_name']);
-        if (gameStarted == true && objJs.length > 1) {
-          var opponentInfo = objJs[1];
-          setState(() => enemyScore =
-              '${opponentInfo['score'].length} games ${opponentInfo['win_count']} win');
-          setState(() => enemyName = opponentInfo['player_name']);
-        }
+      if (balance != null &&
+          balance != double.parse(yourInfo['balance']) &&
+          balance! + 0.499 <= double.parse(yourInfo['balance']) &&
+          balance! + 0.501 >= double.parse(yourInfo['balance'])) {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.success,
+          title: 'Congrats!',
+          text: 'You won 0.5FLOW!',
+        );
+        setState(() {
+          wonFlow = true;
+          balance = double.parse(yourInfo['balance']);
+        });
+      } else {
+        setState(() {
+          balance = double.parse(yourInfo['balance']);
+        });
+      }
+      if (cyberEnergy != null &&
+          cyberEnergy! < int.parse(yourInfo['cyber_energy'])) {
+        showToast('EN is successfully charged.');
+      }
+      setState(() => cyberEnergy = int.parse(yourInfo['cyber_energy']));
+      setState(() => yourScore =
+          '${yourInfo['score'].length} games ${yourInfo['win_count']} win');
+      setState(() => yourName = yourInfo['player_name']);
+      if (gameStarted == true && objJs.length > 1) {
+        var opponentInfo = objJs[1];
+        setState(() => enemyScore =
+            '${opponentInfo['score'].length} games ${opponentInfo['win_count']} win');
+        setState(() => enemyName = opponentInfo['player_name']);
       }
     }
   }
 
   @override
+  void setState(VoidCallback fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
+  @override
   void dispose() {
+    nameController.dispose();
+    // cController.dispose();
+    // _wait.dispose();
     super.dispose();
     if (timerObj != null) {
       timerObj.cancel();

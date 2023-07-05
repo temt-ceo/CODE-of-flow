@@ -48,6 +48,6 @@
   "tooEarly": "Oops, no rush, Speed Move is not reflected in the blockchain yet.",
   "cannotMove": " cannot move!",
   "rollScreen": "When the game starts, roll the screen sideways to play!",
-  "crashHappen": "Macs and PCs are recommended because smartphones are prone to crashes.",
+  "crashHappen": "Mac and PCs are recommended because smartphones are prone to crashes.",
   "rewardRace": "Reward Ranking Race (Last {count} games)"
 }

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:amplify_flutter/amplify_flutter.dart';
@@ -8,6 +9,7 @@ import 'package:amplify_flutter/amplify_flutter.dart';
 // import 'package:amplify_authenticator/amplify_authenticator.dart';
 import 'package:amplify_api/amplify_api.dart';
 import 'amplifyconfiguration.dart';
+
 import 'package:CodeOfFlow/models/ModelProvider.dart';
 import 'package:CodeOfFlow/responsive/mobile_body.dart';
 import 'package:CodeOfFlow/responsive/mobile_body_horizen.dart';
@@ -64,7 +66,7 @@ class AppState extends State<App> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),
         textTheme: GoogleFonts.robotoTextTheme(),
         scaffoldBackgroundColor: Colors.transparent,
-        iconTheme: IconThemeData(size: 15.0),
+        iconTheme: const IconThemeData(size: 20.0),
         useMaterial3: true,
       ),
       supportedLocales: L10n.supportedLocales,

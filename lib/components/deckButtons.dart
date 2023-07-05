@@ -138,7 +138,7 @@ class DeckButtonsState extends State<DeckButtons> {
     Timer.periodic(const Duration(seconds: 2), (timer) async {
       timerObj = timer;
       if (walletUser.addr == '') {
-        print('Not Login.');
+        debugPrint('Not Login.');
       }
     });
 
@@ -189,7 +189,7 @@ class DeckButtonsState extends State<DeckButtons> {
           getPlayerDeck(walletUser.addr, int.parse(playerId!)));
       widget.callback('player-deck', userDeck, null);
     } else {
-      print('Not Imporing.');
+      debugPrint('Not Imporing.');
     }
   }
 

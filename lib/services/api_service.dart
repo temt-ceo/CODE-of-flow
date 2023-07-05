@@ -62,7 +62,7 @@ class APIService {
     final Stream<GraphQLResponse<GameServerProcess>> operation =
         Amplify.API.subscribe(
       subscriptionRequest,
-      onEstablished: () => print('Subscription established'),
+      onEstablished: () => debugPrint('Subscription established'),
     );
     return operation;
   }

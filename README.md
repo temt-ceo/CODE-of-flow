@@ -66,6 +66,16 @@ amplify push
 
 <h4>masonを使うとmason make amplify_startetが使える</h4>
 
+<h3>DevToolsでパフォーマンスを計測する方法</h3>
+```
+dart devtools
+```
+又はVSCode上でcommand + shift + pを押し
+```
+> devtools
+```
+と入力するとVSCode上で計測ができるパネルを表示することが出来る。
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

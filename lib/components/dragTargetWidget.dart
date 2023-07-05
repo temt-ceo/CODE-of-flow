@@ -67,10 +67,13 @@ class DragTargetState extends State<DragTargetWidget> {
   List<Widget> dropedList = [];
   List<Widget> dropedListEnemy = [];
   List<Widget> dropedListSecond = [];
-  final DropAllowBloc _dropBloc = DropAllowBloc();
+  late DropAllowBloc _dropBloc;
   bool canAttack = false;
   int? attackSignalPosition;
   bool attackAPICalled = false;
+  late bool canInit;
+  late double containerW;
+  late double containerH;
 
   void showGameLoading() {
     showDialog(
@@ -119,7 +122,7 @@ class DragTargetState extends State<DragTargetWidget> {
           // Titan's Lock
           canBlock = false;
         }
-        print(
+        debugPrint(
             'widget.info!.opponentDefendableUnitLength ${widget.info!.opponentDefendableUnitLength}');
       }
       if (widget.info!
@@ -157,7 +160,7 @@ class DragTargetState extends State<DragTargetWidget> {
           widget.skillMessage,
         );
       }
-      print(
+      debugPrint(
           'widget.info!.opponentDefendableUnitLength ${widget.info!.opponentDefendableUnitLength}');
       await apiService.saveGameServerProcess(
           'attack', jsonEncode(message), widget.info!.you.toString());
@@ -201,11 +204,22 @@ class DragTargetState extends State<DragTargetWidget> {
     }
   }
 
+  void setMobileInitTrue() async {
+    await Future.delayed(const Duration(milliseconds: 2500));
+    await Future.delayed(const Duration(milliseconds: 10000));
+    canInit = true;
+  }
+
   ////////////////////////////
   ///////  initState   ///////
   ////////////////////////////
   @override
   void initState() {
+    canInit = widget.isMobile == false;
+    setMobileInitTrue();
+    containerW = widget.label == 'unit' ? widget.r(690.0) : widget.r(380.0);
+    containerH = widget.label == 'unit' ? widget.r(380.0) : widget.r(112.0);
+    _dropBloc = DropAllowBloc();
     super.initState();
   }
 
@@ -218,7 +232,7 @@ class DragTargetState extends State<DragTargetWidget> {
 
   @override
   void dispose() {
-    // _dropBloc.dispose();
+    _dropBloc.dispose();
     super.dispose();
   }
 
@@ -536,91 +550,90 @@ class DragTargetState extends State<DragTargetWidget> {
               List<dynamic> accepted,
               List<dynamic> rejected,
             ) {
-              return StreamBuilder(
-                  stream: _dropBloc.bg_color,
-                  initialData: 0xFFFFFFFF,
-                  builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-                    return Container(
-                      width: widget.label == 'deck'
-                          ? widget.r(1320.0)
-                          : (widget.label == 'unit'
-                              ? widget.r(690.0)
-                              : widget.r(380.0)),
-                      height: widget.label == 'deck'
-                          ? widget.r(310.0)
-                          : (widget.label == 'unit'
-                              ? widget.r(380.0)
-                              : widget.r(112.0)),
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                            opacity: 0.9,
-                            image: AssetImage(widget.imageUrl),
-                            fit: BoxFit.cover),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(snapshot.data ?? 0xFFFFFFFF),
-                            spreadRadius: widget.r(4),
-                            blurRadius: widget.r(6),
-                            offset: Offset(widget.r(2),
-                                widget.r(3)), // changes position of shadow
-                          ),
-                        ],
+              // return StreamBuilder(
+              //     stream: _dropBloc.bg_color,
+              //     initialData: 0xFFFFFFFF,
+              //     builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+              if (canInit == false) {
+                return Container();
+              }
+              return Container(
+                width: containerW,
+                height: containerH,
+                // decoration: widget.isMobile
+                //     ? BoxDecoration(
+                //         image: DecorationImage(
+                //             image: AssetImage(widget.imageUrl),
+                //             fit: BoxFit.cover),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Color(snapshot.data ?? 0xFFFFFFFF),
+                //             spreadRadius: widget.r(4),
+                //           ),
+                //         ],
+                //       )
+                //     : BoxDecoration(
+                //         image: DecorationImage(
+                //             image: AssetImage(widget.imageUrl),
+                //             fit: BoxFit.cover),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Color(snapshot.data ?? 0xFFFFFFFF),
+                //             spreadRadius: widget.r(4),
+                //             blurRadius: widget.r(6),
+                //             offset: Offset(
+                //                 widget.r(2),
+                //                 widget
+                //                     .r(3)), // changes position of shadow
+                //           ),
+                //         ],
+                //       ),
+                child: widget.label == 'unit'
+                    // フィールド
+                    ? Stack(children: <Widget>[
+                        // 攻撃シグナル画像
+                        // Visibility(
+                        //     visible: attackSignalPosition != null,
+                        //     child: Positioned(
+                        //       left: widget.r((attackSignalPosition != null &&
+                        //                   attackSignalPosition! >= 2
+                        //               ? widget.r(-100.0)
+                        //               : widget.r(50.0)) +
+                        //           (attackSignalPosition != null
+                        //               ? widget.r(attackSignalPosition! * 140.0)
+                        //               : 0)),
+                        //       top: widget.r(-5.0),
+                        //       child: Container(
+                        //         width: widget.r(attackSignalPosition != null &&
+                        //                 attackSignalPosition! >= 2
+                        //             ? widget.r(340.0)
+                        //             : widget.r(180.0)),
+                        //         height: widget.r(240.0),
+                        //         decoration: BoxDecoration(
+                        //           color: Colors.transparent,
+                        //           image: DecorationImage(
+                        //               opacity: 0.8,
+                        //               image: AssetImage(attackSignalPosition !=
+                        //                           null &&
+                        //                       attackSignalPosition! >= 2
+                        //                   ? '${imagePath}unit/attackSignal2.png'
+                        //                   : '${imagePath}unit/attackSignal.png'),
+                        //               fit: BoxFit.contain),
+                        //         ),
+                        //       ),
+                        //     )),
+                        // // SizedBox(height: widget.r(30.0)), 不要。
+                        // 敵ユニット
+                        Stack(children: dropedListEnemy),
+                        // 味方ユニット
+                        Stack(children: dropedList),
+                      ])
+                    : Stack(
+                        children: dropedList,
                       ),
-                      child: widget.label == 'unit'
-                          // フィールド
-                          ? Stack(children: <Widget>[
-                              // 攻撃シグナル画像
-                              Visibility(
-                                  visible: attackSignalPosition != null,
-                                  child: Positioned(
-                                    left: widget.r((attackSignalPosition !=
-                                                    null &&
-                                                attackSignalPosition! >= 2
-                                            ? widget.r(-100.0)
-                                            : widget.r(50.0)) +
-                                        (attackSignalPosition != null
-                                            ? widget.r(
-                                                attackSignalPosition! * 140.0)
-                                            : 0)),
-                                    top: widget.r(-5.0),
-                                    child: Container(
-                                      width: widget.r(
-                                          attackSignalPosition != null &&
-                                                  attackSignalPosition! >= 2
-                                              ? widget.r(340.0)
-                                              : widget.r(180.0)),
-                                      height: widget.r(240.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        image: DecorationImage(
-                                            opacity: 0.8,
-                                            image: AssetImage(attackSignalPosition !=
-                                                        null &&
-                                                    attackSignalPosition! >= 2
-                                                ? '${imagePath}unit/attackSignal2.png'
-                                                : '${imagePath}unit/attackSignal.png'),
-                                            fit: BoxFit.contain),
-                                      ),
-                                    ),
-                                  )),
-                              SizedBox(height: widget.r(30.0)),
-                              // 敵ユニット
-                              Stack(children: dropedListEnemy),
-                              // 味方ユニット
-                              Stack(children: dropedList),
-                            ])
-                          // デッキ編集画面
-                          : (widget.label == 'deck'
-                              ? Stack(children: <Widget>[
-                                  Stack(children: dropedList),
-                                  Stack(children: dropedListSecond),
-                                ])
-                              : Stack(
-                                  children: dropedList,
-                                )),
-                    );
-                  });
+              );
             });
+            // });
           });
     } else {
       return DragTarget<String>(
@@ -811,9 +824,7 @@ class DragTargetState extends State<DragTargetWidget> {
                         : widget.r(112.0)),
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                      opacity: 0.9,
-                      image: AssetImage(widget.imageUrl),
-                      fit: BoxFit.cover),
+                      image: AssetImage(widget.imageUrl), fit: BoxFit.cover),
                   boxShadow: [
                     BoxShadow(
                       color: const Color(0xFFFFFFFF),

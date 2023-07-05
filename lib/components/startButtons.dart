@@ -144,8 +144,8 @@ class StartButtonsState extends State<StartButtons> {
     subscribe(allowInterop(setupWallet));
 
     _wait = BehaviorSubject<bool>();
-    // setInterval by every 2 second
-    Timer.periodic(const Duration(seconds: 1), (timer) async {
+    // setInterval by every 1 second
+    Timer.periodic(const Duration(milliseconds: 1000), (timer) async {
       timerObj = timer;
       if (walletUser.addr == '') {
         // widget.callback('other-game-info', player.playerId,
@@ -439,7 +439,7 @@ class StartButtonsState extends State<StartButtons> {
         userDeck = await promiseToFuture(
             getPlayerDeck(walletUser.addr, int.parse(playerId!)));
       } else {
-        print('Not Imporing.');
+        debugPrint('Not Imporing.');
         setState(() => player = PlayerResource('', '', ''));
       }
     }
@@ -799,15 +799,15 @@ class StartButtonsState extends State<StartButtons> {
                       ? 'connect to wallet →'
                       : (player.uuid == '' ? '' : ''),
                   style:
-                      TextStyle(color: Colors.white, fontSize: widget.r(23.0)),
+                      TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
                 ))),
         Visibility(
             visible: walletUser.addr == '',
             child: Padding(
                 padding: EdgeInsets.only(top: widget.r(7.0)),
                 child: SizedBox(
-                    width: widget.r(40.0),
-                    height: widget.r(40.0),
+                    width: widget.isMobile ? widget.r(45.0) : widget.r(40.0),
+                    height: widget.isMobile ? widget.r(45.0) : widget.r(40.0),
                     child: const FittedBox(
                         child: FloatingActionButton(
                       onPressed: authenticate,
@@ -879,7 +879,8 @@ class StartButtonsState extends State<StartButtons> {
         Visibility(
             visible: walletUser.addr != '',
             child: Padding(
-                padding: EdgeInsets.only(top: widget.r(16.0)),
+                padding:
+                    EdgeInsets.only(top: widget.r(16.0), left: widget.r(30.0)),
                 child: SizedBox(
                     width: widget.r(30.0),
                     height: widget.r(30.0),
@@ -1046,7 +1047,7 @@ class StartButtonsState extends State<StartButtons> {
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.vertical),
-              itemCount: 25,
+              itemCount: 26,
               itemBuilder: (context, index, realIndex) {
                 dynamic card = cardList != null
                     ? cardList[index >= 11
@@ -1094,21 +1095,19 @@ class StartButtonsState extends State<StartButtons> {
             ),
             SizedBox(height: widget.r(32.0)),
             buildIndicator(),
-            SizedBox(height: widget.r(20.0)),
+            SizedBox(height: widget.r(10.0)),
             ElevatedButton(
               onPressed: () => cController.animateToPage(activeIndex + 1),
               child: const Text('Next->'),
             ),
-            SizedBox(height: widget.r(20.0)),
+            SizedBox(height: widget.r(10.0)),
             ElevatedButton(
               onPressed: () {
                 setState(() {
                   showCarousel2 = false;
                 });
               },
-              child: Text('Close',
-                  style:
-                      TextStyle(color: Colors.black, fontSize: widget.r(28.0))),
+              child: const Text('Close', style: TextStyle(color: Colors.black)),
             ),
           ]))
     ]);

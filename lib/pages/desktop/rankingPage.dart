@@ -108,7 +108,7 @@ class _NestedTabBarState extends State<NestedTabBar>
             fit: BoxFit.cover,
           ),
           onPressed: () {
-            print(objJs[i]['player_name']);
+            debugPrint(objJs[i]['player_name']);
           },
           r: r,
         ));
@@ -135,7 +135,7 @@ class _NestedTabBarState extends State<NestedTabBar>
             fit: BoxFit.cover,
           ),
           onPressed: () {
-            print(objJs[i]['player_name']);
+            debugPrint(objJs[i]['player_name']);
           },
           r: r,
         ));

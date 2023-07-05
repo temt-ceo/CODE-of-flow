@@ -46,7 +46,7 @@ class HomePageState extends State<HomePage> {
   String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
   String savedGraphQLId = '';
-  final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
+  late AttackStatusBloc attackStatusBloc;
   bool gameStarted = false;
   GameObject? gameObject;
   List<List<int>> mariganCardIdList = [];
@@ -103,6 +103,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    attackStatusBloc = AttackStatusBloc();
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
@@ -122,7 +123,7 @@ class HomePageState extends State<HomePage> {
           if (ret.type == 'attack' ||
               // ret.type == 'battle_reaction' ||
               ret.type == 'defence_action') {
-            print('Player No. ${ret.playerId} => ${ret.type}');
+            debugPrint('Player No. ${ret.playerId} => ${ret.type}');
             debugPrint(
                 '*** Subscription event data received: (${ret.id}) ${event.data}');
           }
@@ -137,11 +138,11 @@ class HomePageState extends State<HomePage> {
               ret.playerId != playerId) {
             showToast("No. ${ret.playerId} has entered in Alcana.");
           }
-          if (gameObject!.you.toString() != ret.playerId &&
-              gameObject!.opponent.toString() != ret.playerId) {
+          if (gameObject == null) {
             return;
           }
-          if (gameObject == null) {
+          if (gameObject!.you.toString() != ret.playerId &&
+              gameObject!.opponent.toString() != ret.playerId) {
             return;
           }
           if (ret.type == 'put_card_on_the_field') {
@@ -251,7 +252,7 @@ class HomePageState extends State<HomePage> {
                   toastMsg =
                       "$toastMsg Titan's Lock${L10n.of(context)!.activatedEffect} ${getCardName(target)}${L10n.of(context)!.cannotMove}";
                   yourDefendableUnitPositions.removeWhere((element) {
-                    print(
+                    debugPrint(
                         'element == skillTarget: ${element == skillTarget} element: $element skillTarget: $skillTarget');
                     return element == skillTarget;
                   });
@@ -416,7 +417,7 @@ class HomePageState extends State<HomePage> {
               });
             }
           } else if (ret.type == 'defence_action') {
-            print('##########DEFENCE ACTION Returned##########');
+            debugPrint('##########DEFENCE ACTION Returned##########');
             isBattling = false;
             attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
           }
@@ -1323,7 +1324,7 @@ class HomePageState extends State<HomePage> {
               });
             }
           }
-          print('enemySkillTargetPosition $enemySkillTargetPosition');
+          debugPrint('enemySkillTargetPosition $enemySkillTargetPosition');
           setState(() {
             attackIsReady = true;
             enemySkillTargetPosition = enemySkillTarget;
@@ -1517,10 +1518,13 @@ class HomePageState extends State<HomePage> {
   }
 
   void doAnimation() {
-    setState(() => cardPosition = 400.0);
-    Future.delayed(const Duration(milliseconds: 1500), () {
-      setState(() => cardPosition = 0.0);
-    });
+    // Crashの原因になる
+    if (widget.isMobile == false) {
+      setState(() => cardPosition = 400.0);
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        setState(() => cardPosition = 0.0);
+      });
+    }
   }
 
   void showGameLoading() {
@@ -1664,54 +1668,96 @@ class HomePageState extends State<HomePage> {
                 top: r(403.0),
                 child: Row(children: <Widget>[
                   gameProgressStatus >= 1 && gameStarted
-                      ? AnimatedContainer(
-                          margin: EdgeInsetsDirectional.only(top: cardPosition),
-                          duration: const Duration(milliseconds: 900),
-                          curve: Curves.linear,
-                          child: Row(
-                            children: [
-                              for (var i = 0; i < handCards.length; i++)
-                                GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        tappedCardId = handCards[i];
-                                      });
-                                    },
-                                    child: DragBox(
-                                        i,
-                                        handCards[i],
-                                        putCard,
-                                        cardInfos[handCards[i].toString()],
-                                        r,
-                                        widget.isMobile)),
-                            ],
-                          ),
-                        )
-                      : AnimatedContainer(
-                          margin: EdgeInsetsDirectional.only(top: cardPosition),
-                          duration: const Duration(milliseconds: 900),
-                          curve: Curves.linear,
-                          child: Row(
-                            children: [
-                              for (var cardId in [16, 13, 4, 3, 25, 20, 26])
-                                GestureDetector(
-                                    onTap: () {
-                                      setState(() {
-                                        tappedCardId = cardId;
-                                      });
-                                    },
-                                    child: DragBox(
-                                        null,
-                                        cardId,
-                                        putCard,
-                                        cardInfos != null
-                                            ? cardInfos[cardId.toString()]
-                                            : null,
-                                        r,
-                                        widget.isMobile)),
-                            ],
-                          ),
-                        ),
+                      ? widget.isMobile == true
+                          ? Row(
+                              children: [
+                                for (var i = 0; i < handCards.length; i++)
+                                  GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          tappedCardId = handCards[i];
+                                        });
+                                      },
+                                      child: DragBox(
+                                          i,
+                                          handCards[i],
+                                          putCard,
+                                          cardInfos[handCards[i].toString()],
+                                          r,
+                                          widget.isMobile)),
+                              ],
+                            )
+                          : AnimatedContainer(
+                              margin:
+                                  EdgeInsetsDirectional.only(top: cardPosition),
+                              duration: const Duration(milliseconds: 900),
+                              curve: Curves.linear,
+                              child: Row(
+                                children: [
+                                  for (var i = 0; i < handCards.length; i++)
+                                    GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            tappedCardId = handCards[i];
+                                          });
+                                        },
+                                        child: DragBox(
+                                            i,
+                                            handCards[i],
+                                            putCard,
+                                            cardInfos[handCards[i].toString()],
+                                            r,
+                                            widget.isMobile)),
+                                ],
+                              ),
+                            )
+                      : widget.isMobile == true
+                          ? Row(
+                              children: [
+                                for (var cardId in [16, 13, 4, 3, 25, 20, 26])
+                                  GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          tappedCardId = cardId;
+                                        });
+                                      },
+                                      child: DragBox(
+                                          null,
+                                          cardId,
+                                          putCard,
+                                          cardInfos != null
+                                              ? cardInfos[cardId.toString()]
+                                              : null,
+                                          r,
+                                          widget.isMobile)),
+                              ],
+                            )
+                          : AnimatedContainer(
+                              margin:
+                                  EdgeInsetsDirectional.only(top: cardPosition),
+                              duration: const Duration(milliseconds: 900),
+                              curve: Curves.linear,
+                              child: Row(
+                                children: [
+                                  for (var cardId in [16, 13, 4, 3, 25, 20, 26])
+                                    GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            tappedCardId = cardId;
+                                          });
+                                        },
+                                        child: DragBox(
+                                            null,
+                                            cardId,
+                                            putCard,
+                                            cardInfos != null
+                                                ? cardInfos[cardId.toString()]
+                                                : null,
+                                            r,
+                                            widget.isMobile)),
+                                ],
+                              ),
+                            ),
                 ])),
             Visibility(
               visible: envFlavor == 'prod',
@@ -1961,9 +2007,25 @@ class HomePageState extends State<HomePage> {
                     ),
                   ),
                 )),
-            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(648.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(648.0),
                 top: r(122.0),
@@ -2047,7 +2109,24 @@ class HomePageState extends State<HomePage> {
                     ))),
             // envFlavor == 'prod' ? 'assets/image/' : 'image/';
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(783.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(783.0),
                 top: r(122.0),
@@ -2131,7 +2210,24 @@ class HomePageState extends State<HomePage> {
                     ))),
             // envFlavor == 'prod' ? 'assets/image/' : 'image/';
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(918.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(918.0),
                 top: r(122.0),
@@ -2214,7 +2310,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(1053.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(1053.0),
                 top: r(122.0),
@@ -2297,7 +2410,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(1188.0),
+                top: r(122.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(1188.0),
                 top: r(122.0),
@@ -2380,7 +2510,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(648.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(648.0),
                 top: r(348.0),
@@ -2458,8 +2605,26 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
+
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(783.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(783.0),
                 top: r(348.0),
@@ -2538,7 +2703,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(918.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(918.0),
                 top: r(348.0),
@@ -2617,7 +2799,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(1053.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(1053.0),
                 top: r(348.0),
@@ -2695,7 +2894,24 @@ class HomePageState extends State<HomePage> {
                       fontSize: r(16.0),
                     ))),
             Visibility(
-              visible: envFlavor == 'prod',
+              visible: envFlavor == 'prod' && widget.isMobile == true,
+              child: Positioned(
+                left: r(1188.0),
+                top: r(348.0),
+                child: Container(
+                  width: r(90.0),
+                  height: r(50.0),
+                  decoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    image: DecorationImage(
+                        image: AssetImage('assets/image/unit/status.png'),
+                        fit: BoxFit.cover),
+                  ),
+                ),
+              ),
+            ),
+            Visibility(
+              visible: envFlavor == 'prod' && widget.isMobile == false,
               child: Positioned(
                 left: r(1188.0),
                 top: r(348.0),
@@ -3052,7 +3268,7 @@ class HomePageState extends State<HomePage> {
                             '6'),
                 child: Center(
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: r(270.0)),
+                        padding: EdgeInsets.only(bottom: r(330.0)),
                         child: SizedBox(
                             width: r(180.0),
                             child: StreamBuilder<int>(
@@ -3164,7 +3380,7 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     // cController.dispose();
-    // attackStatusBloc.dispose();
+    attackStatusBloc.dispose();
     super.dispose();
   }
 

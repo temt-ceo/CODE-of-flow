@@ -27,6 +27,7 @@ class TimerComponent {
   }
 
   void dispose() {
+    _timer.cancel();
     events.close();
   }
 }

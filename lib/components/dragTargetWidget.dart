@@ -356,7 +356,7 @@ class DragTargetState extends State<DragTargetWidget> {
               var cardId = int.parse(cardIdStr);
               var imageUrl = cardId > 16
                   ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
-                  : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}${cardId.toString()}.jpeg';
+                  : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
               if (widget.label == 'deck' && dropedList.length >= 15) {
                 dropedListSecond.add(DroppedCardWidget(
                     widget.r(86.0 * dropedListSecond.length - 1 + 10),
@@ -466,7 +466,7 @@ class DragTargetState extends State<DragTargetWidget> {
                 var cardId = int.parse(cardIdStr!);
                 var imageUrl = cardId > 16
                     ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
-                    : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}${cardId.toString()}.jpeg';
+                    : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
 
                 if (widget.label == 'unit' &&
                     imageUrl.startsWith('${imagePath}unit')) {

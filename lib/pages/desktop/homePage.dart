@@ -76,7 +76,6 @@ class HomePageState extends State<HomePage> {
   List<int> defenderUsedInterceptCard = [];
   List<int> attackerUsedCardIds = [];
   List<int> defenderUsedCardIds = [];
-  VideoPlayerController? vController;
   bool isBattling = false;
   int? onBattlePosition;
   bool? isEnemyAttack;
@@ -137,10 +136,15 @@ class HomePageState extends State<HomePage> {
               gameObject == null &&
               ret.playerId != playerId) {
             showToast("No. ${ret.playerId} has entered in Alcana.");
-          } else if (ret.type == 'put_card_on_the_field' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
+          }
+          if (gameObject!.you.toString() != ret.playerId &&
+              gameObject!.opponent.toString() != ret.playerId) {
+            return;
+          }
+          if (gameObject == null) {
+            return;
+          }
+          if (ret.type == 'put_card_on_the_field') {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             if (gameObject != null &&
                 gameObject!.you.toString() == ret.playerId) {
@@ -154,10 +158,7 @@ class HomePageState extends State<HomePage> {
                 showMessage(7, msg['skillMessage'], null);
               });
             }
-          } else if (ret.type == 'turn_change' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
+          } else if (ret.type == 'turn_change') {
             isBattling = false;
             if (attackSignalPosition == null) {
               WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -176,8 +177,7 @@ class HomePageState extends State<HomePage> {
             }
             // あなたの攻撃
           } else if (ret.type == 'attack' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId)) {
+              gameObject!.you.toString() == ret.playerId) {
             var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
             setState(() {
               defaultTriggerCards = onChainYourTriggerCardsDisplay;
@@ -206,8 +206,7 @@ class HomePageState extends State<HomePage> {
             // 敵の攻撃 //
             /////////////
           } else if (ret.type == 'attack' &&
-              gameObject != null &&
-              (gameObject!.opponent.toString() == ret.playerId)) {
+              gameObject!.opponent.toString() == ret.playerId) {
             isBattling = true;
             _timer.countdownStart(7, () {
               isBattling = false;
@@ -303,10 +302,7 @@ class HomePageState extends State<HomePage> {
             }
             // === 敵の攻撃 ここまで ===
             // バトルの相手側の対応
-          } else if (ret.type == 'battle_reaction' &&
-              gameObject != null &&
-              (gameObject!.opponent.toString() == ret.playerId ||
-                  playerId == ret.playerId)) {
+          } else if (ret.type == 'battle_reaction') {
             isBattling = true;
             attackStatusBloc.canAttackEventSink.add(BattlingEvent());
             _timer.countdownStart(6, () {
@@ -419,10 +415,7 @@ class HomePageState extends State<HomePage> {
                 showMessage(5, L10n.of(context)!.interceptAbailable, null);
               });
             }
-          } else if (ret.type == 'defence_action' &&
-              gameObject != null &&
-              (gameObject!.you.toString() == ret.playerId ||
-                  gameObject!.opponent.toString() == ret.playerId)) {
+          } else if (ret.type == 'defence_action') {
             print('##########DEFENCE ACTION Returned##########');
             isBattling = false;
             attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
@@ -3166,6 +3159,7 @@ class HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    // cController.dispose();
     super.dispose();
   }
 

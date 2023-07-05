@@ -51,7 +51,7 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
                     top: r(22.0),
-                    left: r(40.0),
+                    right: r(50.0),
                     child: SizedBox(
                         width: r(50),
                         height: r(35),
@@ -67,7 +67,7 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
                             )))),
                 Positioned(
                   top: r(25.0),
-                  left: r(90.0),
+                  right: r(100.0),
                   child: Text(activeLocale == true ? 'EN' : 'JP',
                       style: TextStyle(
                         color: Colors.white,
@@ -95,8 +95,8 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
                   style: TextStyle(color: Colors.white, fontSize: r(30.0))),
               flexibleSpace: Stack(children: <Widget>[
                 Positioned(
-                    top: r(4.0),
-                    right: r(40.0),
+                    top: r(20.0),
+                    right: r(50.0),
                     child: SizedBox(
                         width: r(50),
                         height: r(35),

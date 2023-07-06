@@ -46,7 +46,7 @@ class HomePageState extends State<HomePage> {
   String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
   APIService apiService = APIService();
   String savedGraphQLId = '';
-  late AttackStatusBloc attackStatusBloc;
+  final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
   bool gameStarted = false;
   GameObject? gameObject;
   List<List<int>> mariganCardIdList = [];
@@ -100,10 +100,10 @@ class HomePageState extends State<HomePage> {
   String? putCardOnFieldType;
   double _r = 1.0;
   bool attackIsReady = false;
+  bool possibleUnitLost = false;
 
   @override
   void initState() {
-    attackStatusBloc = AttackStatusBloc();
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
@@ -122,6 +122,7 @@ class HomePageState extends State<HomePage> {
           savedGraphQLId = ret.id;
           if (ret.type == 'attack' ||
               // ret.type == 'battle_reaction' ||
+              ret.type == 'put_card_on_the_field' ||
               ret.type == 'defence_action') {
             debugPrint('Player No. ${ret.playerId} => ${ret.type}');
             debugPrint(
@@ -296,9 +297,7 @@ class HomePageState extends State<HomePage> {
               // 敵攻撃メッセージ
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showMessage(
-                    7,
-                    '$enemyAbility ${msg['skillMessage'] != '' ? '\n${msg['skillMessage']}' : ''}',
-                    toastMsg);
+                    7, '$toastMsg  $enemyAbility ${msg['skillMessage']}', null);
               });
             }
             // === 敵の攻撃 ここまで ===
@@ -676,10 +675,12 @@ class HomePageState extends State<HomePage> {
             showMessage(5, L10n.of(context)!.battleSettled, null);
           });
         }
+        possibleUnitLost = false;
         // 自ターンでない場合は即座にトリガー、ユニットを反映 / バトルで負けた場合に備え更新
         if (data.isFirst != data.isFirstTurn ||
-            gameObject!.yourAttackingCard != null &&
-                data.yourAttackingCard == null) {
+            (gameObject!.yourAttackingCard != null &&
+                data.yourAttackingCard == null)) {
+          possibleUnitLost = true;
           List<dynamic> _units = [];
           for (int i = 1; i <= 5; i++) {
             _units.add(data.yourFieldUnit[i.toString()]);
@@ -693,6 +694,7 @@ class HomePageState extends State<HomePage> {
               _triggerCards.add(null);
             }
           }
+
           setState(() {
             onChainYourFieldUnit = _units;
             defaultDropedList = _units.isEmpty ? [null] : _units;
@@ -720,6 +722,7 @@ class HomePageState extends State<HomePage> {
         }
       }
     }
+
     setState(() => gameObject = data);
 
     // マリガン時のみこちらへ
@@ -734,13 +737,20 @@ class HomePageState extends State<HomePage> {
       });
       // Start Marigan.
       _timer.countdownStart(8, battleStart);
+      // ゲームが終了した
+    } else if (data == null) {
+      setState(() {
+        handCards = [];
+        defaultDropedList = [null];
+        defaultTriggerCards = [null];
+      });
     } else {
       // 通常時はこちら
       if (turnChanged || onChainHandCards == null) {
         // ハンドのブロックチェーンデータとの調整
         List<int> _hand = [];
         for (int i = 1; i <= 7; i++) {
-          var cardId = gameObject!.yourHand[i.toString()];
+          var cardId = data.yourHand[i.toString()];
           if (cardId != null) {
             _hand.add(int.parse(cardId));
           }
@@ -748,34 +758,26 @@ class HomePageState extends State<HomePage> {
         // フイールドユニットのブロックチェーンデータとの調整
         List<dynamic> _units = [];
         for (int i = 1; i <= 5; i++) {
-          _units.add(gameObject!.yourFieldUnit[i.toString()]);
+          _units.add(data.yourFieldUnit[i.toString()]);
         }
         // トリガーのブロックチェーンデータとの調整
         List<int?> _triggerCards = [];
         for (int i = 1; i <= 4; i++) {
-          var cardId = gameObject!.yourTriggerCards[i.toString()];
+          var cardId = data.yourTriggerCards[i.toString()];
           if (cardId != null) {
             _triggerCards.add(int.parse(cardId));
           } else {
             _triggerCards.add(null);
           }
         }
-        if (gameObject!.yourLife == 0) {
-          QuickAlert.show(
-            context: context,
-            type: QuickAlertType.error,
-            title: 'You Lose...',
-            text: 'Try Again!',
-          );
-        }
         onChainYourTriggerCardsDisplay = [];
-        // 参照私にならないようにディープコピー
+        // 参照渡しにならないようにディープコピー
         for (var i = 0; i < _triggerCards.length; i++) {
           onChainYourTriggerCardsDisplay.add(_triggerCards[i]);
         }
         setState(() {
           handCards = _hand;
-          onChainHandCards = gameObject!.yourHand;
+          onChainHandCards = data.yourHand;
           onChainYourFieldUnit = _units;
           onChainYourTriggerCards = _triggerCards;
           // ターンチェンジ後に空になっている場合は空であることをコンポーネントに伝える必要がある
@@ -783,11 +785,13 @@ class HomePageState extends State<HomePage> {
           defaultTriggerCards = _triggerCards.isEmpty ? [null] : _triggerCards;
         });
       } else {
-        setState(() {
-          // フイールドユニットのブロックチェーンデータとの調整(こうしないとプレイヤーが操作した動きがリセットされる為)
-          defaultDropedList = [];
-          defaultTriggerCards = [];
-        });
+        if (possibleUnitLost == false) {
+          setState(() {
+            // フイールドユニットのブロックチェーンデータとの調整(こうしないとプレイヤーが操作した動きがリセットされる為)
+            defaultDropedList = [];
+            defaultTriggerCards = [];
+          });
+        }
       }
 
       opponentFieldUnitPositions = [];
@@ -805,7 +809,8 @@ class HomePageState extends State<HomePage> {
       }
       Future.delayed(const Duration(milliseconds: 20), () {
         // 攻撃可能かどうかをコンポーネントに通知
-        if (gameObject!.isFirst == gameObject!.isFirstTurn) {
+        if (gameObject != null &&
+            gameObject!.isFirst == gameObject!.isFirstTurn) {
           if (gameObject!.lastTimeTurnend != null) {
             DateTime lastTurnEndTime = DateTime.fromMillisecondsSinceEpoch(
                 double.parse(gameObject!.lastTimeTurnend!).toInt() * 1000);
@@ -1269,7 +1274,7 @@ class HomePageState extends State<HomePage> {
       setCanOperateTmp(false);
       showMessage(5, L10n.of(context)!.interceptAbailable, null);
 
-      _timer.countdownStart(6, () async {
+      _timer.countdownStart(5, () async {
         canUseIntercept = false;
         setCanOperateTmp(true);
         attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
@@ -1658,6 +1663,7 @@ class HomePageState extends State<HomePage> {
       }
 
       double r10 = r(10.0);
+      double r35 = r(35.0);
       double r50 = r(50.0);
       double r80 = r(80.0);
       double r90 = r(90.0);
@@ -2769,118 +2775,55 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            // Choose target unit
+            // ランキングボタン
             Visibility(
-                visible: showUnitTargetCarousel == true,
-                child: Column(children: <Widget>[
-                  CarouselSlider.builder(
-                    carouselController: cController,
-                    options: CarouselOptions(
-                        height: r(300),
-                        aspectRatio: 14 / 9,
-                        viewportFraction: 0.6, // 1.0:1つが全体に出る
-                        initialPage: 0,
-                        // enableInfiniteScroll: true,
-                        enlargeCenterPage: true,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            activeIndex = index;
-                          });
-                        }),
-                    itemCount: gameObject == null
-                        ? 0
-                        : (cannotDefendUnitPositions.isNotEmpty
-                            ? cannotDefendUnitPositions.length
-                            : opponentFieldUnitPositions.length),
-                    itemBuilder: (context, index, realIndex) {
-                      // 行動済みのみ
-                      if (cannotDefendUnitPositions.isNotEmpty) {
-                        var target = cannotDefendUnitPositions[index];
-                        var cardId =
-                            gameObject!.opponentFieldUnit[(target).toString()];
-                        return Image.asset(
-                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                          fit: BoxFit.cover,
-                        );
-                      } else {
-                        // 全体から
-                        var target = opponentFieldUnitPositions[index];
-                        var cardId =
-                            gameObject!.opponentFieldUnit[(target).toString()];
-                        return Image.asset(
-                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                          fit: BoxFit.cover,
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(height: r10),
-                  buildIndicator(cannotDefendUnitPositions.isNotEmpty
-                      ? cannotDefendUnitPositions.length
-                      : opponentFieldUnitPositions.length),
-                  SizedBox(height: r10),
-                  Visibility(
-                      visible: cannotDefendUnitPositions.isNotEmpty
-                          ? cannotDefendUnitPositions.length > 1
-                          : opponentFieldUnitPositions.length > 1,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            cController.animateToPage(activeIndex + 1),
-                        child: const Text('Next->'),
-                      )),
-                  SizedBox(height: r10),
-                  ElevatedButton(
-                    onPressed: () {
-                      showUnitTargetCarousel = false;
-                      selectTarget(activeIndex);
-                    },
-                    child: const Text('Choice'),
-                  ),
-                ])),
-            // 攻撃をブロック
+                visible: gameStarted == false,
+                child: Positioned(
+                    top: r(160.0),
+                    left: r(330.0),
+                    child: SizedBox(
+                        width: r50,
+                        height: r50,
+                        child: FittedBox(
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  html.window.location.href = 'ranking';
+                                },
+                                tooltip: 'RANKING!',
+                                // elevation: 0.0,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(r(4.0)),
+                                  child: Image.asset(
+                                    '${imagePath}button/home_ranking.png',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )))))),
+            // ホワイトペーパー
             Visibility(
-                visible: showDefenceUnitsCarousel == true,
-                child: Column(children: <Widget>[
-                  CarouselSlider.builder(
-                    carouselController: cController,
-                    options: CarouselOptions(
-                        height: r(300),
-                        aspectRatio: 14 / 9,
-                        viewportFraction: 0.6, // 1.0:1つが全体に出る
-                        initialPage: 0,
-                        // enableInfiniteScroll: true,
-                        enlargeCenterPage: true,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            activeIndex = index;
-                          });
-                        }),
-                    itemCount: yourDefendableUnitPositions.length,
-                    itemBuilder: (context, index, realIndex) {
-                      var target = yourDefendableUnitPositions[index];
-                      var cardId =
-                          gameObject!.yourFieldUnit[(target).toString()];
-                      return Image.asset(
-                        '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                  SizedBox(height: r10),
-                  buildIndicator(yourDefendableUnitPositions.length),
-                  SizedBox(height: r10),
-                  ElevatedButton(
-                    onPressed: () => cController.animateToPage(activeIndex + 1),
-                    child: const Text('Next->'),
-                  ),
-                  SizedBox(height: r10),
-                  ElevatedButton(
-                    onPressed: () => block(activeIndex),
-                    child: const Text('Block'),
-                  ),
-                ])),
+                visible: gameStarted == false,
+                child: Positioned(
+                    top: r(160.0),
+                    left: r(205.0),
+                    child: SizedBox(
+                        width: r(52.0),
+                        height: r(52.0),
+                        child: FittedBox(
+                            child: FloatingActionButton(
+                                backgroundColor: Colors.transparent,
+                                onPressed: () {
+                                  html.window.open('white_paper', 'new tab');
+                                  // html.window.location.href = 'white_paper';
+                                },
+                                tooltip: 'White Paper',
+                                // elevation: 0.0,
+                                child: const ClipRRect(
+                                  child: Icon(
+                                    Icons.receipt_long,
+                                    size: 52.0,
+                                    color: Colors.white,
+                                  ),
+                                )))))),
             // 敵のバトルカード
             Visibility(
               visible: gameObject != null &&
@@ -2992,87 +2935,136 @@ class HomePageState extends State<HomePage> {
                           ),
                       ],
                     ))),
+            // Choose target unit
             Visibility(
-                visible: gameStarted == false,
-                child: Positioned(
-                    top: r(160.0),
-                    left: r(205.0),
-                    child: SizedBox(
-                        width: r(52.0),
-                        height: r(52.0),
-                        child: FittedBox(
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  html.window.location.href = 'ranking';
-                                },
-                                tooltip: 'RANKING!',
-                                // elevation: 0.0,
-                                child: const ClipRRect(
-                                  child: Icon(
-                                    Icons.receipt_long,
-                                    size: 52.0,
-                                    color: Colors.white,
-                                  ),
-                                )))))),
+                visible: showUnitTargetCarousel == true,
+                child: Column(children: <Widget>[
+                  CarouselSlider.builder(
+                    carouselController: cController,
+                    options: CarouselOptions(
+                        height: r(300),
+                        aspectRatio: 14 / 9,
+                        viewportFraction: 0.6, // 1.0:1つが全体に出る
+                        initialPage: 0,
+                        // enableInfiniteScroll: true,
+                        enlargeCenterPage: true,
+                        scrollDirection: Axis.horizontal,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            activeIndex = index;
+                          });
+                        }),
+                    itemCount: gameObject == null
+                        ? 0
+                        : (cannotDefendUnitPositions.isNotEmpty
+                            ? cannotDefendUnitPositions.length
+                            : opponentFieldUnitPositions.length),
+                    itemBuilder: (context, index, realIndex) {
+                      // 行動済みのみ
+                      if (cannotDefendUnitPositions.isNotEmpty) {
+                        var target = cannotDefendUnitPositions[index];
+                        var cardId =
+                            gameObject!.opponentFieldUnit[(target).toString()];
+                        return Image.asset(
+                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                          fit: BoxFit.cover,
+                        );
+                      } else {
+                        // 全体から
+                        var target = opponentFieldUnitPositions[index];
+                        var cardId =
+                            gameObject!.opponentFieldUnit[(target).toString()];
+                        return Image.asset(
+                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                          fit: BoxFit.cover,
+                        );
+                      }
+                    },
+                  ),
+                  SizedBox(height: r10),
+                  buildIndicator(cannotDefendUnitPositions.isNotEmpty
+                      ? cannotDefendUnitPositions.length
+                      : opponentFieldUnitPositions.length),
+                  SizedBox(height: r10),
+                  Visibility(
+                      visible: cannotDefendUnitPositions.isNotEmpty
+                          ? cannotDefendUnitPositions.length > 1
+                          : opponentFieldUnitPositions.length > 1,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            cController.animateToPage(activeIndex + 1),
+                        child: const Text('Next->'),
+                      )),
+                  SizedBox(height: r10),
+                  ElevatedButton(
+                    onPressed: () {
+                      showUnitTargetCarousel = false;
+                      selectTarget(activeIndex);
+                    },
+                    child: const Text('Choice'),
+                  ),
+                ])),
+            // 攻撃をブロックするユニットを選ぶ
             Visibility(
-                visible: gameStarted == false,
-                child: Positioned(
-                    top: r(160.0),
-                    left: r(330.0),
-                    child: SizedBox(
-                        width: r50,
-                        height: r50,
-                        child: FittedBox(
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  html.window.location.href = 'ranking';
-                                },
-                                tooltip: 'RANKING!',
-                                // elevation: 0.0,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(r(4.0)),
-                                  child: Image.asset(
-                                    '${imagePath}button/home_ranking.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                )))))),
-            // 防御側タイマー
+                visible: showDefenceUnitsCarousel == true,
+                child: Column(children: <Widget>[
+                  CarouselSlider.builder(
+                    carouselController: cController,
+                    options: CarouselOptions(
+                        height: r(300),
+                        aspectRatio: 14 / 9,
+                        viewportFraction: 0.6, // 1.0:1つが全体に出る
+                        initialPage: 0,
+                        // enableInfiniteScroll: true,
+                        enlargeCenterPage: true,
+                        scrollDirection: Axis.horizontal,
+                        onPageChanged: (index, reason) {
+                          setState(() {
+                            activeIndex = index;
+                          });
+                        }),
+                    itemCount: yourDefendableUnitPositions.length,
+                    itemBuilder: (context, index, realIndex) {
+                      var target = yourDefendableUnitPositions[index];
+                      var cardId =
+                          gameObject!.yourFieldUnit[(target).toString()];
+                      return Image.asset(
+                        '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                        fit: BoxFit.cover,
+                      );
+                    },
+                  ),
+                  SizedBox(height: r10),
+                  buildIndicator(yourDefendableUnitPositions.length),
+                  SizedBox(height: r10),
+                  SizedBox(
+                      height: r35,
+                      child: ElevatedButton(
+                        onPressed: () =>
+                            cController.animateToPage(activeIndex + 1),
+                        child: const Text('Next->'),
+                      )),
+                  SizedBox(height: r10),
+                  SizedBox(
+                      height: r35,
+                      child: ElevatedButton(
+                        onPressed: () => block(activeIndex),
+                        child: const Text('Block'),
+                      )),
+                ])),
+            // 相手ユニット選択タイマー 兼 防御側タイマー
             Visibility(
-                visible: isBattling == true &&
-                    yourDefendableUnitPositions.isNotEmpty &&
-                    !(onBattlePosition != null &&
-                        gameObject!.opponentFieldUnit[
-                                onBattlePosition.toString()] ==
-                            '6'),
+                // visible: (canUseIntercept == true || showUnitTargetCarousel == true) ||
+                visible: showUnitTargetCarousel == true ||
+                    (isBattling == true &&
+                        yourDefendableUnitPositions.isNotEmpty &&
+                        !(onBattlePosition != null &&
+                            gameObject!.opponentFieldUnit[
+                                    onBattlePosition.toString()] ==
+                                '6')),
                 child: Center(
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: r(330.0)),
-                        child: SizedBox(
-                            width: r(180.0),
-                            child: StreamBuilder<int>(
-                                stream: _timer.events.stream,
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<int> snapshot) {
-                                  return Visibility(
-                                      visible: snapshot.data != null &&
-                                          snapshot.data != 0,
-                                      child: Center(
-                                          child: Text(
-                                        '0:0${snapshot.data.toString()}',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: r(60.0)),
-                                      )));
-                                }))))),
-            // タイマー
-            Visibility(
-                visible:
-                    canUseIntercept == true || showUnitTargetCarousel == true,
-                child: Center(
-                    child: Padding(
-                        padding: EdgeInsets.only(bottom: r(270.0)),
+                        padding: EdgeInsets.only(bottom: r(300.0)),
                         child: SizedBox(
                             width: r(180.0),
                             child: StreamBuilder<int>(
@@ -3116,18 +3108,26 @@ class HomePageState extends State<HomePage> {
                 // バトルデータなし
                 if (gameObject != null) {
                   // データがない = 10ターンが終わった可能性
-                  if (gameObject!.turn == 10 &&
-                      gameObject!.isFirstTurn == false) {
-                    if (gameObject!.yourLife < gameObject!.opponentLife ||
-                        (gameObject!.isFirst &&
-                            gameObject!.yourLife == gameObject!.opponentLife)) {
-                      QuickAlert.show(
-                        context: context,
-                        type: QuickAlertType.error,
-                        title: 'You Lose...',
-                        text: 'Try Again!',
-                      );
-                    }
+                  if ((gameObject!.turn == 10 &&
+                          gameObject!.yourLife < gameObject!.opponentLife) ||
+                      (gameObject!.yourLife == 1 &&
+                          gameObject!.yourLife < gameObject!.opponentLife)) {
+                    QuickAlert.show(
+                      context: context,
+                      type: QuickAlertType.error,
+                      title: 'You Lose...',
+                      text: 'Try Again!',
+                    );
+                  } else if (gameObject!.turn == 10 &&
+                      gameObject!.isFirstTurn == true &&
+                      gameObject!.isFirst == true &&
+                      gameObject!.yourLife <= gameObject!.opponentLife) {
+                    QuickAlert.show(
+                      context: context,
+                      type: QuickAlertType.error,
+                      title: 'You Lose...',
+                      text: 'Try Again!',
+                    );
                   }
                 }
                 // 内部データ初期化
@@ -3160,7 +3160,7 @@ class HomePageState extends State<HomePage> {
   @override
   void dispose() {
     // cController.dispose();
-    attackStatusBloc.dispose();
+    // attackStatusBloc.dispose();
     super.dispose();
   }
 

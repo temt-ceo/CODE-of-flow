@@ -8,11 +8,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
-typedef double ResponsiveSizeChangeFunction(double data);
-
 class RankingInfo extends StatelessWidget {
-  final ResponsiveSizeChangeFunction r;
-
   const RankingInfo(
       {Key? key,
       required this.onPressed,
@@ -21,7 +17,7 @@ class RankingInfo extends StatelessWidget {
       required this.playerName,
       required this.win,
       required this.icon,
-      required this.r})
+      required this.wRes})
       : super(key: key);
 
   final VoidCallback? onPressed;
@@ -29,16 +25,20 @@ class RankingInfo extends StatelessWidget {
   final int point;
   final String playerName;
   final int win;
-  final Image icon;
+  final String icon;
+  final double wRes;
   final String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  double r(double val) {
+    return val * wRes;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        height: rank <= 3 ? r(50.0) : r(40.0),
+        height: r(50.0),
         decoration: BoxDecoration(border: Border.all(color: Colors.blueAccent)),
         child: Container(
-            height: rank <= 3 ? r(50.0) : r(40.0),
+            height: r(50.0),
             color: rank == 1
                 ? const Color.fromARGB(255, 175, 149, 0)
                 : rank == 2
@@ -47,32 +47,36 @@ class RankingInfo extends StatelessWidget {
                         ? const Color.fromARGB(255, 106, 56, 5)
                         : const Color.fromARGB(255, 251, 249, 249),
             child: Stack(children: <Widget>[
-              Padding(
-                padding: rank <= 3
-                    ? EdgeInsets.only(top: r(4.0))
-                    : rank <= 9
-                        ? EdgeInsets.only(top: r(4.0), left: r(7.0))
-                        : EdgeInsets.only(top: r(4.0), left: r(10.0)),
-                child: Material(
-                    shape: const CircleBorder(),
-                    clipBehavior: Clip.antiAlias,
-                    color: Colors.transparent,
-                    elevation: 0.0,
-                    child: rank <= 9
-                        ? IconButton(
-                            onPressed: onPressed,
-                            iconSize: rank <= 3 ? r(50.0) : r(30.0),
-                            icon: icon)
-                        : Text(rank.toString(),
-                            style: TextStyle(
-                                color: rank <= 3
-                                    ? const Color.fromARGB(255, 247, 245, 245)
-                                    : const Color.fromARGB(255, 0, 0, 0),
-                                fontSize: r(18.0)))),
-              ),
+              Positioned(
+                  left: r(10.0),
+                  top: r(14.0),
+                  child: rank <= 9
+                      ? Container(
+                          width: r(20.0),
+                          height: r(20.0),
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(icon), fit: BoxFit.cover),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.yellow,
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset:
+                                    Offset(1, 1), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                        )
+                      : Text(rank.toString(),
+                          style: TextStyle(
+                              color: rank <= 3
+                                  ? const Color.fromARGB(255, 247, 245, 245)
+                                  : const Color.fromARGB(255, 0, 0, 0),
+                              fontSize: r(18.0)))),
               Positioned(
                 left: r(70.0),
-                top: rank <= 3 ? r(17.0) : r(4.0),
+                top: r(15.0),
                 child: Container(
                   width: r(20.0),
                   height: r(20.0),
@@ -93,31 +97,31 @@ class RankingInfo extends StatelessWidget {
               ),
               Positioned(
                   left: r(100.0),
-                  top: rank <= 3 ? r(15.0) : r(7.0),
-                  child: Text('$point Point',
+                  top: r(9.0),
+                  child: Text('$point Points',
                       style: TextStyle(
                           color: rank <= 3
-                              ? const Color.fromARGB(255, 247, 245, 245)
+                              ? const Color.fromARGB(255, 221, 32, 32)
                               : const Color.fromARGB(255, 0, 0, 0),
-                          fontSize: r(18.0)))),
+                          fontSize: r(23.0)))),
               Positioned(
                   left: r(250.0),
-                  top: rank <= 3 ? r(15.0) : r(7.0),
+                  top: r(9.0),
                   child: Text(playerName,
                       style: TextStyle(
                           color: rank <= 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
-                          fontSize: r(18.0)))),
+                          fontSize: r(23.0)))),
               Positioned(
-                  left: r(400.0),
-                  top: rank <= 3 ? r(15.0) : r(7.0),
+                  left: r(500.0),
+                  top: r(9.0),
                   child: Text('$win Win',
                       style: TextStyle(
                           color: rank <= 3
-                              ? const Color.fromARGB(255, 221, 32, 32)
+                              ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
-                          fontSize: r(14.0)))),
+                          fontSize: r(19.0)))),
             ])));
   }
 }

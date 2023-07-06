@@ -233,7 +233,7 @@ class DeckButtonsState extends State<DeckButtons> {
         // Call GraphQL method.
         await apiService.saveGameServerProcess(
             'save_deck', jsonEncode(widget.savedDeck), player.playerId);
-        await Future.delayed(const Duration(seconds: 4));
+        await Future.delayed(const Duration(seconds: 3));
         closeGameLoading();
         showAlertWindow('success');
       }

@@ -41,36 +41,57 @@ class RankingPage extends StatefulWidget {
 class RankingPageState extends State<RankingPage> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        supportedLocales: L10n.supportedLocales,
-        localizationsDelegates: L10n.localizationsDelegates,
-        home: DefaultTabController(
-            length: 2,
-            child: Scaffold(
-                backgroundColor: Colors.transparent,
-                appBar: PreferredSize(
-                    preferredSize: const Size.fromHeight(50),
-                    child: AppBar(
-                        // backgroundColor:
-                        //     const ui.Color.fromARGB(255, 221, 32, 32),
-                        bottom: const TabBar(tabs: [
-                      Tab(
-                        text: 'Mainnet',
-                      ),
-                      Tab(
-                        text: 'Testnet',
-                      )
-                    ]))),
-                body: TabBarView(children: [
-                  NestedTabBar(isEnglish: widget.enLocale),
-                  NestedTabBar(isEnglish: widget.enLocale),
-                ]))));
+    return DefaultTabController(
+        length: 2,
+        child: Scaffold(
+            backgroundColor: Colors.redAccent,
+            appBar: PreferredSize(
+                preferredSize: const Size.fromHeight(40),
+                child: AppBar(
+                    backgroundColor: Colors.black45,
+                    elevation: 0,
+                    bottom: const TabBar(
+                        unselectedLabelColor: Colors.redAccent,
+                        indicatorSize: TabBarIndicatorSize.tab,
+                        indicator: BoxDecoration(
+                            borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(8.0),
+                                topRight: Radius.circular(8.0)),
+                            color: Colors.redAccent),
+                        tabs: [
+                          SizedBox(
+                              height: 38,
+                              child: Tab(
+                                child: Align(
+                                    alignment: Alignment.center,
+                                    child: Text('Mainnet',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22.0))),
+                              )),
+                          SizedBox(
+                              height: 38,
+                              child: Tab(
+                                child: Align(
+                                    alignment: Alignment.center,
+                                    child: Text('Testnet',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22.0))),
+                              ))
+                        ]))),
+            body: TabBarView(children: [
+              NestedTabBar(isEnglish: widget.enLocale, chain: 'Mainnet'),
+              NestedTabBar(isEnglish: widget.enLocale, chain: 'Testnet'),
+            ])));
   }
 }
 
 class NestedTabBar extends StatefulWidget {
-  const NestedTabBar({Key? key, required this.isEnglish}) : super(key: key);
+  const NestedTabBar({Key? key, required this.isEnglish, required this.chain})
+      : super(key: key);
   final bool isEnglish;
+  final String chain;
 
   @override
   _NestedTabBarState createState() => _NestedTabBarState();
@@ -86,10 +107,7 @@ class _NestedTabBarState extends State<NestedTabBar>
   Size size = WidgetsBinding.instance.window.physicalSize;
   int battleCount = 0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
-  double r(double val) {
-    final wRes = size.width / desktopWidth;
-    return val * wRes;
-  }
+  double _r = 1.0;
 
   void setRankingScores(dynamic rankingScores) {
     var objStr = jsonToString(rankingScores);
@@ -103,14 +121,12 @@ class _NestedTabBarState extends State<NestedTabBar>
           point: int.parse(objJs[i]['point']),
           playerName: objJs[i]['player_name'],
           win: int.parse(objJs[i]['period_win_count']),
-          icon: Image.asset(
-            '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
-            fit: BoxFit.cover,
-          ),
+          icon:
+              '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
           onPressed: () {
             debugPrint(objJs[i]['player_name']);
           },
-          r: r,
+          wRes: _r,
         ));
       }
     });
@@ -130,14 +146,12 @@ class _NestedTabBarState extends State<NestedTabBar>
           win: int.parse(objJs[i]['win_count']),
           rank1win: int.parse(objJs[i]['ranking_win_count']),
           rank2win: int.parse(objJs[i]['ranking_2nd_win_count']),
-          icon: Image.asset(
-            '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
-            fit: BoxFit.cover,
-          ),
+          icon:
+              '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
           onPressed: () {
             debugPrint(objJs[i]['player_name']);
           },
-          r: r,
+          wRes: _r,
         ));
       }
     });
@@ -180,57 +194,88 @@ class _NestedTabBarState extends State<NestedTabBar>
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 2,
-        child: Scaffold(
-            appBar: PreferredSize(
-                preferredSize: const Size.fromHeight(50),
-                child: AppBar(
-                    bottom: TabBar(tabs: [
-                  Tab(
-                    text: widget.isEnglish
-                        ? 'Reward Ranking Race (Last ${1000 - battleCount} games)'
-                        : 'リワード ランキング レース (残り ${1000 - battleCount} games)',
+    return LayoutBuilder(builder: (layoutContext, constraints) {
+      final wRes = constraints.maxWidth / desktopHeight;
+      double r(double val) {
+        return val * wRes;
+      }
+
+      _r = wRes;
+
+      return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+              backgroundColor: Colors.redAccent,
+              appBar: PreferredSize(
+                  preferredSize: const Size.fromHeight(40.0),
+                  child: AppBar(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      bottom: TabBar(
+                          unselectedLabelColor: Colors.redAccent,
+                          indicatorSize: TabBarIndicatorSize.tab,
+                          indicator: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(4.0),
+                                  topRight: Radius.circular(4.0)),
+                              color: Colors.redAccent),
+                          tabs: [
+                            SizedBox(
+                                height: 38,
+                                child: Tab(
+                                  child: Align(
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                          widget.isEnglish
+                                              ? 'Reward Ranking Race (Last ${1000 - battleCount} games)'
+                                              : 'リワード ランキング レース (残り ${1000 - battleCount} games)',
+                                          style: TextStyle(fontSize: r(12.0)))),
+                                )),
+                            SizedBox(
+                                height: 38,
+                                child: Tab(
+                                  child: Align(
+                                      alignment: Alignment.center,
+                                      child: Text('Total Score Ranking',
+                                          style: TextStyle(fontSize: r(12.0)))),
+                                ))
+                          ]))),
+              body: TabBarView(
+                children: [
+                  Container(
+                    color: Colors.black,
+                    child: SmartRefresher(
+                        controller: refreshController,
+                        header: WaterDropHeader(
+                          waterDropColor: Colors.blue.shade700,
+                          // refresh:,
+                          // complete: Container(),
+                          completeDuration: Duration.zero,
+                        ),
+                        onRefresh: () => getRankings(),
+                        child: ListView.builder(
+                            itemCount: rankings.length,
+                            itemBuilder: (BuildContext context, int index) =>
+                                rankings[index])),
                   ),
-                  const Tab(
-                    text: 'Total Score Ranking',
-                  )
-                ]))),
-            body: TabBarView(
-              children: [
-                Container(
-                  color: Colors.black,
-                  child: SmartRefresher(
-                      controller: refreshController,
-                      header: WaterDropHeader(
-                        waterDropColor: Colors.blue.shade700,
-                        // refresh:,
-                        // complete: Container(),
-                        completeDuration: Duration.zero,
-                      ),
-                      onRefresh: () => getRankings(),
-                      child: ListView.builder(
-                          itemCount: rankings.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              rankings[index])),
-                ),
-                Container(
-                  color: Colors.black12,
-                  child: SmartRefresher(
-                      controller: refreshController2,
-                      header: WaterDropHeader(
-                        waterDropColor: Colors.blue.shade700,
-                        // refresh:,
-                        // complete: Container(),
-                        completeDuration: Duration.zero,
-                      ),
-                      onRefresh: () => getPlayers(),
-                      child: ListView.builder(
-                          itemCount: players.length,
-                          itemBuilder: (BuildContext context, int index) =>
-                              players[index])),
-                ),
-              ],
-            )));
+                  Container(
+                    color: Colors.grey,
+                    child: SmartRefresher(
+                        controller: refreshController2,
+                        header: WaterDropHeader(
+                          waterDropColor: Colors.blue.shade700,
+                          // refresh:,
+                          // complete: Container(),
+                          completeDuration: Duration.zero,
+                        ),
+                        onRefresh: () => getPlayers(),
+                        child: ListView.builder(
+                            itemCount: players.length,
+                            itemBuilder: (BuildContext context, int index) =>
+                                players[index])),
+                  ),
+                ],
+              )));
+    });
   }
 }

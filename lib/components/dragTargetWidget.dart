@@ -67,7 +67,7 @@ class DragTargetState extends State<DragTargetWidget> {
   List<Widget> dropedList = [];
   List<Widget> dropedListEnemy = [];
   List<Widget> dropedListSecond = [];
-  late DropAllowBloc _dropBloc;
+  final DropAllowBloc _dropBloc = DropAllowBloc();
   bool canAttack = false;
   int? attackSignalPosition;
   bool attackAPICalled = false;
@@ -100,12 +100,8 @@ class DragTargetState extends State<DragTargetWidget> {
   void attack() async {
     if (widget.actedCardPosition != null && attackAPICalled == false) {
       attackAPICalled = true;
-      bool canBlock = false;
-      for (int i = 1; i <= 5; i++) {
-        if (widget.info!.opponentFieldUnit[i.toString()] != null) {
-          canBlock = true;
-        }
-      }
+      bool canBlock =
+          widget.info!.opponentDefendableUnitLength > 0 ? true : false;
       for (int i = 1; i <= 5; i++) {
         if (widget.info!.opponentFieldUnitAction[i.toString()] == '0') {
           canBlock = false;
@@ -214,7 +210,6 @@ class DragTargetState extends State<DragTargetWidget> {
   void initState() {
     canInit = widget.isMobile == false;
     setMobileInitTrue();
-    _dropBloc = DropAllowBloc();
     super.initState();
   }
 
@@ -227,7 +222,7 @@ class DragTargetState extends State<DragTargetWidget> {
 
   @override
   void dispose() {
-    _dropBloc.dispose();
+    // _dropBloc.dispose();
     super.dispose();
   }
 
@@ -288,7 +283,7 @@ class DragTargetState extends State<DragTargetWidget> {
             var imageUrl =
                 '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardIdStr.jpeg';
             dropedList[i] = DroppedCardWidget(
-                widget.r(132.0 * i + 20), // TODO 690 / 700
+                widget.r(132.0 * i + 20),
                 imageUrl,
                 widget.label,
                 widget.cardInfos[cardIdStr],
@@ -362,6 +357,7 @@ class DragTargetState extends State<DragTargetWidget> {
       });
     }
 
+    // フィールド, Triggerゾーン
     if (widget.label != 'deck') {
       return DragTarget<String>(
           // onAccept
@@ -370,29 +366,7 @@ class DragTargetState extends State<DragTargetWidget> {
         var imageUrl = cardId > 16
             ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
             : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
-        if (widget.label == 'deck' && dropedList.length >= 15) {
-          dropedListSecond.add(DroppedCardWidget(
-              widget.r(86.0 * dropedListSecond.length - 1 + 10),
-              imageUrl,
-              widget.label,
-              widget.cardInfos[cardIdStr],
-              true,
-              widget.tapCardCallback,
-              dropedList.length + dropedListSecond.length,
-              widget.attack_stream,
-              widget.r));
-        } else if (widget.label == 'deck') {
-          dropedList.add(DroppedCardWidget(
-              widget.r(86.0 * dropedList.length - 1 + 10), // TODO 380 / 440
-              imageUrl,
-              widget.label,
-              widget.cardInfos[cardIdStr],
-              false,
-              widget.tapCardCallback,
-              dropedList.length,
-              widget.attack_stream,
-              widget.r));
-        } else if (widget.label == 'unit') {
+        if (widget.label == 'unit') {
           for (int i = 0; i < 5; i++) {
             if (dropedList[i].runtimeType.toString() ==
                 Container().runtimeType.toString()) {
@@ -431,101 +405,73 @@ class DragTargetState extends State<DragTargetWidget> {
       },
           // onWillAccept
           onWillAccept: (String? cardIdStr) {
-        if (widget.label == 'deck') {
-          if (dropedListSecond.length >= 15) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          int cardCount = 0;
-          for (int i = 0; i < widget.defaultDropedList.length; i++) {
-            if (cardIdStr == widget.defaultDropedList[i]) {
-              cardCount++;
-            }
-            if (cardCount >= 3) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              QuickAlert.show(
-                context: context,
-                type: QuickAlertType.info,
-                title: 'Up to 3 identical cards can be inserted.',
-                text: '',
-              );
+        if (widget.canOperate == false || widget.tmpCanOperate == false) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
+        if (widget.info != null &&
+            widget.info!.isFirst != widget.info!.isFirstTurn) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
+        if (dropedList.isEmpty) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
+        if (widget.info!.yourAttackingCard != null) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
+        var cardId = int.parse(cardIdStr!);
+        var imageUrl = cardId > 16
+            ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
+            : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
 
+        if (widget.label == 'unit' && imageUrl.startsWith('${imagePath}unit')) {
+          if (widget.info != null) {
+            // カード情報がない。
+            if (widget.cardInfos == null ||
+                widget.cardInfos[cardIdStr] == null) {
+              _dropBloc.counterEventSink.add(DropDeniedEvent());
               return false;
             }
+            var cardData = widget.cardInfos[cardIdStr];
+            if (int.parse(cardData['cost']) > widget.info!.yourCp) {
+              _dropBloc.counterEventSink.add(DropDeniedEvent());
+              return false;
+            }
+          }
+          bool noSpace = true;
+          for (int i = 0; i < 5; i++) {
+            if (dropedList[i].runtimeType.toString() ==
+                Container().runtimeType.toString()) {
+              noSpace = false;
+            }
+          }
+          if (noSpace) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
           }
           _dropBloc.counterEventSink.add(DropAllowedEvent());
           return true;
-          // フィールド, Triggerゾーン
+        } else if (widget.label == 'trigger' &&
+            imageUrl.startsWith('${imagePath}trigger')) {
+          bool noSpace = true;
+          for (int i = 0; i < 4; i++) {
+            if (dropedList[i].runtimeType.toString() ==
+                Container().runtimeType.toString()) {
+              noSpace = false;
+            }
+          }
+          if (noSpace) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            return false;
+          }
+          _dropBloc.counterEventSink.add(DropAllowedEvent());
+          return true;
         } else {
-          if (widget.canOperate == false || widget.tmpCanOperate == false) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (widget.info != null &&
-              widget.info!.isFirst != widget.info!.isFirstTurn) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (dropedList.isEmpty) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (widget.info!.yourAttackingCard != null) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          var cardId = int.parse(cardIdStr!);
-          var imageUrl = cardId > 16
-              ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
-              : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
-
-          if (widget.label == 'unit' &&
-              imageUrl.startsWith('${imagePath}unit')) {
-            if (widget.info != null) {
-              // カード情報がない。
-              if (widget.cardInfos == null ||
-                  widget.cardInfos[cardIdStr] == null) {
-                _dropBloc.counterEventSink.add(DropDeniedEvent());
-                return false;
-              }
-              var cardData = widget.cardInfos[cardIdStr];
-              if (int.parse(cardData['cost']) > widget.info!.yourCp) {
-                _dropBloc.counterEventSink.add(DropDeniedEvent());
-                return false;
-              }
-            }
-            bool noSpace = true;
-            for (int i = 0; i < 5; i++) {
-              if (dropedList[i].runtimeType.toString() ==
-                  Container().runtimeType.toString()) {
-                noSpace = false;
-              }
-            }
-            if (noSpace) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
-            }
-            _dropBloc.counterEventSink.add(DropAllowedEvent());
-            return true;
-          } else if (widget.label == 'trigger' &&
-              imageUrl.startsWith('${imagePath}trigger')) {
-            bool noSpace = true;
-            for (int i = 0; i < 4; i++) {
-              if (dropedList[i].runtimeType.toString() ==
-                  Container().runtimeType.toString()) {
-                noSpace = false;
-              }
-            }
-            if (noSpace) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
-            }
-            _dropBloc.counterEventSink.add(DropAllowedEvent());
-            return true;
-          } else {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
         }
       }, onLeave: (String? item) {
         _dropBloc.counterEventSink.add(DropLeaveEvent());
@@ -599,8 +545,8 @@ class DragTargetState extends State<DragTargetWidget> {
                                             ? widget.r(-100.0)
                                             : widget.r(50.0)) +
                                         (attackSignalPosition != null
-                                            ? widget.r(
-                                                attackSignalPosition! * 140.0)
+                                            ? widget.r(attackSignalPosition! *
+                                                widget.r(140.0))
                                             : 0)),
                                     top: widget.r(-5.0),
                                     child: Container(
@@ -635,6 +581,7 @@ class DragTargetState extends State<DragTargetWidget> {
                   });
             });
       });
+      // デッキ編集
     } else {
       return DragTarget<String>(
           // onAccept
@@ -643,7 +590,7 @@ class DragTargetState extends State<DragTargetWidget> {
         var imageUrl = cardId > 16
             ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
             : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
-        if (widget.label == 'deck' && dropedList.length >= 15) {
+        if (dropedList.length >= 15) {
           dropedListSecond.add(DroppedCardWidget(
               widget.r(86.0 * dropedListSecond.length - 1 + 10),
               imageUrl,
@@ -654,7 +601,7 @@ class DragTargetState extends State<DragTargetWidget> {
               dropedList.length + dropedListSecond.length,
               widget.attack_stream,
               widget.r));
-        } else if (widget.label == 'deck') {
+        } else {
           dropedList.add(DroppedCardWidget(
               widget.r(86.0 * dropedList.length - 1 + 10), // TODO 380 / 440
               imageUrl,
@@ -665,141 +612,34 @@ class DragTargetState extends State<DragTargetWidget> {
               dropedList.length,
               widget.attack_stream,
               widget.r));
-        } else if (widget.label == 'unit') {
-          for (int i = 0; i < 5; i++) {
-            if (dropedList[i].runtimeType.toString() ==
-                Container().runtimeType.toString()) {
-              dropedList[i] = DroppedCardWidget(
-                  widget.r(132.0 * i + 20), // TODO 380 / 440
-                  imageUrl,
-                  widget.label,
-                  widget.cardInfos[cardIdStr],
-                  false,
-                  widget.tapCardCallback,
-                  i,
-                  widget.attack_stream,
-                  widget.r);
-              break;
-            }
-          }
-        } else if (widget.label == 'trigger') {
-          for (int i = 0; i < 4; i++) {
-            if (dropedList[i].runtimeType.toString() ==
-                Container().runtimeType.toString()) {
-              dropedList[i] = DroppedCardWidget(
-                  widget.r(93.0 * i + 17), // TODO 380 / 440
-                  imageUrl,
-                  widget.label,
-                  widget.cardInfos[cardIdStr],
-                  false,
-                  widget.tapCardCallback,
-                  i,
-                  widget.attack_stream,
-                  widget.r);
-              break;
-            }
-          }
         }
         _dropBloc.counterEventSink.add(DropLeaveEvent());
       },
           // onWillAccept
           onWillAccept: (String? cardIdStr) {
-        if (widget.label == 'deck') {
-          if (dropedListSecond.length >= 15) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
+        if (dropedListSecond.length >= 15) {
+          _dropBloc.counterEventSink.add(DropDeniedEvent());
+          return false;
+        }
+        int cardCount = 0;
+        for (int i = 0; i < widget.defaultDropedList.length; i++) {
+          if (cardIdStr == widget.defaultDropedList[i]) {
+            cardCount++;
           }
-          int cardCount = 0;
-          for (int i = 0; i < widget.defaultDropedList.length; i++) {
-            if (cardIdStr == widget.defaultDropedList[i]) {
-              cardCount++;
-            }
-            if (cardCount >= 3) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              QuickAlert.show(
-                context: context,
-                type: QuickAlertType.info,
-                title: 'Up to 3 identical cards can be inserted.',
-                text: '',
-              );
+          if (cardCount >= 3) {
+            _dropBloc.counterEventSink.add(DropDeniedEvent());
+            QuickAlert.show(
+              context: context,
+              type: QuickAlertType.info,
+              title: 'Up to 3 identical cards can be inserted.',
+              text: '',
+            );
 
-              return false;
-            }
-          }
-          _dropBloc.counterEventSink.add(DropAllowedEvent());
-          return true;
-          // フィールド, Triggerゾーン
-        } else {
-          if (widget.canOperate == false) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (widget.info != null &&
-              widget.info!.isFirst != widget.info!.isFirstTurn) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (dropedList.isEmpty) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          if (widget.info!.yourAttackingCard != null) {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
-            return false;
-          }
-          var cardId = int.parse(cardIdStr!);
-          var imageUrl = cardId > 16
-              ? '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'
-              : '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg';
-
-          if (widget.label == 'unit' &&
-              imageUrl.startsWith('${imagePath}unit')) {
-            if (widget.info != null) {
-              // // カード情報がない。
-              if (widget.cardInfos == null ||
-                  widget.cardInfos[cardIdStr] == null) {
-                _dropBloc.counterEventSink.add(DropDeniedEvent());
-                return false;
-              }
-              var cardData = widget.cardInfos[cardIdStr];
-              if (int.parse(cardData['cost']) > widget.info!.yourCp) {
-                _dropBloc.counterEventSink.add(DropDeniedEvent());
-                return false;
-              }
-            }
-            bool noSpace = true;
-            for (int i = 0; i < 5; i++) {
-              if (dropedList[i].runtimeType.toString() ==
-                  Container().runtimeType.toString()) {
-                noSpace = false;
-              }
-            }
-            if (noSpace) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
-            }
-            _dropBloc.counterEventSink.add(DropAllowedEvent());
-            return true;
-          } else if (widget.label == 'trigger' &&
-              imageUrl.startsWith('${imagePath}trigger')) {
-            bool noSpace = true;
-            for (int i = 0; i < 4; i++) {
-              if (dropedList[i].runtimeType.toString() ==
-                  Container().runtimeType.toString()) {
-                noSpace = false;
-              }
-            }
-            if (noSpace) {
-              _dropBloc.counterEventSink.add(DropDeniedEvent());
-              return false;
-            }
-            _dropBloc.counterEventSink.add(DropAllowedEvent());
-            return true;
-          } else {
-            _dropBloc.counterEventSink.add(DropDeniedEvent());
             return false;
           }
         }
+        _dropBloc.counterEventSink.add(DropAllowedEvent());
+        return true;
       }, onLeave: (String? item) {
         _dropBloc.counterEventSink.add(DropLeaveEvent());
       }, builder: (
@@ -812,16 +652,8 @@ class DragTargetState extends State<DragTargetWidget> {
             initialData: 0xFFFFFFFF,
             builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
               return Container(
-                width: widget.label == 'deck'
-                    ? widget.r(1320.0)
-                    : (widget.label == 'unit'
-                        ? widget.r(690.0)
-                        : widget.r(380.0)),
-                height: widget.label == 'deck'
-                    ? widget.r(310.0)
-                    : (widget.label == 'unit'
-                        ? widget.r(380.0)
-                        : widget.r(112.0)),
+                width: widget.r(1320.0),
+                height: widget.r(310.0),
                 decoration: BoxDecoration(
                   image: DecorationImage(
                       image: AssetImage(widget.imageUrl), fit: BoxFit.cover),
@@ -835,55 +667,10 @@ class DragTargetState extends State<DragTargetWidget> {
                     ),
                   ],
                 ),
-                child: widget.label == 'unit'
-                    // フィールド
-                    ? Stack(children: <Widget>[
-                        // 攻撃シグナル画像
-                        Visibility(
-                            visible: attackSignalPosition != null,
-                            child: Positioned(
-                              left: widget.r((attackSignalPosition != null &&
-                                          attackSignalPosition! >= 2
-                                      ? widget.r(-130.0)
-                                      : widget.r(50.0)) +
-                                  (attackSignalPosition != null
-                                      ? widget.r(attackSignalPosition! * 140.0)
-                                      : 0)),
-                              top: widget.r(-5.0),
-                              child: Container(
-                                width: widget.r(attackSignalPosition != null &&
-                                        attackSignalPosition! >= 2
-                                    ? widget.r(340.0)
-                                    : widget.r(180.0)),
-                                height: widget.r(240.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  image: DecorationImage(
-                                      opacity: 0.8,
-                                      image: AssetImage(attackSignalPosition !=
-                                                  null &&
-                                              attackSignalPosition! >= 2
-                                          ? '${imagePath}unit/attackSignal2.png'
-                                          : '${imagePath}unit/attackSignal.png'),
-                                      fit: BoxFit.contain),
-                                ),
-                              ),
-                            )),
-                        SizedBox(height: widget.r(30.0)),
-                        // 敵ユニット
-                        Stack(children: dropedListEnemy),
-                        // 味方ユニット
-                        Stack(children: dropedList),
-                      ])
-                    // デッキ編集画面
-                    : (widget.label == 'deck'
-                        ? Stack(children: <Widget>[
-                            Stack(children: dropedList),
-                            Stack(children: dropedListSecond),
-                          ])
-                        : Stack(
-                            children: dropedList,
-                          )),
+                child: Stack(children: <Widget>[
+                  Stack(children: dropedList),
+                  Stack(children: dropedListSecond)
+                ]),
               );
             });
       });

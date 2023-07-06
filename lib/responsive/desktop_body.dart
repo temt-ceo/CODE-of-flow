@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 import 'package:CodeOfFlow/pages/desktop/homePage.dart';
 import 'package:CodeOfFlow/pages/desktop/deckEditPage.dart';
 import 'package:CodeOfFlow/pages/desktop/rankingPage.dart';
+import 'package:CodeOfFlow/pages/desktop/whitePaperPage.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 typedef void StringCallback(Locale val);
@@ -43,82 +44,11 @@ class DesktopBodyState extends State<DesktopBody> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      appBar: widget.route == 'Home'
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              title: Text(widget.title,
-                  style: TextStyle(color: Colors.white, fontSize: r(30.0))),
-              flexibleSpace: Stack(children: <Widget>[
-                Positioned(
-                    top: r(22.0),
-                    right: r(50.0),
-                    child: SizedBox(
-                        width: r(50),
-                        height: r(35),
-                        child: FittedBox(
-                            fit: BoxFit.fill,
-                            child: Switch(
-                              value: activeLocale,
-                              activeColor: Colors.black,
-                              activeTrackColor: Colors.blueGrey,
-                              inactiveThumbColor: Colors.black,
-                              inactiveTrackColor: Colors.blueGrey,
-                              onChanged: changeSwitch,
-                            )))),
-                Positioned(
-                  top: r(25.0),
-                  right: r(100.0),
-                  child: Text(activeLocale == true ? 'EN' : 'JP',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: r(20.0),
-                      )),
-                )
-              ]),
-            )
-          : widget.route == 'Ranking'
+      appBar: PreferredSize(
+          preferredSize: Size.fromHeight(45.0), // here the desired height
+          child: widget.route == 'Home'
               ? AppBar(
                   backgroundColor: Colors.transparent,
-                  leading: IconButton(
-                    icon: const Icon(Icons.reply, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                  title: Text('Player Ranking | COF',
-                      style: TextStyle(color: Colors.white, fontSize: r(30.0))),
-                  flexibleSpace: Stack(children: <Widget>[
-                    Positioned(
-                        top: r(7.0),
-                        right: r(50.0),
-                        child: SizedBox(
-                            width: r(50),
-                            height: r(35),
-                            child: FittedBox(
-                                fit: BoxFit.fill,
-                                child: Switch(
-                                  value: activeLocale,
-                                  activeColor: Colors.black,
-                                  activeTrackColor: Colors.blueGrey,
-                                  inactiveThumbColor: Colors.black,
-                                  inactiveTrackColor: Colors.blueGrey,
-                                  onChanged: changeSwitch,
-                                )))),
-                    Positioned(
-                      top: r(10.0),
-                      right: r(100.0),
-                      child: Text(activeLocale == true ? 'EN' : 'JP',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: r(20.0),
-                          )),
-                    )
-                  ]),
-                )
-              : AppBar(
-                  backgroundColor: Colors.transparent,
-                  leading: IconButton(
-                    icon: const Icon(Icons.reply, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
                   title: Text(widget.title,
                       style: TextStyle(color: Colors.white, fontSize: r(30.0))),
                   flexibleSpace: Stack(children: <Widget>[
@@ -139,7 +69,7 @@ class DesktopBodyState extends State<DesktopBody> {
                                   onChanged: changeSwitch,
                                 )))),
                     Positioned(
-                      top: r(10.0),
+                      top: r(7.0),
                       right: r(100.0),
                       child: Text(activeLocale == true ? 'EN' : 'JP',
                           style: TextStyle(
@@ -148,12 +78,91 @@ class DesktopBodyState extends State<DesktopBody> {
                           )),
                     )
                   ]),
-                ),
+                )
+              : widget.route == 'Ranking'
+                  ? AppBar(
+                      backgroundColor: Color.fromARGB(155, 106, 56, 5),
+                      leading: IconButton(
+                        icon: const Icon(Icons.reply, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      title: Text("👑 Player's Ranking | Code Of Flow 👑",
+                          style: TextStyle(
+                              color: Colors.white, fontSize: r(30.0))),
+                      flexibleSpace: Stack(children: <Widget>[
+                        Positioned(
+                            top: r(7.0),
+                            right: r(50.0),
+                            child: SizedBox(
+                                width: r(50),
+                                height: r(35),
+                                child: FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: Switch(
+                                      value: activeLocale,
+                                      activeColor: Colors.black,
+                                      activeTrackColor: Colors.blueGrey,
+                                      inactiveThumbColor: Colors.black,
+                                      inactiveTrackColor: Colors.blueGrey,
+                                      onChanged: changeSwitch,
+                                    )))),
+                        Positioned(
+                          top: r(10.0),
+                          right: r(100.0),
+                          child: Text(activeLocale == true ? 'EN' : 'JP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: r(20.0),
+                              )),
+                        )
+                      ]),
+                    )
+                  : AppBar(
+                      backgroundColor: Colors.transparent,
+                      leading: IconButton(
+                        icon: const Icon(Icons.reply, color: Colors.white),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                      title: Text(widget.title,
+                          style: TextStyle(
+                              color: Colors.white, fontSize: r(30.0))),
+                      flexibleSpace: Stack(children: <Widget>[
+                        Positioned(
+                            top: r(7.0),
+                            right: r(50.0),
+                            child: SizedBox(
+                                width: r(50),
+                                height: r(35),
+                                child: FittedBox(
+                                    fit: BoxFit.fill,
+                                    child: Switch(
+                                      value: activeLocale,
+                                      activeColor: Colors.black,
+                                      activeTrackColor: Colors.blueGrey,
+                                      inactiveThumbColor: Colors.black,
+                                      inactiveTrackColor: Colors.blueGrey,
+                                      onChanged: changeSwitch,
+                                    )))),
+                        Positioned(
+                          top: r(10.0),
+                          right: r(100.0),
+                          child: Text(activeLocale == true ? 'EN' : 'JP',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: r(20.0),
+                              )),
+                        )
+                      ]),
+                    )),
       body: widget.route == 'Home'
           ? HomePage(enLocale: activeLocale, isMobile: false)
           : widget.route == 'DeckEditor'
               ? DeckEditPage(enLocale: activeLocale, isMobile: false)
-              : RankingPage(enLocale: activeLocale),
+              : widget.route == 'Ranking'
+                  ? RankingPage(enLocale: activeLocale)
+                  : widget.route == 'WhitePaper'
+                      ? WhitePaperPage(enLocale: activeLocale)
+                      : HomePage(enLocale: activeLocale, isMobile: false),
     );
   }
 }

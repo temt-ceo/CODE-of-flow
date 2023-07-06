@@ -383,7 +383,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                   BoxShadow(
                                     color: Colors.yellow,
                                     spreadRadius: 1,
-                                    blurRadius: 2,
+                                    blurRadius: 1,
                                     offset: Offset(
                                         1, 1), // changes position of shadow
                                   ),
@@ -397,7 +397,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                               BoxShadow(
                                 color: Colors.yellow,
                                 spreadRadius: 1,
-                                blurRadius: 2,
+                                blurRadius: 1,
                                 offset:
                                     Offset(1, 1), // changes position of shadow
                               ),
@@ -442,10 +442,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.yellow,
-                                    spreadRadius: 1,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                        -1, 0), // changes position of shadow
+                                    blurRadius: 1, // changes position of shadow
                                   ),
                                 ],
                               ))
@@ -455,12 +452,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                 fit: BoxFit.cover),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.yellow,
-                                spreadRadius: 1,
-                                blurRadius: 1,
-                                offset:
-                                    Offset(-1, 0), // changes position of shadow
-                              ),
+                                  color: Colors.yellow,
+                                  spreadRadius: 1,
+                                  blurRadius: 1 // changes position of shadow
+                                  ),
                             ],
                           ),
                   ),
@@ -521,7 +516,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                   BoxShadow(
                                     color: Color.fromARGB(255, 41, 39, 176),
                                     spreadRadius: 1,
-                                    blurRadius: 2,
+                                    blurRadius: 1,
                                     offset: Offset(
                                         1, 1), // changes position of shadow
                                   ),
@@ -535,7 +530,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                               BoxShadow(
                                 color: Color.fromARGB(255, 41, 39, 176),
                                 spreadRadius: 1,
-                                blurRadius: 2,
+                                blurRadius: 1,
                                 offset:
                                     Offset(1, 1), // changes position of shadow
                               ),
@@ -568,7 +563,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                 BoxShadow(
                                   color: Color.fromARGB(255, 41, 39, 176),
                                   spreadRadius: 1,
-                                  blurRadius: 2,
+                                  blurRadius: 1,
                                   offset: Offset(
                                       1, 1), // changes position of shadow
                                 ),
@@ -582,7 +577,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                             BoxShadow(
                               color: Color.fromARGB(255, 41, 39, 176),
                               spreadRadius: 1,
-                              blurRadius: 2,
+                              blurRadius: 1,
                               offset:
                                   Offset(1, 1), // changes position of shadow
                             ),
@@ -619,7 +614,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                               BoxShadow(
                                 color: Color.fromARGB(255, 41, 39, 176),
                                 spreadRadius: 1,
-                                blurRadius: 2,
+                                blurRadius: 1,
                                 offset:
                                     Offset(1, 1), // changes position of shadow
                               ),
@@ -677,10 +672,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.yellow,
-                                    spreadRadius: 1,
-                                    blurRadius: 1,
+                                    spreadRadius: 2,
+                                    blurRadius: 2,
                                     offset: Offset(
-                                        -1, 0), // changes position of shadow
+                                        1, -1), // changes position of shadow
                                   ),
                                 ],
                               ))
@@ -691,10 +686,10 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.yellow,
-                                spreadRadius: 1,
-                                blurRadius: 1,
+                                spreadRadius: 2,
+                                blurRadius: 2,
                                 offset:
-                                    Offset(-1, 0), // changes position of shadow
+                                    Offset(1, -1), // changes position of shadow
                               ),
                             ],
                           ),

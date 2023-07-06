@@ -358,62 +358,55 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(12.0),
                     ))),
             // EnemyLife
-            Visibility(
-                visible: envFlavor == 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentLife; i++)
-                    Positioned(
-                      left: widget.r(170.0 + i * 19),
-                      top: widget.r(90.0),
-                      child: Container(
-                        width: widget.r(18.0),
-                        height: widget.r(18.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(
-                                  'assets/image/button/enemyLife.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset:
-                                  Offset(1, 1), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
-            // EnemyLife
-            Visibility(
-                visible: envFlavor != 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentLife; i++)
-                    Positioned(
-                      left: widget.r(170.0 + i * 19),
-                      top: widget.r(90.0),
-                      child: Container(
-                        width: widget.r(18.0),
-                        height: widget.r(18.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('image/button/enemyLife.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset:
-                                  Offset(1, 1), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
+            Stack(children: <Widget>[
+              for (var i = 0; i < widget.info!.opponentLife; i++)
+                Positioned(
+                  left: widget.r(170.0 + i * 19),
+                  top: widget.r(90.0),
+                  child: Container(
+                    width: widget.r(18.0),
+                    height: widget.r(18.0),
+                    decoration: envFlavor == 'prod'
+                        ? (widget.isMobile == true
+                            ? const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/enemyLife.png'),
+                                    fit: BoxFit.cover),
+                              )
+                            : const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/enemyLife.png'),
+                                    fit: BoxFit.cover),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.yellow,
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                    offset: Offset(
+                                        1, 1), // changes position of shadow
+                                  ),
+                                ],
+                              ))
+                        : const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('image/button/enemyLife.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow,
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset:
+                                    Offset(1, 1), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+            ]),
+
             Positioned(
                 left: widget.r(85.0),
                 top: widget.r(120.0),
@@ -425,61 +418,54 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             // EnemyCP
-            Visibility(
-                visible: envFlavor == 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentCp; i++)
-                    Positioned(
-                      left: widget.r(172.0 + i * 16),
-                      top: widget.r(128.0),
-                      child: Container(
-                        width: widget.r(15.0),
-                        height: widget.r(15.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('assets/image/button/cp.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(-1, 0), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
-            // EnemyCP
-            Visibility(
-                visible: envFlavor != 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentCp; i++)
-                    Positioned(
-                      left: widget.r(172.0 + i * 16),
-                      top: widget.r(128.0),
-                      child: Container(
-                        width: widget.r(15.0),
-                        height: widget.r(15.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('image/button/cp.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(-1, 0), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
+            Stack(children: <Widget>[
+              for (var i = 0; i < widget.info!.opponentCp; i++)
+                Positioned(
+                  left: widget.r(172.0 + i * 16),
+                  top: widget.r(128.0),
+                  child: Container(
+                    width: widget.r(15.0),
+                    height: widget.r(15.0),
+                    decoration: envFlavor == 'prod'
+                        ? (widget.isMobile == true
+                            ? const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/cp.png'),
+                                    fit: BoxFit.cover),
+                              )
+                            : const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/cp.png'),
+                                    fit: BoxFit.cover),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.yellow,
+                                    spreadRadius: 1,
+                                    blurRadius: 1,
+                                    offset: Offset(
+                                        -1, 0), // changes position of shadow
+                                  ),
+                                ],
+                              ))
+                        : const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('image/button/cp.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow,
+                                spreadRadius: 1,
+                                blurRadius: 1,
+                                offset:
+                                    Offset(-1, 0), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+            ]),
             Positioned(
                 left: widget.r(360.0),
                 top: widget.r(130.0),
@@ -510,46 +496,85 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(22.0),
                     ))),
             // EnemyHand
-            Visibility(
-                visible: envFlavor == 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentHand; i++)
-                    Positioned(
-                      left: widget.r(170.0 + i * 21),
-                      top: widget.r(158.0),
-                      child: Container(
-                        width: widget.r(20.0),
-                        height: widget.r(20.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage(
-                                  'assets/image/button/enemyHand.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromARGB(255, 41, 39, 176),
-                              spreadRadius: 1,
-                              blurRadius: 2,
-                              offset:
-                                  Offset(1, 1), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
-            // EnemyHand
-            Visibility(
-                visible: envFlavor != 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.opponentHand; i++)
-                    Positioned(
-                      left: widget.r(170.0 + i * 21),
-                      top: widget.r(158.0),
-                      child: Container(
-                        width: widget.r(20.0),
-                        height: widget.r(20.0),
-                        decoration: const BoxDecoration(
+            Stack(children: <Widget>[
+              for (var i = 0; i < widget.info!.opponentHand; i++)
+                Positioned(
+                  left: widget.r(170.0 + i * 21),
+                  top: widget.r(158.0),
+                  child: Container(
+                    width: widget.r(20.0),
+                    height: widget.r(20.0),
+                    decoration: envFlavor == 'prod'
+                        ? (widget.isMobile == true
+                            ? const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/enemyHand.png'),
+                                    fit: BoxFit.cover),
+                              )
+                            : const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/enemyHand.png'),
+                                    fit: BoxFit.cover),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.fromARGB(255, 41, 39, 176),
+                                    spreadRadius: 1,
+                                    blurRadius: 2,
+                                    offset: Offset(
+                                        1, 1), // changes position of shadow
+                                  ),
+                                ],
+                              ))
+                        : const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('image/button/enemyHand.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 41, 39, 176),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset:
+                                    Offset(1, 1), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+            ]),
+            for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
+              Positioned(
+                left: widget.r(471.0 + i * 31),
+                top: widget.r(93.0),
+                child: Container(
+                  width: widget.r(27.0),
+                  height: widget.r(27.0),
+                  decoration: envFlavor == 'prod'
+                      ? (widget.isMobile == true
+                          ? const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/image/button/enemyHand.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : const BoxDecoration(
+                              image: DecorationImage(
+                                  image: AssetImage(
+                                      'assets/image/button/enemyHand.png'),
+                                  fit: BoxFit.cover),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Color.fromARGB(255, 41, 39, 176),
+                                  spreadRadius: 1,
+                                  blurRadius: 2,
+                                  offset: Offset(
+                                      1, 1), // changes position of shadow
+                                ),
+                              ],
+                            ))
+                      : const BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('image/button/enemyHand.png'),
                               fit: BoxFit.cover),
@@ -563,29 +588,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                             ),
                           ],
                         ),
-                      ),
-                    ),
-                ])),
-            for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
-              Positioned(
-                left: widget.r(471.0 + i * 31),
-                top: widget.r(93.0),
-                child: Container(
-                  width: widget.r(27.0),
-                  height: widget.r(27.0),
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: AssetImage('${imagePath}button/enemyHand.png'),
-                        fit: BoxFit.cover),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromARGB(255, 41, 39, 176),
-                        spreadRadius: 1,
-                        blurRadius: 2,
-                        offset: Offset(1, 1), // changes position of shadow
-                      ),
-                    ],
-                  ),
                 ),
               ),
             Positioned(
@@ -599,62 +601,47 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(15.0),
                     ))),
             // YourLife
-            Visibility(
-              visible: envFlavor == 'prod',
-              child: Stack(children: <Widget>[
-                for (var i = 0; i < widget.info!.yourLife; i++)
-                  Positioned(
-                    left: widget.r(170.0 + i * 24),
-                    top: widget.r(220.0),
-                    child: Container(
-                      width: widget.r(23.0),
-                      height: widget.r(23.0),
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image:
-                                AssetImage('assets/image/button/yourLife.png'),
-                            fit: BoxFit.cover),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromARGB(255, 41, 39, 176),
-                            spreadRadius: 1,
-                            blurRadius: 2,
-                            offset: Offset(1, 1), // changes position of shadow
+            Stack(children: <Widget>[
+              for (var i = 0; i < widget.info!.yourLife; i++)
+                Positioned(
+                  left: widget.r(170.0 + i * 24),
+                  top: widget.r(220.0),
+                  child: Container(
+                    width: widget.r(23.0),
+                    height: widget.r(23.0),
+                    decoration: envFlavor == 'prod'
+                        ? const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/image/button/yourLife.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 41, 39, 176),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset:
+                                    Offset(1, 1), // changes position of shadow
+                              ),
+                            ],
+                          )
+                        : const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('image/button/yourLife.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 41, 39, 176),
+                                spreadRadius: 1,
+                                blurRadius: 2,
+                                offset:
+                                    Offset(1, 1), // changes position of shadow
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  )
-              ]),
-            ),
-            // YourLife
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Stack(children: <Widget>[
-                for (var i = 0; i < widget.info!.yourLife; i++)
-                  Positioned(
-                    left: widget.r(170.0 + i * 24),
-                    top: widget.r(220.0),
-                    child: Container(
-                      width: widget.r(23.0),
-                      height: widget.r(23.0),
-                      decoration: const BoxDecoration(
-                        image: DecorationImage(
-                            image: AssetImage('image/button/yourLife.png'),
-                            fit: BoxFit.cover),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color.fromARGB(255, 41, 39, 176),
-                            spreadRadius: 1,
-                            blurRadius: 2,
-                            offset: Offset(1, 1), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-              ]),
-            ),
+                  ),
+                )
+            ]),
             Positioned(
                 left: widget.r(95.0),
                 top: widget.r(248.0),
@@ -666,61 +653,54 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                       fontSize: widget.r(24.0),
                     ))),
             // YourCP
-            Visibility(
-                visible: envFlavor == 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.yourCp; i++)
-                    Positioned(
-                      left: widget.r(184.0 + i * 26),
-                      top: widget.r(252.0),
-                      child: Container(
-                        width: widget.r(25.0),
-                        height: widget.r(25.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('assets/image/button/cp.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(-1, 0), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
-            // YourCP
-            Visibility(
-                visible: envFlavor != 'prod',
-                child: Stack(children: <Widget>[
-                  for (var i = 0; i < widget.info!.yourCp; i++)
-                    Positioned(
-                      left: widget.r(184.0 + i * 26),
-                      top: widget.r(252.0),
-                      child: Container(
-                        width: widget.r(25.0),
-                        height: widget.r(25.0),
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage('image/button/cp.png'),
-                              fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.yellow,
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(-1, 0), // changes position of shadow
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ])),
+            Stack(children: <Widget>[
+              for (var i = 0; i < widget.info!.yourCp; i++)
+                Positioned(
+                  left: widget.r(184.0 + i * 26),
+                  top: widget.r(252.0),
+                  child: Container(
+                    width: widget.r(25.0),
+                    height: widget.r(25.0),
+                    decoration: envFlavor == 'prod'
+                        ? (widget.isMobile == true
+                            ? const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/cp.png'),
+                                    fit: BoxFit.cover),
+                              )
+                            : const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/cp.png'),
+                                    fit: BoxFit.cover),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.yellow,
+                                    spreadRadius: 1,
+                                    blurRadius: 1,
+                                    offset: Offset(
+                                        -1, 0), // changes position of shadow
+                                  ),
+                                ],
+                              ))
+                        : const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage('image/button/cp.png'),
+                                fit: BoxFit.cover),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.yellow,
+                                spreadRadius: 1,
+                                blurRadius: 1,
+                                offset:
+                                    Offset(-1, 0), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+            ]),
             Positioned(
                 left: widget.r(1255.0),
                 top: widget.r(450.0),
@@ -779,7 +759,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             // ターンチェンジボタン
             Positioned(
                 left: widget.r(1120.0),
-                top: widget.r(435.0),
+                top: widget.r(430.0),
                 child: Visibility(
                   visible: widget.info != null
                       ? widget.info!.isFirst == widget.info!.isFirstTurn &&

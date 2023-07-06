@@ -173,7 +173,7 @@ class HomePageState extends State<HomePage> {
                         '\nLimaru ${L10n.of(context)!.activatedAbility} - Unconquerable! -';
                   }
                 }
-                showMessage(7, 'Turn Change! $enemyAbility', null);
+                showMessage(9, 'Turn Change! $enemyAbility', null);
               });
             }
             // あなたの攻撃
@@ -1657,6 +1657,20 @@ class HomePageState extends State<HomePage> {
         return val * wRes;
       }
 
+      double r10 = r(10.0);
+      double r50 = r(50.0);
+      double r80 = r(80.0);
+      double r90 = r(90.0);
+      double r100 = r(100.0);
+      double r122 = r(122.0);
+      double r125 = r(125.0);
+      double r351 = r(351.0);
+      double r373 = r(373.0);
+      double r650 = r(650.0);
+      double r785 = r(785.0);
+      double r920 = r(920.0);
+      double r1055 = r(1055.0);
+      double r1190 = r(1190.0);
       _r = wRes;
 
       return Scaffold(
@@ -1759,40 +1773,28 @@ class HomePageState extends State<HomePage> {
                               ),
                             ),
                 ])),
-            Visibility(
-              visible: envFlavor == 'prod',
-              child: Positioned(
-                left: r(470.0),
-                top: r(90.0),
-                child: Container(
-                  width: r(125.0),
-                  height: r(45.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/trigger/trigger.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(470.0),
-                top: r(90.0),
-                child: Container(
-                  width: r(125.0),
-                  height: r(45.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/trigger/trigger.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(470.0),
+              top: r90,
+              child: Container(
+                width: r125,
+                height: r(45.0),
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/trigger/trigger.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image:
+                                AssetImage('assets/image/trigger/trigger.png'),
+                            fit: BoxFit.cover),
+                      ),
               ),
             ),
             gameObject != null && gameStarted == true
@@ -1904,7 +1906,7 @@ class HomePageState extends State<HomePage> {
                     left: r(800),
                     top: r(480),
                     child: SizedBox(
-                        width: r(100.0),
+                        width: r100,
                         child: StreamBuilder<int>(
                             stream: _timer.events.stream,
                             builder: (BuildContext context,
@@ -1932,7 +1934,7 @@ class HomePageState extends State<HomePage> {
                           return Visibility(
                               visible: snapshot.data != 0,
                               child: SizedBox(
-                                  width: snapshot.data != 0 ? r(100.0) : 0.0,
+                                  width: snapshot.data != 0 ? r100 : 0.0,
                                   height: r(25.0),
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
@@ -1964,7 +1966,7 @@ class HomePageState extends State<HomePage> {
                         }))),
             // AttackTarget
             Visibility(
-                visible: envFlavor == 'prod' && attackSignalPosition != null,
+                visible: attackSignalPosition != null,
                 child: Positioned(
                   left: r(attackSignalPosition != null &&
                           (attackSignalPosition! == 2 ||
@@ -1975,96 +1977,63 @@ class HomePageState extends State<HomePage> {
                   child: Container(
                     width: r(75.0),
                     height: r(75.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
-                      image: DecorationImage(
-                          opacity: 0.7,
-                          image:
-                              AssetImage('assets/image/unit/attackTarget.png'),
-                          fit: BoxFit.cover),
-                    ),
+                    decoration: envFlavor != 'prod'
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.7,
+                                image:
+                                    AssetImage('image/unit/attackTarget.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.7,
+                                image: AssetImage(
+                                    'assets/image/unit/attackTarget.png'),
+                                fit: BoxFit.cover),
+                          ),
                   ),
                 )),
-            // AttackTarget
-            Visibility(
-                visible: envFlavor != 'prod' && attackSignalPosition != null,
-                child: Positioned(
-                  left: r(attackSignalPosition != null &&
-                          (attackSignalPosition! == 2 ||
-                              attackSignalPosition! == 0)
-                      ? 760.0
-                      : 850.0),
-                  top: r(-2.0),
-                  child: Container(
-                    width: r(75.0),
-                    height: r(75.0),
-                    decoration: const BoxDecoration(
-                      color: Colors.transparent,
-                      image: DecorationImage(
-                          opacity: 0.7,
-                          image: AssetImage('image/unit/attackTarget.png'),
-                          fit: BoxFit.cover),
-                    ),
-                  ),
-                )),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(648.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(648.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(648.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+
+            Positioned(
+              left: r(648.0),
+              top: r122,
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Enemy's 1st Unit Name
             Positioned(
-                left: r(650.0),
-                top: r(125.0),
-                width: r(100.0),
+                left: r650,
+                top: r125,
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['1'] != null
@@ -2080,9 +2049,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Enemy's 1st Unit BP
             Positioned(
-                left: r(650.0),
+                left: r650,
                 top: r(147.0),
-                width: r(100.0),
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['1'] != null
@@ -2107,65 +2076,44 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(783.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(783.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(783.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+
+            Positioned(
+              left: r(783.0),
+              top: r122,
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Enemy's 2st Unit Name
             Positioned(
-                left: r(785.0),
-                top: r(125.0),
-                width: r(100.0),
+                left: r785,
+                top: r125,
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['2'] != null
@@ -2181,9 +2129,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Enemy's 2st Unit BP
             Positioned(
-                left: r(785.0),
+                left: r785,
                 top: r(147.0),
-                width: r(100.0),
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['2'] != null
@@ -2208,65 +2156,44 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            // envFlavor == 'prod' ? 'assets/image/' : 'image/';
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(918.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(918.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(918.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+
+            Positioned(
+              left: r(918.0),
+              top: r122,
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Enemy's 3st Unit Name
             Positioned(
-                left: r(920.0),
-                top: r(125.0),
-                width: r(100.0),
+                left: r920,
+                top: r125,
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['3'] != null
@@ -2282,9 +2209,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Enemy's 3st Unit BP
             Positioned(
-                left: r(920.0),
+                left: r920,
                 top: r(147.0),
-                width: r(100.0),
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['3'] != null
@@ -2309,64 +2236,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(1053.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(1053.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(1053.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(1053.0),
+              top: r122,
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Enemy's 4st Unit Name
             Positioned(
-                left: r(1055.0),
-                top: r(125.0),
-                width: r(100.0),
+                left: r1055,
+                top: r125,
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['4'] != null
@@ -2382,9 +2288,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Enemy's 4st Unit BP
             Positioned(
-                left: r(1055.0),
+                left: r1055,
                 top: r(147.0),
-                width: r(100.0),
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['4'] != null
@@ -2409,64 +2315,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(1188.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(1188.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(1188.0),
-                top: r(122.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(1188.0),
+              top: r122,
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Enemy's 5st Unit Name
             Positioned(
-                left: r(1190.0),
-                top: r(125.0),
-                width: r(100.0),
+                left: r1190,
+                top: r125,
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['5'] != null
@@ -2482,9 +2367,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Enemy's 5st Unit BP
             Positioned(
-                left: r(1190.0),
+                left: r1190,
                 top: r(147.0),
-                width: r(100.0),
+                width: r100,
                 child: Text(
                     gameObject != null &&
                             gameObject!.opponentFieldUnit['5'] != null
@@ -2509,64 +2394,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(648.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(648.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(648.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(648.0),
+              top: r(348.0),
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Your 1st Unit Name
             Positioned(
-                left: r(650.0),
-                top: r(351.0),
-                width: r(100.0),
+                left: r650,
+                top: r351,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
                         ? (gameObject!.yourFieldUnitAction['1'] == '2'
@@ -2581,9 +2445,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Your 1st Unit BP
             Positioned(
-                left: r(650.0),
-                top: r(373.0),
-                width: r(100.0),
+                left: r650,
+                top: r373,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['1'] != null
                         ? (gameObject!.yourFieldUnitAction['1'] == '1' ||
@@ -2605,65 +2469,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(783.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(783.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(783.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(783.0),
+              top: r(348.0),
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Your 2st Unit Name
             Positioned(
-                left: r(785.0),
-                top: r(351.0),
-                width: r(100.0),
+                left: r785,
+                top: r351,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
                         ? (gameObject!.yourFieldUnitAction['2'] == '2'
@@ -2678,9 +2520,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Your 2st Unit BP
             Positioned(
-                left: r(785.0),
-                top: r(373.0),
-                width: r(100.0),
+                left: r785,
+                top: r373,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['2'] != null
                         ? (gameObject!.yourFieldUnitAction['2'] == '1' ||
@@ -2702,64 +2544,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(918.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(918.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(918.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(918.0),
+              top: r(348.0),
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Your 3st Unit Name
             Positioned(
-                left: r(920.0),
-                top: r(351.0),
-                width: r(100.0),
+                left: r920,
+                top: r351,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
                         ? (gameObject!.yourFieldUnitAction['3'] == '2'
@@ -2774,9 +2595,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Your 3st Unit BP
             Positioned(
-                left: r(920.0),
-                top: r(373.0),
-                width: r(100.0),
+                left: r920,
+                top: r373,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['3'] != null
                         ? (gameObject!.yourFieldUnitAction['3'] == '1' ||
@@ -2798,63 +2619,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(1053.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(1053.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(1053.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ), // Your 4st Unit Name
             Positioned(
-                left: r(1055.0),
-                top: r(351.0),
-                width: r(100.0),
+              left: r(1053.0),
+              top: r(348.0),
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
+              ),
+            ),
+            // Your 4st Unit Name
+            Positioned(
+                left: r1055,
+                top: r351,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['4'] == '2'
@@ -2869,9 +2670,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Your 4st Unit BP
             Positioned(
-                left: r(1055.0),
-                top: r(373.0),
-                width: r(100.0),
+                left: r1055,
+                top: r373,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['4'] != null
                         ? (gameObject!.yourFieldUnitAction['4'] == '1' ||
@@ -2893,64 +2694,43 @@ class HomePageState extends State<HomePage> {
                       decoration: TextDecoration.none,
                       fontSize: r(16.0),
                     ))),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == true,
-              child: Positioned(
-                left: r(1188.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor == 'prod' && widget.isMobile == false,
-              child: Positioned(
-                left: r(1188.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('assets/image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: envFlavor != 'prod',
-              child: Positioned(
-                left: r(1188.0),
-                top: r(348.0),
-                child: Container(
-                  width: r(90.0),
-                  height: r(50.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.transparent,
-                    image: DecorationImage(
-                        opacity: 0.5,
-                        image: AssetImage('image/unit/status.png'),
-                        fit: BoxFit.cover),
-                  ),
-                ),
+            Positioned(
+              left: r(1188.0),
+              top: r(348.0),
+              child: Container(
+                width: r90,
+                height: r50,
+                decoration: envFlavor != 'prod'
+                    ? const BoxDecoration(
+                        color: Colors.transparent,
+                        image: DecorationImage(
+                            opacity: 0.5,
+                            image: AssetImage('image/unit/status.png'),
+                            fit: BoxFit.cover),
+                      )
+                    : (widget.isMobile == true
+                        ? const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )
+                        : const BoxDecoration(
+                            color: Colors.transparent,
+                            image: DecorationImage(
+                                opacity: 0.5,
+                                image:
+                                    AssetImage('assets/image/unit/status.png'),
+                                fit: BoxFit.cover),
+                          )),
               ),
             ),
             // Your 5st Unit Name
             Positioned(
-                left: r(1190.0),
-                top: r(351.0),
-                width: r(100.0),
+                left: r1190,
+                top: r351,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['5'] != null
                         ? (gameObject!.yourFieldUnitAction['5'] == '2'
@@ -2965,9 +2745,9 @@ class HomePageState extends State<HomePage> {
                     ))),
             // Your 5st Unit BP
             Positioned(
-                left: r(1190.0),
-                top: r(373.0),
-                width: r(100.0),
+                left: r1190,
+                top: r373,
+                width: r100,
                 child: Text(
                     gameObject != null && gameObject!.yourFieldUnit['5'] != null
                         ? (gameObject!.yourFieldUnitAction['5'] == '1' ||
@@ -3035,11 +2815,11 @@ class HomePageState extends State<HomePage> {
                       }
                     },
                   ),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   buildIndicator(cannotDefendUnitPositions.isNotEmpty
                       ? cannotDefendUnitPositions.length
                       : opponentFieldUnitPositions.length),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   Visibility(
                       visible: cannotDefendUnitPositions.isNotEmpty
                           ? cannotDefendUnitPositions.length > 1
@@ -3049,7 +2829,7 @@ class HomePageState extends State<HomePage> {
                             cController.animateToPage(activeIndex + 1),
                         child: const Text('Next->'),
                       )),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   ElevatedButton(
                     onPressed: () {
                       showUnitTargetCarousel = false;
@@ -3088,14 +2868,14 @@ class HomePageState extends State<HomePage> {
                       );
                     },
                   ),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   buildIndicator(yourDefendableUnitPositions.length),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   ElevatedButton(
                     onPressed: () => cController.animateToPage(activeIndex + 1),
                     child: const Text('Next->'),
                   ),
-                  SizedBox(height: r(10.0)),
+                  SizedBox(height: r10),
                   ElevatedButton(
                     onPressed: () => block(activeIndex),
                     child: const Text('Block'),
@@ -3115,8 +2895,8 @@ class HomePageState extends State<HomePage> {
                                   opponentDefendPosition.toString()] !=
                               null)),
               child: Positioned(
-                right: r(80.0),
-                top: r(90.0),
+                right: r80,
+                top: r90,
                 child: GFImageOverlay(
                   width: r(200.0),
                   height: r(300.0),
@@ -3152,7 +2932,7 @@ class HomePageState extends State<HomePage> {
                               null)),
               child: Positioned(
                   right: r(400.0),
-                  top: r(90.0),
+                  top: r90,
                   child: GFImageOverlay(
                     width: r(200.0),
                     height: r(300.0),
@@ -3180,13 +2960,13 @@ class HomePageState extends State<HomePage> {
             Visibility(
                 visible: gameObject != null && attackerUsedCardIds.isNotEmpty,
                 child: Positioned(
-                    right: isEnemyAttack == true ? r(80.0) : r(400.0),
+                    right: isEnemyAttack == true ? r80 : r(400.0),
                     top: r(340.0),
                     child: Row(
                       children: [
                         for (var cardId in attackerUsedCardIds)
                           GFImageOverlay(
-                            width: r(80.0),
+                            width: r80,
                             height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
@@ -3198,13 +2978,13 @@ class HomePageState extends State<HomePage> {
             Visibility(
                 visible: gameObject != null && defenderUsedCardIds.isNotEmpty,
                 child: Positioned(
-                    right: isEnemyAttack == true ? r(400.0) : r(80.0),
+                    right: isEnemyAttack == true ? r(400.0) : r80,
                     top: r(340.0),
                     child: Row(
                       children: [
                         for (var cardId in defenderUsedCardIds)
                           GFImageOverlay(
-                            width: r(80.0),
+                            width: r80,
                             height: r(120.0),
                             image: AssetImage(gameObject == null
                                 ? ''
@@ -3241,8 +3021,8 @@ class HomePageState extends State<HomePage> {
                     top: r(160.0),
                     left: r(330.0),
                     child: SizedBox(
-                        width: r(50.0),
-                        height: r(50.0),
+                        width: r50,
+                        height: r50,
                         child: FittedBox(
                             child: FloatingActionButton(
                                 backgroundColor: Colors.transparent,

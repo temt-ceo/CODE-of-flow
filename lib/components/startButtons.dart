@@ -901,17 +901,17 @@ class StartButtonsState extends State<StartButtons> {
               top: 0,
               child: Stack(children: <Widget>[
                 SizedBox(
-                    width: widget.r(280.0),
+                    width: widget.r(290.0),
                     child: Text(
-                      '${L10n.of(context)!.balance} ${widget.isEnglish ? "　" : "　"}${balance.toString()} ${wonFlow ? "(UP!)" : ""}',
+                      '${L10n.of(context)!.balance}   ${balance.toString()}${wonFlow ? "(UP!)" : ""}',
                       style: TextStyle(
                           color: wonFlow
                               ? const Color.fromARGB(255, 248, 224, 9)
                               : Colors.lightGreen,
-                          fontSize: widget.r(26.0)),
+                          fontSize: widget.r(25.0)),
                     )),
                 Positioned(
-                    left: widget.isEnglish ? widget.r(110.0) : widget.r(66.0),
+                    left: widget.isEnglish ? widget.r(100.0) : widget.r(60.0),
                     top: widget.isEnglish ? widget.r(6.0) : widget.r(7.0),
                     child: Container(
                         width: widget.r(20.0),

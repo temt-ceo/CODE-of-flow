@@ -79,10 +79,10 @@ class MobileBodyState extends State<MobileBody> {
                     ),
                     Positioned(
                       top: r(105.0),
-                      left: r(240.0),
+                      left: r(245.0),
                       child: Text(L10n.of(context)!.rollScreen,
                           style: TextStyle(
-                            color: Colors.red,
+                            color: Colors.black,
                             fontSize: r(36.0),
                           )),
                     ),
@@ -95,7 +95,7 @@ class MobileBodyState extends State<MobileBody> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking | Code Of Flow 👑",
+                      title: Text("👑 Player's Ranking of Code Of Flow 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(60.0))),
                       flexibleSpace: Stack(children: <Widget>[
@@ -126,43 +126,81 @@ class MobileBodyState extends State<MobileBody> {
                         )
                       ]),
                     )
-                  : AppBar(
-                      backgroundColor: Colors.transparent,
-                      leading: IconButton(
-                        icon: const Icon(Icons.reply, color: Colors.white),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      title: Text(widget.title,
-                          style: TextStyle(
-                              color: Colors.white, fontSize: r(30.0))),
-                      flexibleSpace: Stack(children: <Widget>[
-                        Positioned(
-                            top: r(30.0),
-                            right: r(50.0),
-                            child: SizedBox(
-                                width: r(50),
-                                height: r(35),
-                                child: FittedBox(
-                                    fit: BoxFit.fill,
-                                    child: Switch(
-                                      value: activeLocale,
-                                      activeColor: Colors.black,
-                                      activeTrackColor: Colors.blueGrey,
-                                      inactiveThumbColor: Colors.black,
-                                      inactiveTrackColor: Colors.blueGrey,
-                                      onChanged: changeSwitch,
-                                    )))),
-                        Positioned(
-                          top: r(33.0),
-                          right: r(100.0),
-                          child: Text(activeLocale == true ? 'EN' : 'JP',
+                  : widget.route == 'WhitePaper'
+                      ? AppBar(
+                          backgroundColor: Color.fromARGB(155, 106, 56, 5),
+                          leading: IconButton(
+                            icon: const Icon(Icons.reply, color: Colors.white),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          title: Text("White Paper | Code Of Flow",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: r(20.0),
-                              )),
+                                  color: Colors.white, fontSize: r(60.0))),
+                          flexibleSpace: Stack(children: <Widget>[
+                            Positioned(
+                                top: r(30.0),
+                                right: r(50.0),
+                                child: SizedBox(
+                                    width: r(50),
+                                    height: r(35),
+                                    child: FittedBox(
+                                        fit: BoxFit.fill,
+                                        child: Switch(
+                                          value: activeLocale,
+                                          activeColor: Colors.black,
+                                          activeTrackColor: Colors.blueGrey,
+                                          inactiveThumbColor: Colors.black,
+                                          inactiveTrackColor: Colors.blueGrey,
+                                          onChanged: changeSwitch,
+                                        )))),
+                            Positioned(
+                              top: r(33.0),
+                              right: r(100.0),
+                              child: Text(activeLocale == true ? 'EN' : 'JP',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: r(20.0),
+                                  )),
+                            )
+                          ]),
                         )
-                      ]),
-                    )),
+                      : AppBar(
+                          backgroundColor: Colors.transparent,
+                          leading: IconButton(
+                            icon: const Icon(Icons.reply, color: Colors.white),
+                            onPressed: () => Navigator.of(context).pop(),
+                          ),
+                          title: Text(widget.title,
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: r(30.0))),
+                          flexibleSpace: Stack(children: <Widget>[
+                            Positioned(
+                                top: r(30.0),
+                                right: r(50.0),
+                                child: SizedBox(
+                                    width: r(50),
+                                    height: r(35),
+                                    child: FittedBox(
+                                        fit: BoxFit.fill,
+                                        child: Switch(
+                                          value: activeLocale,
+                                          activeColor: Colors.black,
+                                          activeTrackColor: Colors.blueGrey,
+                                          inactiveThumbColor: Colors.black,
+                                          inactiveTrackColor: Colors.blueGrey,
+                                          onChanged: changeSwitch,
+                                        )))),
+                            Positioned(
+                              top: r(33.0),
+                              right: r(100.0),
+                              child: Text(activeLocale == true ? 'EN' : 'JP',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: r(20.0),
+                                  )),
+                            )
+                          ]),
+                        )),
       body: widget.route == 'Home'
           ? HomePage(enLocale: activeLocale, isMobile: true)
           : widget.route == 'DeckEditor'

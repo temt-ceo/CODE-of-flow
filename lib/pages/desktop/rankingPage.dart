@@ -229,15 +229,21 @@ class _NestedTabBarState extends State<NestedTabBar>
                                           widget.isEnglish
                                               ? 'Reward Ranking Race (Last ${1000 - battleCount} games)'
                                               : 'リワード ランキング レース (残り ${1000 - battleCount} games)',
-                                          style: TextStyle(fontSize: r(12.0)))),
+                                          style: const TextStyle(
+                                            fontSize: 13.0,
+                                            color: Colors.black,
+                                          ))),
                                 )),
-                            SizedBox(
+                            const SizedBox(
                                 height: 38,
                                 child: Tab(
                                   child: Align(
                                       alignment: Alignment.center,
                                       child: Text('Total Score Ranking',
-                                          style: TextStyle(fontSize: r(12.0)))),
+                                          style: TextStyle(
+                                            fontSize: 13.0,
+                                            color: Colors.black,
+                                          ))),
                                 ))
                           ]))),
               body: TabBarView(

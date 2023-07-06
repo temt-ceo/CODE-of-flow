@@ -74,7 +74,7 @@ class PlayerInfo extends StatelessWidget {
                         )
                       : Text(rank.toString(),
                           style: TextStyle(
-                              color: rank <= 3
+                              color: rank == 1 || rank == 3
                                   ? const Color.fromARGB(255, 247, 245, 245)
                                   : const Color.fromARGB(255, 0, 0, 0),
                               fontSize: r(18.0)))),
@@ -113,7 +113,7 @@ class PlayerInfo extends StatelessWidget {
                   top: r(7.0),
                   child: Text(playerName,
                       style: TextStyle(
-                          color: rank <= 3
+                          color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(18.0)))),
@@ -122,7 +122,7 @@ class PlayerInfo extends StatelessWidget {
                   top: r(7.0),
                   child: Text('$win Win',
                       style: TextStyle(
-                          color: rank <= 3
+                          color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(14.0)))),
@@ -131,7 +131,7 @@ class PlayerInfo extends StatelessWidget {
                   top: r(30.0),
                   child: Text('History',
                       style: TextStyle(
-                          color: rank <= 3
+                          color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(12.0)))),
@@ -140,7 +140,7 @@ class PlayerInfo extends StatelessWidget {
                   top: r(30.0),
                   child: Text('Ranking 1st. 0 times Win',
                       style: TextStyle(
-                          color: rank <= 3
+                          color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(12.0)))),
@@ -149,7 +149,7 @@ class PlayerInfo extends StatelessWidget {
                   top: r(30.0),
                   child: Text('Ranking 2nd. 0 times Win',
                       style: TextStyle(
-                          color: rank <= 3
+                          color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(12.0)))),

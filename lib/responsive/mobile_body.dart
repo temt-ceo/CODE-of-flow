@@ -6,6 +6,7 @@ import 'package:CodeOfFlow/pages/desktop/homePage.dart';
 import 'package:CodeOfFlow/pages/desktop/deckEditPage.dart';
 import 'package:CodeOfFlow/pages/desktop/rankingPage.dart';
 import 'package:CodeOfFlow/pages/desktop/whitePaperPage.dart';
+import 'package:CodeOfFlow/pages/desktop/ruleBookPage.dart';
 import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 typedef void StringCallback(Locale val);
@@ -54,10 +55,10 @@ class MobileBodyState extends State<MobileBody> {
                   flexibleSpace: Stack(children: <Widget>[
                     Positioned(
                         top: r(30.0),
-                        right: r(50.0),
+                        right: r(10.0),
                         child: SizedBox(
-                            width: r(50),
-                            height: r(35),
+                            width: r(100),
+                            height: r(70),
                             child: FittedBox(
                                 fit: BoxFit.fill,
                                 child: Switch(
@@ -70,11 +71,11 @@ class MobileBodyState extends State<MobileBody> {
                                 )))),
                     Positioned(
                       top: r(33.0),
-                      right: r(100.0),
+                      right: r(120.0),
                       child: Text(activeLocale == true ? 'EN' : 'JP',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: r(20.0),
+                            fontSize: r(40.0),
                           )),
                     ),
                     Positioned(
@@ -100,11 +101,11 @@ class MobileBodyState extends State<MobileBody> {
                               color: Colors.white, fontSize: r(60.0))),
                       flexibleSpace: Stack(children: <Widget>[
                         Positioned(
-                            top: r(30.0),
-                            right: r(50.0),
+                            top: r(13.0),
+                            right: r(10.0),
                             child: SizedBox(
-                                width: r(50),
-                                height: r(35),
+                                width: r(100),
+                                height: r(70),
                                 child: FittedBox(
                                     fit: BoxFit.fill,
                                     child: Switch(
@@ -116,12 +117,12 @@ class MobileBodyState extends State<MobileBody> {
                                       onChanged: changeSwitch,
                                     )))),
                         Positioned(
-                          top: r(33.0),
-                          right: r(100.0),
+                          top: r(15.0),
+                          right: r(120.0),
                           child: Text(activeLocale == true ? 'EN' : 'JP',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: r(20.0),
+                                fontSize: r(40.0),
                               )),
                         )
                       ]),
@@ -139,10 +140,10 @@ class MobileBodyState extends State<MobileBody> {
                           flexibleSpace: Stack(children: <Widget>[
                             Positioned(
                                 top: r(30.0),
-                                right: r(50.0),
+                                right: r(10.0),
                                 child: SizedBox(
-                                    width: r(50),
-                                    height: r(35),
+                                    width: r(100),
+                                    height: r(70),
                                     child: FittedBox(
                                         fit: BoxFit.fill,
                                         child: Switch(
@@ -155,52 +156,96 @@ class MobileBodyState extends State<MobileBody> {
                                         )))),
                             Positioned(
                               top: r(33.0),
-                              right: r(100.0),
+                              right: r(120.0),
                               child: Text(activeLocale == true ? 'EN' : 'JP',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: r(20.0),
+                                    fontSize: r(40.0),
                                   )),
                             )
                           ]),
                         )
-                      : AppBar(
-                          backgroundColor: Colors.transparent,
-                          leading: IconButton(
-                            icon: const Icon(Icons.reply, color: Colors.white),
-                            onPressed: () => Navigator.of(context).pop(),
-                          ),
-                          title: Text(widget.title,
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: r(30.0))),
-                          flexibleSpace: Stack(children: <Widget>[
-                            Positioned(
-                                top: r(30.0),
-                                right: r(50.0),
-                                child: SizedBox(
-                                    width: r(50),
-                                    height: r(35),
-                                    child: FittedBox(
-                                        fit: BoxFit.fill,
-                                        child: Switch(
-                                          value: activeLocale,
-                                          activeColor: Colors.black,
-                                          activeTrackColor: Colors.blueGrey,
-                                          inactiveThumbColor: Colors.black,
-                                          inactiveTrackColor: Colors.blueGrey,
-                                          onChanged: changeSwitch,
-                                        )))),
-                            Positioned(
-                              top: r(33.0),
-                              right: r(100.0),
-                              child: Text(activeLocale == true ? 'EN' : 'JP',
+                      : widget.route == 'RuleBook'
+                          ? AppBar(
+                              backgroundColor: Color.fromARGB(155, 106, 56, 5),
+                              leading: IconButton(
+                                icon: const Icon(Icons.reply,
+                                    color: Colors.white),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                              title: Text("Rule Book | Code Of Flow",
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: r(20.0),
-                                  )),
+                                      color: Colors.white, fontSize: r(60.0))),
+                              flexibleSpace: Stack(children: <Widget>[
+                                Positioned(
+                                    top: r(30.0),
+                                    right: r(10.0),
+                                    child: SizedBox(
+                                        width: r(100),
+                                        height: r(70),
+                                        child: FittedBox(
+                                            fit: BoxFit.fill,
+                                            child: Switch(
+                                              value: activeLocale,
+                                              activeColor: Colors.black,
+                                              activeTrackColor: Colors.blueGrey,
+                                              inactiveThumbColor: Colors.black,
+                                              inactiveTrackColor:
+                                                  Colors.blueGrey,
+                                              onChanged: changeSwitch,
+                                            )))),
+                                Positioned(
+                                  top: r(33.0),
+                                  right: r(120.0),
+                                  child:
+                                      Text(activeLocale == true ? 'EN' : 'JP',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: r(40.0),
+                                          )),
+                                )
+                              ]),
                             )
-                          ]),
-                        )),
+                          : AppBar(
+                              backgroundColor: Colors.transparent,
+                              leading: IconButton(
+                                icon: const Icon(Icons.reply,
+                                    color: Colors.white),
+                                onPressed: () => Navigator.of(context).pop(),
+                              ),
+                              title: Text(widget.title,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: r(30.0))),
+                              flexibleSpace: Stack(children: <Widget>[
+                                Positioned(
+                                    top: r(30.0),
+                                    right: r(10.0),
+                                    child: SizedBox(
+                                        width: r(100),
+                                        height: r(70),
+                                        child: FittedBox(
+                                            fit: BoxFit.fill,
+                                            child: Switch(
+                                              value: activeLocale,
+                                              activeColor: Colors.black,
+                                              activeTrackColor: Colors.blueGrey,
+                                              inactiveThumbColor: Colors.black,
+                                              inactiveTrackColor:
+                                                  Colors.blueGrey,
+                                              onChanged: changeSwitch,
+                                            )))),
+                                Positioned(
+                                  top: r(33.0),
+                                  right: r(120.0),
+                                  child:
+                                      Text(activeLocale == true ? 'EN' : 'JP',
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: r(40.0),
+                                          )),
+                                )
+                              ]),
+                            )),
       body: widget.route == 'Home'
           ? HomePage(enLocale: activeLocale, isMobile: true)
           : widget.route == 'DeckEditor'
@@ -209,7 +254,9 @@ class MobileBodyState extends State<MobileBody> {
                   ? RankingPage(enLocale: activeLocale)
                   : widget.route == 'WhitePaper'
                       ? WhitePaperPage(enLocale: activeLocale)
-                      : HomePage(enLocale: activeLocale, isMobile: false),
+                      : widget.route == 'RuleBook'
+                          ? RuleBookPage(enLocale: activeLocale)
+                          : HomePage(enLocale: activeLocale, isMobile: false),
     );
   }
 }

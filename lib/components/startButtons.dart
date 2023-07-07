@@ -322,9 +322,7 @@ class StartButtonsState extends State<StartButtons> {
       dynamic cardInfo = await promiseToFuture(getCardInfo());
       var objStr = jsonToString(cardInfo);
       var objJs = jsonDecode(objStr);
-      setState(() {
-        cardList = objJs;
-      });
+      setState(() => cardList = objJs);
       widget.callback('card-info', player.playerId, null, null, objJs);
     } catch (e) {}
   }
@@ -806,13 +804,13 @@ class StartButtonsState extends State<StartButtons> {
             child: Padding(
                 padding: EdgeInsets.only(top: widget.r(7.0)),
                 child: SizedBox(
-                    width: widget.isMobile ? widget.r(45.0) : widget.r(40.0),
-                    height: widget.isMobile ? widget.r(45.0) : widget.r(40.0),
+                    width: widget.isMobile ? widget.r(50.0) : widget.r(45.0),
+                    height: widget.isMobile ? widget.r(50.0) : widget.r(45.0),
                     child: const FittedBox(
                         child: FloatingActionButton(
                       onPressed: authenticate,
                       tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined, size: 28.0),
+                      child: Icon(Icons.key_outlined, size: 30.0),
                     ))))),
         Visibility(
             visible: walletUser.addr != '' &&
@@ -936,13 +934,13 @@ class StartButtonsState extends State<StartButtons> {
                       Text(
                         'EN:  ',
                         style: TextStyle(
-                            color: Color.fromARGB(255, 32, 243, 102),
+                            color: const Color.fromARGB(255, 32, 243, 102),
                             fontSize: widget.r(16.0)),
                       ),
                       Text(
                         '${cyberEnergy.toString()} / 200',
                         style: TextStyle(
-                            color: Color.fromARGB(255, 32, 243, 102),
+                            color: const Color.fromARGB(255, 32, 243, 102),
                             fontSize: widget.r(16.0)),
                       ),
                       SizedBox(width: widget.r(20.0)),
@@ -1011,10 +1009,10 @@ class StartButtonsState extends State<StartButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                          icon: Icon(Icons.design_services,
-                              size: widget.r(20.0), color: Colors.white),
+                          icon: const Icon(Icons.design_services,
+                              size: 25.0, color: Colors.white),
                           onPressed: () {
-                            showToast('EN is successfully charged.');
+                            html.window.open('rule_book', 'rule_book');
                           },
                           tooltip: 'The rule of this game'))),
               SizedBox(
@@ -1022,12 +1020,10 @@ class StartButtonsState extends State<StartButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: Icon(Icons.how_to_vote,
-                        size: widget.r(20.0), color: Colors.white),
+                    icon: const Icon(Icons.how_to_vote,
+                        size: 25.0, color: Colors.white),
                     onPressed: () {
-                      setState(() {
-                        showCarousel2 = true;
-                      });
+                      setState(() => showCarousel2 = true);
                     },
                     tooltip: 'How to Play',
                   ))),
@@ -1036,12 +1032,10 @@ class StartButtonsState extends State<StartButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: Icon(Icons.view_carousel_outlined,
-                        size: widget.r(20.0), color: Colors.white),
+                    icon: const Icon(Icons.view_carousel_outlined,
+                        size: 25.0, color: Colors.white),
                     onPressed: () {
-                      setState(() {
-                        showCarousel = true;
-                      });
+                      setState(() => showCarousel = true);
                     },
                     tooltip: 'Card List',
                   ))),
@@ -1070,7 +1064,7 @@ class StartButtonsState extends State<StartButtons> {
               },
             ),
             Positioned(
-                top: widget.r(15.0),
+                top: widget.r(8.0),
                 child: ElevatedButton(
                   onPressed: () {
                     setState(() {
@@ -1088,13 +1082,14 @@ class StartButtonsState extends State<StartButtons> {
             CarouselSlider.builder(
               carouselController: cController,
               options: CarouselOptions(
-                  height: widget.r(300),
+                  height: widget.r(450.0),
                   // aspectRatio: 9 / 9,
                   viewportFraction: 0.4, // 1.0:1つが全体に出る
                   initialPage: 0,
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.horizontal,
+                  autoPlay: true,
                   onPageChanged: (index, reason) {
                     setState(() {
                       activeIndex = index;
@@ -1102,16 +1097,17 @@ class StartButtonsState extends State<StartButtons> {
                   }),
               itemCount: 4,
               itemBuilder: (context, index, realIndex) {
-                return buildCarouselImage2(index);
+                List<String> messages = [
+                  L10n.of(context)!.tutorial1,
+                  L10n.of(context)!.tutorial2,
+                  L10n.of(context)!.tutorial3,
+                  L10n.of(context)!.tutorial4
+                ];
+                return buildCarouselImage2(index, messages[index]);
               },
             ),
-            SizedBox(height: widget.r(32.0)),
-            buildIndicator(),
             SizedBox(height: widget.r(10.0)),
-            ElevatedButton(
-              onPressed: () => cController.animateToPage(activeIndex + 1),
-              child: const Text('Next->'),
-            ),
+            buildIndicator(),
             SizedBox(height: widget.r(10.0)),
             ElevatedButton(
               onPressed: () {
@@ -1119,7 +1115,8 @@ class StartButtonsState extends State<StartButtons> {
                   showCarousel2 = false;
                 });
               },
-              child: const Text('Close', style: TextStyle(color: Colors.black)),
+              child: const Text('Close',
+                  style: TextStyle(color: Colors.black, fontSize: 22.0)),
             ),
           ]))
     ]);
@@ -1187,12 +1184,22 @@ class StartButtonsState extends State<StartButtons> {
                     child: Text(cell,
                         style: TextStyle(fontSize: widget.r(28.0)))));
       }).toList());
-  Widget buildCarouselImage2(int index) => Container(
-        width: MediaQuery.of(context).size.width,
-        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
-        color: Colors.grey,
-        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
-      );
+  Widget buildCarouselImage2(int index, String message) => Column(children: [
+        Image.asset(
+          '${imagePath}button/how_to_play${index + 1}.png',
+          fit: BoxFit.cover,
+        ),
+        Container(
+            color: Colors.white,
+            height: widget.r(100.0),
+            child: Padding(
+                padding: EdgeInsets.all(widget.r(20.0)),
+                child: Text(
+                  message,
+                  style:
+                      TextStyle(color: Colors.black, fontSize: widget.r(16.0)),
+                ))),
+      ]);
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,

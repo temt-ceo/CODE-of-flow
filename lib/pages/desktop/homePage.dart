@@ -2812,7 +2812,8 @@ class HomePageState extends State<HomePage> {
                             child: FloatingActionButton(
                                 backgroundColor: Colors.transparent,
                                 onPressed: () {
-                                  html.window.open('white_paper', 'new tab');
+                                  html.window
+                                      .open('white_paper', 'white_paper');
                                   // html.window.location.href = 'white_paper';
                                 },
                                 tooltip: 'White Paper',
@@ -2942,7 +2943,7 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(300),
+                        height: r(250),
                         aspectRatio: 14 / 9,
                         viewportFraction: 0.6, // 1.0:1つが全体に出る
                         initialPage: 0,
@@ -2993,7 +2994,9 @@ class HomePageState extends State<HomePage> {
                       child: ElevatedButton(
                         onPressed: () =>
                             cController.animateToPage(activeIndex + 1),
-                        child: const Text('Next->'),
+                        child: Text('Next->',
+                            style: TextStyle(
+                                color: Colors.black, fontSize: r(28.0))),
                       )),
                   SizedBox(height: r10),
                   ElevatedButton(
@@ -3001,7 +3004,9 @@ class HomePageState extends State<HomePage> {
                       showUnitTargetCarousel = false;
                       selectTarget(activeIndex);
                     },
-                    child: const Text('Choice'),
+                    child: Text('Choice',
+                        style:
+                            TextStyle(color: Colors.black, fontSize: r(28.0))),
                   ),
                 ])),
             // 攻撃をブロックするユニットを選ぶ
@@ -3011,7 +3016,7 @@ class HomePageState extends State<HomePage> {
                   CarouselSlider.builder(
                     carouselController: cController,
                     options: CarouselOptions(
-                        height: r(300),
+                        height: r(250),
                         aspectRatio: 14 / 9,
                         viewportFraction: 0.6, // 1.0:1つが全体に出る
                         initialPage: 0,
@@ -3042,14 +3047,18 @@ class HomePageState extends State<HomePage> {
                       child: ElevatedButton(
                         onPressed: () =>
                             cController.animateToPage(activeIndex + 1),
-                        child: const Text('Next->'),
+                        child: Text('Next->',
+                            style: TextStyle(
+                                color: Colors.black, fontSize: r(28.0))),
                       )),
                   SizedBox(height: r10),
                   SizedBox(
                       height: r35,
                       child: ElevatedButton(
                         onPressed: () => block(activeIndex),
-                        child: const Text('Block'),
+                        child: Text('Block',
+                            style: TextStyle(
+                                color: Colors.black, fontSize: r(28.0))),
                       )),
                 ])),
             // 相手ユニット選択タイマー 兼 防御側タイマー

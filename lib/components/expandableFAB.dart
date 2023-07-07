@@ -74,21 +74,29 @@ class ExpandableFABState extends State<ExpandableFAB>
 
   // FAB(Floating Animation Button)を再度クリックした時
   Widget _tapToClose() {
-    return SizedBox(
-        height: widget.r(40.0),
-        width: widget.r(40.0),
-        child: Center(
-            child: Material(
-                shape: const CircleBorder(),
-                clipBehavior: Clip.antiAlias,
-                elevation: 4,
-                child: InkWell(
-                    onTap: _toggle,
-                    child: Padding(
-                        padding: EdgeInsets.all(widget.r(8.0)),
-                        child: Icon(Icons.close,
-                            size: widget.r(20.0),
-                            color: Theme.of(context).primaryColor))))));
+    return Positioned(
+        left: widget.r(4.0),
+        top: widget.r(4.0),
+        child: SizedBox(
+            height: widget.r(40.0),
+            width: widget.r(40.0),
+            child: Center(
+                child: Material(
+                    shape: const CircleBorder(),
+                    clipBehavior: Clip.antiAlias,
+                    elevation: 4,
+                    child: InkWell(
+                        onTap: _toggle,
+                        child: Padding(
+                            padding: EdgeInsets.all(widget.r(7.0)),
+                            child: SizedBox(
+                                height: widget.r(50.0),
+                                width: widget.r(50.0),
+                                child: FittedBox(
+                                    child: Icon(Icons.close,
+                                        size: 20.0,
+                                        color: Theme.of(context)
+                                            .primaryColor)))))))));
   }
 
   // FAB(Floating Animation Button)をクリックした時(アニメーション)
@@ -108,14 +116,15 @@ class ExpandableFABState extends State<ExpandableFAB>
             curve: Curves.easeInOut,
             duration: const Duration(milliseconds: 250),
             child: SizedBox(
-                height: widget.r(40.0),
-                width: widget.r(40.0),
+                height: widget.r(50.0),
+                width: widget.r(50.0),
                 child: FittedBox(
                     child: FloatingActionButton(
                   shape: const CircleBorder(),
                   onPressed: _toggle,
                   tooltip: 'MANUAL',
                   child: const Icon(
+                    size: 25.0,
                     Icons.import_contacts,
                   ),
                 )))));

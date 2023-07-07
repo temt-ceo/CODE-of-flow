@@ -143,6 +143,25 @@ class AppState extends State<App> {
                   localeCallback: setLocale,
                   route: 'WhitePaper'),
             )),
+        '/rule_book': (context) => Container(
+            decoration: BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('${imagePath}unit/bg-2.jpg'),
+                    fit: BoxFit.cover)),
+            child: ResponsiveLayout(
+              desktopBody: DesktopBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'RuleBook'),
+              mobileBody: MobileBody(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'RuleBook'),
+              mobileBodyHorizen: MobileBodyHorizen(
+                  title: L10n.of(context)!.homePageTitle,
+                  localeCallback: setLocale,
+                  route: 'RuleBook'),
+            )),
       },
     );
     // );

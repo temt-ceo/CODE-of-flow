@@ -539,13 +539,14 @@ class DeckButtonsState extends State<DeckButtons> {
             CarouselSlider.builder(
               carouselController: cController,
               options: CarouselOptions(
-                  height: widget.r(300),
+                  height: widget.r(450.0),
                   // aspectRatio: 9 / 9,
                   viewportFraction: 0.4, // 1.0:1つが全体に出る
                   initialPage: 0,
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.horizontal,
+                  autoPlay: true,
                   onPageChanged: (index, reason) {
                     setState(() {
                       activeIndex = index;
@@ -553,26 +554,26 @@ class DeckButtonsState extends State<DeckButtons> {
                   }),
               itemCount: 4,
               itemBuilder: (context, index, realIndex) {
-                return buildCarouselImage2(index);
+                List<String> messages = [
+                  L10n.of(context)!.tutorial1,
+                  L10n.of(context)!.tutorial2,
+                  L10n.of(context)!.tutorial3,
+                  L10n.of(context)!.tutorial4
+                ];
+                return buildCarouselImage2(index, messages[index]);
               },
             ),
-            SizedBox(height: widget.r(32.0)),
+            SizedBox(height: widget.r(2.0)),
             buildIndicator(),
-            SizedBox(height: widget.r(20.0)),
-            ElevatedButton(
-              onPressed: () => cController.animateToPage(activeIndex + 1),
-              child: const Text('Next->'),
-            ),
-            SizedBox(height: widget.r(20.0)),
+            SizedBox(height: widget.r(10.0)),
             ElevatedButton(
               onPressed: () {
                 setState(() {
                   showCarousel2 = false;
                 });
               },
-              child: Text('Close',
-                  style:
-                      TextStyle(color: Colors.black, fontSize: widget.r(28.0))),
+              child: const Text('Close',
+                  style: TextStyle(color: Colors.black, fontSize: 22.0)),
             ),
           ]))
     ]);
@@ -640,12 +641,22 @@ class DeckButtonsState extends State<DeckButtons> {
                     child: Text(cell,
                         style: TextStyle(fontSize: widget.r(28.0)))));
       }).toList());
-  Widget buildCarouselImage2(int index) => Container(
-        width: MediaQuery.of(context).size.width,
-        // margin: const EdgeInsets.symmetric(horizontal: 1.0),
-        color: Colors.grey,
-        // child: Text('text $index', style: TextStyle(fontSize: 16.0)),
-      );
+  Widget buildCarouselImage2(int index, String message) => Column(children: [
+        Image.asset(
+          '${imagePath}button/how_to_play${index + 1}.png',
+          fit: BoxFit.cover,
+        ),
+        Container(
+            color: Colors.white,
+            height: widget.r(100.0),
+            child: Padding(
+                padding: EdgeInsets.all(widget.r(20.0)),
+                child: Text(
+                  message,
+                  style:
+                      TextStyle(color: Colors.black, fontSize: widget.r(16.0)),
+                ))),
+      ]);
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,

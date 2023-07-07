@@ -605,21 +605,27 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     width: widget.r(23.0),
                     height: widget.r(23.0),
                     decoration: envFlavor == 'prod'
-                        ? const BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage(
-                                    'assets/image/button/yourLife.png'),
-                                fit: BoxFit.cover),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color.fromARGB(255, 41, 39, 176),
-                                spreadRadius: 1,
-                                blurRadius: 1,
-                                offset:
-                                    Offset(1, 1), // changes position of shadow
-                              ),
-                            ],
-                          )
+                        ? widget.isMobile == true
+                            ? const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/yourLife.png'),
+                                    fit: BoxFit.cover))
+                            : const BoxDecoration(
+                                image: DecorationImage(
+                                    image: AssetImage(
+                                        'assets/image/button/yourLife.png'),
+                                    fit: BoxFit.cover),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.fromARGB(255, 41, 39, 176),
+                                    spreadRadius: 1,
+                                    blurRadius: 1,
+                                    offset: Offset(
+                                        1, 1), // changes position of shadow
+                                  ),
+                                ],
+                              )
                         : const BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage('image/button/yourLife.png'),

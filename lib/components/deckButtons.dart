@@ -151,6 +151,9 @@ class DeckButtonsState extends State<DeckButtons> {
     dynamic cardInfo = await promiseToFuture(getCardInfo());
     var objStr = jsonToString(cardInfo);
     var objJs = jsonDecode(objStr);
+    setState(() {
+      cardList = objJs;
+    });
     widget.callback('card-info', null, objJs);
   }
 
@@ -454,33 +457,45 @@ class DeckButtonsState extends State<DeckButtons> {
             top: 0.0,
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
-              FABActionButton(
-                icon: Icon(Icons.create,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {},
-                tooltip: 'White Paper',
-              ),
-              FABActionButton(
-                icon: Icon(Icons.settings,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    showCarousel2 = true;
-                  });
-                },
-                tooltip: 'How to Play',
-              ),
-              FABActionButton(
-                icon: Icon(Icons.view_carousel,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    showCarousel = true;
-                  });
-                  ;
-                },
-                tooltip: 'Card List',
-              ),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                    icon: Icon(Icons.create,
+                        size: widget.r(20.0), color: Colors.white),
+                    onPressed: () {},
+                    tooltip: 'The rule of this game',
+                  ))),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                    icon: Icon(Icons.settings,
+                        size: widget.r(20.0), color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel2 = true;
+                      });
+                    },
+                    tooltip: 'How to Play',
+                  ))),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                    icon: Icon(Icons.view_carousel,
+                        size: widget.r(20.0), color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel = true;
+                      });
+                      ;
+                    },
+                    tooltip: 'Card List',
+                  ))),
             ])),
       ]),
       Visibility(
@@ -495,7 +510,7 @@ class DeckButtonsState extends State<DeckButtons> {
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.vertical),
-              itemCount: 25,
+              itemCount: 26,
               itemBuilder: (context, index, realIndex) {
                 dynamic card = cardList != null
                     ? cardList[index >= 11

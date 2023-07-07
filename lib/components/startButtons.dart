@@ -812,7 +812,7 @@ class StartButtonsState extends State<StartButtons> {
                         child: FloatingActionButton(
                       onPressed: authenticate,
                       tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined),
+                      child: Icon(Icons.key_outlined, size: 28.0),
                     ))))),
         Visibility(
             visible: walletUser.addr != '' &&
@@ -1006,33 +1006,45 @@ class StartButtonsState extends State<StartButtons> {
             top: widget.r(5),
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
-              FABActionButton(
-                  icon: Icon(Icons.design_services,
-                      size: widget.r(20.0), color: Colors.white),
-                  onPressed: () {
-                    showToast('EN is successfully charged.');
-                  },
-                  tooltip: 'White Paper'),
-              FABActionButton(
-                icon: Icon(Icons.how_to_vote,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    showCarousel2 = true;
-                  });
-                },
-                tooltip: 'How to Play',
-              ),
-              FABActionButton(
-                icon: Icon(Icons.view_carousel_outlined,
-                    size: widget.r(20.0), color: Colors.white),
-                onPressed: () {
-                  setState(() {
-                    showCarousel = true;
-                  });
-                },
-                tooltip: 'Card List',
-              ),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                          icon: Icon(Icons.design_services,
+                              size: widget.r(20.0), color: Colors.white),
+                          onPressed: () {
+                            showToast('EN is successfully charged.');
+                          },
+                          tooltip: 'The rule of this game'))),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                    icon: Icon(Icons.how_to_vote,
+                        size: widget.r(20.0), color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel2 = true;
+                      });
+                    },
+                    tooltip: 'How to Play',
+                  ))),
+              SizedBox(
+                  width: widget.r(50.0),
+                  height: widget.r(50.0),
+                  child: FittedBox(
+                      child: FABActionButton(
+                    icon: Icon(Icons.view_carousel_outlined,
+                        size: widget.r(20.0), color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        showCarousel = true;
+                      });
+                    },
+                    tooltip: 'Card List',
+                  ))),
             ])),
       ]),
       Visibility(

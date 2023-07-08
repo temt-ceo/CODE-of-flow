@@ -645,7 +645,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
             ]),
             Positioned(
                 left: widget.r(95.0),
-                top: widget.r(248.0),
+                top: widget.r(250.0),
                 child: Text(
                     'CP ${widget.info != null ? (widget.info!.yourCp < 10 ? '0${widget.info!.yourCp}' : widget.info!.yourCp) : '--'}',
                     style: TextStyle(
@@ -658,7 +658,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
               for (var i = 0; i < widget.info!.yourCp; i++)
                 Positioned(
                   left: widget.r(184.0 + i * 26),
-                  top: widget.r(252.0),
+                  top: widget.r(254.0),
                   child: Container(
                     width: widget.r(25.0),
                     height: widget.r(25.0),

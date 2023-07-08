@@ -77,66 +77,93 @@ class DragBoxState extends State<DragBox> {
           ? Container()
           : Padding(
               padding: EdgeInsets.only(left: widget.r(10.0)),
-              child: Container(
-                width: widget.r(100.0),
-                height: widget.r(150.0),
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                      image: AssetImage(imageUrl), fit: BoxFit.contain),
+              child: Column(children: [
+                Positioned(
+                    left: 0.0,
+                    top: 0.0,
+                    child: SizedBox(
+                        width: widget.r(80.0),
+                        height: widget.r(17.0),
+                        child: ClipRRect(
+                            borderRadius: BorderRadius.circular(widget.r(2.0)),
+                            child: Container(
+                                alignment: Alignment.topCenter,
+                                color: const Color.fromARGB(255, 52, 51, 51),
+                                child: Text(
+                                    widget.cardInfo == null
+                                        ? ''
+                                        : widget.cardInfo?['category'] == '0'
+                                            ? 'Unit'
+                                            : (widget.cardInfo?['category'] ==
+                                                    '1'
+                                                ? 'Trigger'
+                                                : 'Intercept'),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      decoration: TextDecoration.none,
+                                      fontSize: widget.r(13.0),
+                                    )))))),
+                Container(
+                  width: widget.r(100.0),
+                  height: widget.r(150.0),
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage(imageUrl), fit: BoxFit.contain),
+                  ),
+                  child: Stack(children: <Widget>[
+                    Positioned(
+                        left: 0.0,
+                        top: 0.0,
+                        child: SizedBox(
+                            width: widget.r(20.0),
+                            height: widget.r(26.0),
+                            child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.circular(widget.r(2.0)),
+                                child: Container(
+                                    alignment: Alignment.topCenter,
+                                    color: widget.cardInfo?['type'] == '0'
+                                        ? Colors.red
+                                        : (widget.cardInfo?['type'] == '1'
+                                            ? const Color.fromARGB(
+                                                255, 170, 153, 1)
+                                            : Colors.grey),
+                                    child: Text(
+                                        widget.cardInfo == null
+                                            ? ''
+                                            : widget.cardInfo?['cost'],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          decoration: TextDecoration.none,
+                                          fontSize: widget.r(20.0),
+                                        )))))),
+                    widget.cardInfo?['bp'] == '0'
+                        ? Container()
+                        : Positioned(
+                            right: 0.0,
+                            bottom: 0.0,
+                            child: SizedBox(
+                                width: widget.r(60.0),
+                                height: widget.r(19.0),
+                                child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(widget.r(2.0)),
+                                    child: Container(
+                                        alignment: Alignment.centerRight,
+                                        color: const Color.fromARGB(
+                                            255, 52, 51, 51),
+                                        child: Text(
+                                            widget.cardInfo == null
+                                                ? ''
+                                                : widget.cardInfo?['bp'],
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              decoration: TextDecoration.none,
+                                              fontSize: widget.r(16.0),
+                                            )))))),
+                  ]),
                 ),
-                child: Stack(children: <Widget>[
-                  Positioned(
-                      left: 0.0,
-                      top: 0.0,
-                      child: SizedBox(
-                          width: widget.r(20.0),
-                          height: widget.r(26.0),
-                          child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.circular(widget.r(2.0)),
-                              child: Container(
-                                  alignment: Alignment.topCenter,
-                                  color: widget.cardInfo?['type'] == '0'
-                                      ? Colors.red
-                                      : (widget.cardInfo?['type'] == '1'
-                                          ? const Color.fromARGB(
-                                              255, 170, 153, 1)
-                                          : Colors.grey),
-                                  child: Text(
-                                      widget.cardInfo == null
-                                          ? ''
-                                          : widget.cardInfo?['cost'],
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        decoration: TextDecoration.none,
-                                        fontSize: widget.r(20.0),
-                                      )))))),
-                  widget.cardInfo?['bp'] == '0'
-                      ? Container()
-                      : Positioned(
-                          right: 0.0,
-                          bottom: 0.0,
-                          child: SizedBox(
-                              width: widget.r(60.0),
-                              height: widget.r(19.0),
-                              child: ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(widget.r(2.0)),
-                                  child: Container(
-                                      alignment: Alignment.centerRight,
-                                      color:
-                                          const Color.fromARGB(255, 52, 51, 51),
-                                      child: Text(
-                                          widget.cardInfo == null
-                                              ? ''
-                                              : widget.cardInfo?['bp'],
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            decoration: TextDecoration.none,
-                                            fontSize: widget.r(16.0),
-                                          )))))),
-                ]),
-              ),
+              ]),
             ),
     );
   }

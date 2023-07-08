@@ -909,7 +909,7 @@ class StartButtonsState extends State<StartButtons> {
                           fontSize: widget.r(25.0)),
                     )),
                 Positioned(
-                    left: widget.isEnglish ? widget.r(100.0) : widget.r(60.0),
+                    left: widget.isEnglish ? widget.r(100.0) : widget.r(57.0),
                     top: widget.isEnglish ? widget.r(6.0) : widget.r(7.0),
                     child: Container(
                         width: widget.r(20.0),

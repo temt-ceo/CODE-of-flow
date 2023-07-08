@@ -18,11 +18,17 @@ import 'package:CodeOfFlow/responsive/dimensions.dart';
 
 const envFlavor = String.fromEnvironment('flavor');
 
-@JS('getRankingScores')
-external dynamic getRankingScores();
+@JS('getMainnetRankingScores')
+external dynamic getMainnetRankingScores();
 
-@JS('getTotalScores')
-external dynamic getTotalScores();
+@JS('getTestnetRankingScores')
+external dynamic getTestnetRankingScores();
+
+@JS('getMainnetTotalScores')
+external dynamic getMainnetTotalScores();
+
+@JS('getTestnetTotalScores')
+external dynamic getTestnetTotalScores();
 
 @JS('getRewardRaceBattleCount')
 external dynamic getRewardRaceBattleCount();
@@ -161,8 +167,13 @@ class _NestedTabBarState extends State<NestedTabBar>
     setState(() {
       rankings.clear();
     });
-    var rankingScores = await promiseToFuture(getRankingScores());
-    setRankingScores(rankingScores);
+    if (widget.chain == 'Mainnet') {
+      var rankingScores = await promiseToFuture(getMainnetRankingScores());
+      setRankingScores(rankingScores);
+    } else {
+      var rankingScores = await promiseToFuture(getTestnetRankingScores());
+      setRankingScores(rankingScores);
+    }
 
     refreshController.refreshCompleted();
   }
@@ -171,15 +182,23 @@ class _NestedTabBarState extends State<NestedTabBar>
     setState(() {
       players.clear();
     });
-    var totalScores = await promiseToFuture(getTotalScores());
-    setTotalScores(totalScores);
-
+    if (widget.chain == 'Mainnet') {
+      var totalScores = await promiseToFuture(getMainnetTotalScores());
+      setTotalScores(totalScores);
+    } else {
+      var totalScores = await promiseToFuture(getTestnetTotalScores());
+      setTotalScores(totalScores);
+    }
     refreshController2.refreshCompleted();
   }
 
   Future<void> getRewardRaceBattles() async {
     var ret = await promiseToFuture(getRewardRaceBattleCount());
-    setState(() => battleCount = int.parse(ret));
+    if (widget.chain == 'Mainnet') {
+      setState(() => battleCount = int.parse(ret));
+    } else {
+      setState(() => battleCount = 19);
+    }
   }
 
   ////////////////////////////

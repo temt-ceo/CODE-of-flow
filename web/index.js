@@ -4,6 +4,7 @@
 var _fcl = require("@onflow/fcl");
 
 var fcl = _interopRequireWildcard(_fcl);
+var testnet_fcl = _interopRequireWildcard(_fcl);
 
 var _types = require("@onflow/types");
 
@@ -12,8 +13,10 @@ var types = _interopRequireWildcard(_types);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 fcl.config({
-  "accessNode.api": "https://rest-testnet.onflow.org",
-  "discovery.wallet": "https://fcl-discovery.onflow.org/testnet/authn"
+  'accessNode.api': 'https://rest-mainnet.onflow.org',
+  'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+  'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+  'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
 });
 
 window.authenticate = fcl.authenticate;
@@ -25,18 +28,24 @@ window.getAddr = function(user) {
 
 // transactions
 window.createPlayer = async function (playerName) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   var transactionId = await fcl.mutate({
     cadence: `
-      import FlowToken from 0x7e60df042a9c0868
-      import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+      import FlowToken from 0x1654653399040a61
+      import FungibleToken from 0xf233dcee88fe0abe
+      import CodeOfFlow from 0x24466f7fc36e3388
 
       transaction(nickname: String) {
         prepare(signer: AuthAccount) {
           let FlowTokenReceiver = signer.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver)
 
-          signer.save(<- CodeOfFlowV2.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlowV2.PlayerStoragePath)
-          signer.link<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath, target: CodeOfFlowV2.PlayerStoragePath)
+          signer.save(<- CodeOfFlow.createPlayer(nickname: nickname, flow_vault_receiver: FlowTokenReceiver), to: CodeOfFlow.PlayerStoragePath)
+          signer.link<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath, target: CodeOfFlow.PlayerStoragePath)
           }
         execute {
           log("success")
@@ -54,17 +63,23 @@ window.createPlayer = async function (playerName) {
   console.log("TransactionId: " + transactionId);
 };
 window.buyCyberEN = async () => {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const transactionId = await fcl.mutate({
     cadence: `
-      import FlowToken from 0x7e60df042a9c0868
-      import FungibleToken from 0x9a0766d93b6608b7
-      import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+      import FlowToken from 0x1654653399040a61
+      import FungibleToken from 0xf233dcee88fe0abe
+      import CodeOfFlow from 0x24466f7fc36e3388
 
       transaction() {
         prepare(signer: AuthAccount) {
           let payment <- signer.borrow<&FlowToken.Vault>(from: /storage/flowTokenVault)!.withdraw(amount: 1.0) as! @FlowToken.Vault
 
-          let player = signer.borrow<&CodeOfFlowV2.Player>(from: CodeOfFlowV2.PlayerStoragePath)
+          let player = signer.borrow<&CodeOfFlow.Player>(from: CodeOfFlow.PlayerStoragePath)
               ?? panic("Could not borrow reference to the Owner's Player Resource.")
           player.buy_en(payment: <- payment)
         }
@@ -85,12 +100,18 @@ window.buyCyberEN = async () => {
 
 // scripts
 window.isRegistered = async function (address) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
-    pub fun main(address: Address): &CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}? {
+    import CodeOfFlow from 0x24466f7fc36e3388
+    pub fun main(address: Address): &CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}? {
         let account = getAccount(address)
-        return account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
+        return account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
     }
     `,
     args: (arg, t) => [
@@ -101,12 +122,18 @@ window.isRegistered = async function (address) {
 };
 var counter = 0;
 window.getCurrentStatus = async function (address) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import CodeOfFlow from 0x24466f7fc36e3388
     pub fun main(address: Address): AnyStruct {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_current_status()
     }
@@ -122,12 +149,18 @@ window.getCurrentStatus = async function (address) {
   return result;
 };
 window.getMariganCards = async function (address, playerId) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import CodeOfFlow from 0x24466f7fc36e3388
     pub fun main(address: Address, player_id: UInt): [[UInt16]] {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_marigan_cards(player_id: player_id)
     }
@@ -141,12 +174,18 @@ window.getMariganCards = async function (address, playerId) {
   return result
 };
 window.getPlayerDeck = async function (address, playerId) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import CodeOfFlow from 0x24466f7fc36e3388
     pub fun main(address: Address, player_id: UInt): [UInt16] {
         let account = getAccount(address)
-        let cap = account.getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
+        let cap = account.getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
           ?? panic("Doesn't have capability!")
         return cap.get_player_deck(player_id: player_id)
     }
@@ -159,11 +198,17 @@ window.getPlayerDeck = async function (address, playerId) {
   return result
 };
 window.getStarterDeck = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import CodeOfFlow from 0x24466f7fc36e3388
     pub fun main(): [UInt16] {
-        return CodeOfFlowV2.getStarterDeck()
+        return CodeOfFlow.getStarterDeck()
     }
     `,
     args: (arg, t) => [
@@ -173,11 +218,17 @@ window.getStarterDeck = async function () {
   return result
 };
 window.getCardInfo = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
-    pub fun main(): {UInt16: CodeOfFlowV2.CardStruct} {
-        return CodeOfFlowV2.getCardInfo()
+    import CodeOfFlow from 0x24466f7fc36e3388
+    pub fun main(): {UInt16: CodeOfFlow.CardStruct} {
+        return CodeOfFlow.getCardInfo()
     }
     `,
     args: (arg, t) => [
@@ -188,20 +239,26 @@ window.getCardInfo = async function () {
 };
 
 window.getBalance = async function (address, playerId) {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import FlowToken from 0x7e60df042a9c0868
-    import FungibleToken from 0x9a0766d93b6608b7
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import FlowToken from 0x1654653399040a61
+    import FungibleToken from 0xf233dcee88fe0abe
+    import CodeOfFlow from 0x24466f7fc36e3388
 
-    pub fun main(address: Address, player_id: UInt?): [CodeOfFlowV2.CyberScoreStruct] {
+    pub fun main(address: Address, player_id: UInt?): [CodeOfFlow.CyberScoreStruct] {
         let account = getAccount(address)
         let vaultRef = account.getCapability(/public/flowTokenBalance).borrow<&FlowToken.Vault{FungibleToken.Balance}>()
             ?? panic("Could not borrow Balance reference to the Vault")
 
-        var retArr: [CodeOfFlowV2.CyberScoreStruct] = []
+        var retArr: [CodeOfFlow.CyberScoreStruct] = []
         if player_id != nil {
-          let cap = getAccount(address).getCapability<&CodeOfFlowV2.Player{CodeOfFlowV2.IPlayerPublic}>(CodeOfFlowV2.PlayerPublicPath).borrow()
+          let cap = getAccount(address).getCapability<&CodeOfFlow.Player{CodeOfFlow.IPlayerPublic}>(CodeOfFlow.PlayerPublicPath).borrow()
               ?? panic("Doesn't have capability!")
 
           let player_arr = cap.get_players_score()
@@ -214,7 +271,7 @@ window.getBalance = async function (address, playerId) {
           }
           return retArr
         }
-        let guestData = CodeOfFlowV2.CyberScoreStruct(player_name: "Guest")
+        let guestData = CodeOfFlow.CyberScoreStruct(player_name: "Guest")
         guestData.balance = vaultRef.balance
         retArr.append(guestData)
         return retArr
@@ -228,8 +285,36 @@ window.getBalance = async function (address, playerId) {
   // console.log(result);
   return result
 };
-window.getRankingScores = async function () {
+
+window.getMainnetRankingScores = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
+    cadence: `
+    import CodeOfFlow from 0x24466f7fc36e3388
+    pub fun main(): [CodeOfFlow.RankScoreStruct] {
+        return CodeOfFlow.getRankingScores()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
+window.getTestnetRankingScores = async function () {
+  testnet_fcl.config({
+    'accessNode.api': 'https://rest-testnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
+  const result = await testnet_fcl.query({
     cadence: `
     import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(): [CodeOfFlowV2.RankScoreStruct] {
@@ -243,8 +328,35 @@ window.getRankingScores = async function () {
   return result
 };
 
-window.getTotalScores = async function () {
+window.getMainnetTotalScores = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
+    cadence: `
+    import CodeOfFlow from 0x24466f7fc36e3388
+    pub fun main(): [CodeOfFlow.RankScoreStruct] {
+        return CodeOfFlow.getTotalScores()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
+window.getTestnetTotalScores = async function () {
+  testnet_fcl.config({
+    'accessNode.api': 'https://rest-testnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/testnet/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
+  const result = await testnet_fcl.query({
     cadence: `
     import CodeOfFlowV2 from 0x9e447fb949c3f1b6
     pub fun main(): [CodeOfFlowV2.RankScoreStruct] {
@@ -259,11 +371,17 @@ window.getTotalScores = async function () {
 };
 
 window.getRewardRaceBattleCount = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
   const result = await fcl.query({
     cadence: `
-    import CodeOfFlowV2 from 0x9e447fb949c3f1b6
+    import CodeOfFlow from 0x24466f7fc36e3388
     pub fun main(): UInt {
-        return CodeOfFlowV2.getRewardRaceBattleCount()
+        return CodeOfFlow.getRewardRaceBattleCount()
     }
     `,
     args: (arg, t) => [

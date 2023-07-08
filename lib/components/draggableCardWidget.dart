@@ -83,26 +83,24 @@ class DragBoxState extends State<DragBox> {
                     top: 0.0,
                     child: SizedBox(
                         width: widget.r(80.0),
-                        height: widget.r(17.0),
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(widget.r(2.0)),
-                            child: Container(
-                                alignment: Alignment.topCenter,
-                                color: const Color.fromARGB(255, 52, 51, 51),
-                                child: Text(
-                                    widget.cardInfo == null
-                                        ? ''
-                                        : widget.cardInfo?['category'] == '0'
-                                            ? 'Unit'
-                                            : (widget.cardInfo?['category'] ==
-                                                    '1'
-                                                ? 'Trigger'
-                                                : 'Intercept'),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      decoration: TextDecoration.none,
-                                      fontSize: widget.r(13.0),
-                                    )))))),
+                        height: widget.r(16.0),
+                        child: Container(
+                            alignment: Alignment.topCenter,
+                            color: const Color.fromARGB(255, 52, 51, 51),
+                            child: Text(
+                                widget.cardInfo == null
+                                    ? ''
+                                    : widget.cardInfo?['category'] == '0'
+                                        ? 'Unit'
+                                        : (widget.cardInfo?['category'] == '1'
+                                            ? 'Trigger'
+                                            : 'Intercept'),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  decoration: TextDecoration.none,
+                                  textBaseline: TextBaseline.ideographic,
+                                  fontSize: widget.r(13.0),
+                                ))))),
                 Container(
                   width: widget.r(100.0),
                   height: widget.r(150.0),

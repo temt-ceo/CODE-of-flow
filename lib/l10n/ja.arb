@@ -159,7 +159,7 @@
   "whitepaper33": "AWS Lambdaファイルには１ファイルに全てのトランザクション実行ロジックが書かれていますが、とてもシンプルです。これをzip化してアップロードするだけでこのゲームの全てのバックエンド機能を用意してくれます。ぜひ一度そのファイルを見てください。",
   "whitepaper34": "https://github.com/temt-ceo/CODE-of-flow/blob/develop/aws_lambda/src/index.js",
   "whitepaper35": "Flow Blockchainスマートコントラクト:",
-  "whitepaper36": "https://flow-view-source.com/testnet/account/0x9e447fb949c3f1b6/contract/CodeOfFlowV2",
+  "whitepaper36": "https://contractbrowser.com/A.24466f7fc36e3388.CodeOfFlow",
   "inputPlayerName": " プレイヤー名を入力して下さい。",
   "nameConfirmText": " プレイヤー名が{name}でよろしければ, 以下のボタンを押して下さい。",
   "insufficientEN": "あなたは現在 {balance} FLOW コインをお持ちです。\n 以下のボタンを押すと1FLOWコインを支払って良いか聞かれます。",

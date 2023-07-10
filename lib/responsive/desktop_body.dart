@@ -87,7 +87,7 @@ class DesktopBodyState extends State<DesktopBody> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking of Code Of Flow 👑",
+                      title: Text("👑 Player's Ranking of COF.ninja 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(30.0))),
                       flexibleSpace: Stack(children: <Widget>[
@@ -164,7 +164,7 @@ class DesktopBodyState extends State<DesktopBody> {
                                     color: Colors.white),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
-                              title: Text("Rule Book | Code Of Flow",
+                              title: Text("Rule Book | COF.ninja",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: r(30.0))),
                               flexibleSpace: Stack(children: <Widget>[
@@ -238,7 +238,8 @@ class DesktopBodyState extends State<DesktopBody> {
                               ]),
                             )),
       body: widget.route == 'Home'
-          ? HomePage(enLocale: activeLocale, isMobile: false)
+          ? HomePage(
+              enLocale: activeLocale, isMobile: false, needEyeCatch: true)
           : widget.route == 'DeckEditor'
               ? DeckEditPage(enLocale: activeLocale, isMobile: false)
               : widget.route == 'Ranking'
@@ -247,7 +248,10 @@ class DesktopBodyState extends State<DesktopBody> {
                       ? WhitePaperPage(enLocale: activeLocale)
                       : widget.route == 'RuleBook'
                           ? RuleBookPage(enLocale: activeLocale)
-                          : HomePage(enLocale: activeLocale, isMobile: false),
+                          : HomePage(
+                              enLocale: activeLocale,
+                              isMobile: false,
+                              needEyeCatch: true),
     );
   }
 }

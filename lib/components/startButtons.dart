@@ -15,6 +15,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:flash/flash.dart';
 
 import 'package:CodeOfFlow/services/api_service.dart';
 import 'package:CodeOfFlow/models/onGoingInfoModel.dart';
@@ -173,12 +174,16 @@ class StartButtonsState extends State<StartButtons> {
                   return SizedBox(
                       child: Padding(
                           padding:
-                              const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
+                              const EdgeInsets.fromLTRB(0.0, 60.0, 0.0, 0.0),
                           child: Column(children: <Widget>[
-                            Text(L10n.of(context)!.inputPlayerName,
-                                style: const TextStyle(
-                                    fontSize: 20.0, color: Color(0xFFFFFFFF))),
-                            const SizedBox(height: 5.0),
+                            Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    widget.r(50), 0, widget.r(50), 0),
+                                child: Text(L10n.of(context)!.inputPlayerName,
+                                    style: const TextStyle(
+                                        fontSize: 20.0,
+                                        color: Color(0xFFFFFFFF)))),
+                            const SizedBox(height: 2.0),
                             SizedBox(
                               width: 250.0,
                               // child: Focus(
@@ -195,23 +200,26 @@ class StartButtonsState extends State<StartButtons> {
                               //   },
                               // )
                             ),
-                            const SizedBox(height: 60.0),
+                            const SizedBox(height: 5.0),
                             Visibility(
                               visible: registerDoing == true,
                               child: const CircularProgressIndicator(),
                             ),
-                            const SizedBox(height: 10.0),
+                            const SizedBox(height: 5.0),
                             Visibility(
                                 visible: onTyping,
-                                child: Text(
-                                  L10n.of(context)!
-                                      .nameConfirmText(nameController.text),
-                                  style: const TextStyle(
-                                    color: Color(0xFFFFFFFF),
-                                    fontSize: 16.0,
-                                  ),
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                      widget.r(50), 0, widget.r(50), 0),
+                                  child: Text(
+                                      L10n.of(context)!
+                                          .nameConfirmText(nameController.text),
+                                      style: const TextStyle(
+                                        color: Color(0xFFFFFFFF),
+                                        fontSize: 16.0,
+                                      )),
                                 )),
-                            const SizedBox(height: 20.0),
+                            const SizedBox(height: 10.0),
                             Center(
                                 child: ElevatedButton(
                               style: ButtonStyle(
@@ -243,6 +251,28 @@ class StartButtonsState extends State<StartButtons> {
                                               null);
                                         }
                                       });
+                                      showFlash(
+                                          context: context,
+                                          duration: const Duration(seconds: 3),
+                                          builder: (context, controller) {
+                                            return Flash(
+                                              controller: controller,
+                                              position: FlashPosition.bottom,
+                                              child: FlashBar(
+                                                controller: controller,
+                                                content: Text(
+                                                    L10n.of(context)!
+                                                        .waitTransaction,
+                                                    style: const TextStyle(
+                                                        fontSize: 18.0)),
+                                                indicatorColor: Colors.blue,
+                                                icon: const Icon(
+                                                  Icons.info_outline_rounded,
+                                                  color: Colors.blue,
+                                                ),
+                                              ),
+                                            );
+                                          });
                                     }
                                   : null,
                               child: const Text('Create a Player',
@@ -600,13 +630,13 @@ class StartButtonsState extends State<StartButtons> {
           builder: (buildContext) {
             return SizedBox(
                 child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0.0, 80.0, 0.0, 0.0),
+                    padding: const EdgeInsets.fromLTRB(0.0, 20.0, 0.0, 0.0),
                     child: Column(children: <Widget>[
                       const Text('EN is insufficient.\n(ENが不足しています)',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Color(0xFFFFFFFF), fontSize: 20.0)),
-                      const SizedBox(height: 35.0),
+                      const SizedBox(height: 10.0),
                       Center(
                           child: ElevatedButton(
                         style: ButtonStyle(
@@ -621,24 +651,54 @@ class StartButtonsState extends State<StartButtons> {
                           showBottomSheet2 = false;
                           Navigator.pop(buildContext);
                           buyCyberEN();
+                          showFlash(
+                              context: context,
+                              duration: const Duration(seconds: 3),
+                              builder: (context, controller) {
+                                return Flash(
+                                  controller: controller,
+                                  position: FlashPosition.bottom,
+                                  child: FlashBar(
+                                    controller: controller,
+                                    content: Text(
+                                        L10n.of(context)!.waitTransaction,
+                                        style: const TextStyle(fontSize: 18.0)),
+                                    indicatorColor: Colors.blue,
+                                    icon: const Icon(
+                                      Icons.info_outline_rounded,
+                                      color: Colors.blue,
+                                    ),
+                                  ),
+                                );
+                              });
                         },
                         child: const Text('Insert 1FLOW coin.'),
                       )),
                       const SizedBox(height: 10.0),
-                      Text(L10n.of(context)!.insufficientEN(balance.toString()),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
-                      const SizedBox(height: 8.0),
-                      Text(L10n.of(context)!.insufficientEN2,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
-                      const SizedBox(height: 4.0),
-                      Text(L10n.of(context)!.insufficientEN3,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                              color: Color(0xFFFFFFFF), fontSize: 16.0)),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              widget.r(50), 0, widget.r(50), 0),
+                          child: Text(
+                              L10n.of(context)!
+                                  .insufficientEN(balance.toString()),
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(
+                                  color: Color(0xFFFFFFFF), fontSize: 16.0))),
+                      const SizedBox(height: 5.0),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              widget.r(50), 0, widget.r(50), 0),
+                          child: Text(L10n.of(context)!.insufficientEN2,
+                              textAlign: TextAlign.left,
+                              style: const TextStyle(
+                                  color: Color(0xFFFFFFFF), fontSize: 16.0))),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(
+                              widget.r(50), 0, widget.r(50), 0),
+                          child: Text(L10n.of(context)!.insufficientEN3,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  color: Color(0xFFFFFFFF), fontSize: 16.0))),
                     ])));
           }).whenComplete(() {
         showBottomSheet2 = false;
@@ -1020,7 +1080,7 @@ class StartButtonsState extends State<StartButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: const Icon(Icons.how_to_vote,
+                    icon: const Icon(Icons.view_carousel_outlined,
                         size: 25.0, color: Colors.white),
                     onPressed: () {
                       setState(() => showCarousel2 = true);
@@ -1032,7 +1092,7 @@ class StartButtonsState extends State<StartButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: const Icon(Icons.view_carousel_outlined,
+                    icon: const Icon(Icons.how_to_vote,
                         size: 25.0, color: Colors.white),
                     onPressed: () {
                       setState(() => showCarousel = true);

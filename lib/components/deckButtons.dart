@@ -228,7 +228,7 @@ class DeckButtonsState extends State<DeckButtons> {
         // Call GraphQL method.
         apiService.saveGameServerProcess(
             'save_deck', jsonEncode(widget.savedDeck), player.playerId);
-        await Future.delayed(const Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 6));
         closeGameLoading();
         showAlertWindow('success');
       } else {
@@ -462,22 +462,21 @@ class DeckButtonsState extends State<DeckButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: Icon(Icons.create,
-                        size: widget.r(20.0), color: Colors.white),
-                    onPressed: () {},
-                    tooltip: 'The rule of this game',
-                  ))),
+                          icon: const Icon(Icons.design_services,
+                              size: 25.0, color: Colors.white),
+                          onPressed: () {
+                            html.window.open('rule_book', 'rule_book');
+                          },
+                          tooltip: 'The rule of this game'))),
               SizedBox(
                   width: widget.r(50.0),
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: Icon(Icons.settings,
-                        size: widget.r(20.0), color: Colors.white),
+                    icon: const Icon(Icons.view_carousel_outlined,
+                        size: 25.0, color: Colors.white),
                     onPressed: () {
-                      setState(() {
-                        showCarousel2 = true;
-                      });
+                      setState(() => showCarousel2 = true);
                     },
                     tooltip: 'How to Play',
                   ))),
@@ -486,13 +485,10 @@ class DeckButtonsState extends State<DeckButtons> {
                   height: widget.r(50.0),
                   child: FittedBox(
                       child: FABActionButton(
-                    icon: Icon(Icons.view_carousel,
-                        size: widget.r(20.0), color: Colors.white),
+                    icon: const Icon(Icons.how_to_vote,
+                        size: 25.0, color: Colors.white),
                     onPressed: () {
-                      setState(() {
-                        showCarousel = true;
-                      });
-                      ;
+                      setState(() => showCarousel = true);
                     },
                     tooltip: 'Card List',
                   ))),

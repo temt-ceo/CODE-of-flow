@@ -60,7 +60,7 @@ class AppState extends State<App> {
 
     return MaterialApp(
       locale: _locale,
-      title: 'Code Of Flow',
+      title: 'COF.ninja',
       theme: ThemeData(
         fontFamily: 'Hiragino Maru',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.grey),

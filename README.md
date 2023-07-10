@@ -1,4 +1,4 @@
-# CodeOfFlow
+# CodeOfFlow(COF.ninja)
 
 This game is paying an homage to the SEGA's arcade game, Code Of Joker.
 

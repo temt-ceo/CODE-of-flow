@@ -96,7 +96,7 @@ class MobileBodyState extends State<MobileBody> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking of Code Of Flow 👑",
+                      title: Text("👑 Player's Ranking COF.ninja 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(60.0))),
                       flexibleSpace: Stack(children: <Widget>[
@@ -173,7 +173,7 @@ class MobileBodyState extends State<MobileBody> {
                                     color: Colors.white),
                                 onPressed: () => Navigator.of(context).pop(),
                               ),
-                              title: Text("Rule Book | Code Of Flow",
+                              title: Text("Rule Book | COF.ninja",
                                   style: TextStyle(
                                       color: Colors.white, fontSize: r(60.0))),
                               flexibleSpace: Stack(children: <Widget>[
@@ -247,7 +247,7 @@ class MobileBodyState extends State<MobileBody> {
                               ]),
                             )),
       body: widget.route == 'Home'
-          ? HomePage(enLocale: activeLocale, isMobile: true)
+          ? HomePage(enLocale: activeLocale, isMobile: true, needEyeCatch: true)
           : widget.route == 'DeckEditor'
               ? DeckEditPage(enLocale: activeLocale, isMobile: true)
               : widget.route == 'Ranking'
@@ -256,7 +256,10 @@ class MobileBodyState extends State<MobileBody> {
                       ? WhitePaperPage(enLocale: activeLocale)
                       : widget.route == 'RuleBook'
                           ? RuleBookPage(enLocale: activeLocale)
-                          : HomePage(enLocale: activeLocale, isMobile: false),
+                          : HomePage(
+                              enLocale: activeLocale,
+                              isMobile: true,
+                              needEyeCatch: true),
     );
   }
 }

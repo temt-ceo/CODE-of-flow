@@ -171,15 +171,15 @@ exports.handler = async function (event) {
     if (fs.existsSync('/tmp/sequence.txt')) {
       KEY_ID_IT = parseInt(fs.readFileSync('/tmp/sequence.txt', {encoding: 'utf8'}));
     } else {
-      KEY_ID_IT = (new Date()).getMilliseconds() % 100;
+      KEY_ID_IT = (new Date()).getMilliseconds() % 300;
     }
-    KEY_ID_IT = !KEY_ID_IT || KEY_ID_IT >= 100 ? 1 : KEY_ID_IT + 1
+    KEY_ID_IT = !KEY_ID_IT || KEY_ID_IT >= 300 ? 1 : KEY_ID_IT + 1
     fs.writeFileSync('/tmp/sequence.txt', KEY_ID_IT.toString());
     console.log('KEY_ID_IT', KEY_ID_IT);
 
     const client = new SecretsManagerClient({region: "ap-northeast-1"});
     const response = await client.send(new GetSecretValueCommand({
-      SecretId: "SmartContractPK",
+      SecretId: "PrivateKeyForMainnet",
       VersionStage: "AWSCURRENT",
     }));
 
@@ -190,7 +190,7 @@ exports.handler = async function (event) {
       .put("accessNode.api", "https://rest-mainnet.onflow.org")
 
     // CHANGE THESE THINGS FOR YOU
-    const PRIVATE_KEY = JSON.parse(response.SecretString)?.SmartContractPK;
+    const PRIVATE_KEY = JSON.parse(response.SecretString)?.SmartContractPKForMainnet;
     const ADDRESS = "0x24466f7fc36e3388";
     const KEY_ID = 0;
     const CONTRACT_NAME = "CodeOfFlow";

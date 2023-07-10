@@ -34,7 +34,12 @@ const envFlavor = String.fromEnvironment('flavor');
 class HomePage extends StatefulWidget {
   final bool enLocale;
   final bool isMobile;
-  const HomePage({super.key, required this.enLocale, required this.isMobile});
+  final bool needEyeCatch;
+  const HomePage(
+      {super.key,
+      required this.enLocale,
+      required this.isMobile,
+      required this.needEyeCatch});
 
   @override
   State<HomePage> createState() => HomePageState();
@@ -43,7 +48,8 @@ class HomePage extends StatefulWidget {
 class HomePageState extends State<HomePage> {
   double cardPosition = 0.0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
-  String videoPath = envFlavor == 'prod' ? 'assets/video/' : 'video/';
+  String lottiePath =
+      envFlavor == 'prod' ? 'assets/lottieFiles/' : 'lottieFiles/';
   APIService apiService = APIService();
   String savedGraphQLId = '';
   final AttackStatusBloc attackStatusBloc = AttackStatusBloc();
@@ -101,12 +107,28 @@ class HomePageState extends State<HomePage> {
   double _r = 1.0;
   bool attackIsReady = false;
   bool possibleUnitLost = false;
+  bool isMainWindow = false;
+  int eyeCatchSequence = 0;
 
   @override
   void initState() {
     super.initState();
     // GraphQL Subscription
     listenBCGGameServerProcess();
+    showMainWindow();
+  }
+
+  void showMainWindow() async {
+    if (widget.needEyeCatch == false) {
+      setState(() => isMainWindow = true);
+      return;
+    }
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() => eyeCatchSequence = 1);
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() => eyeCatchSequence = 2);
+    await Future.delayed(const Duration(seconds: 2));
+    setState(() => isMainWindow = true);
   }
 
   /*
@@ -1678,1420 +1700,1537 @@ class HomePageState extends State<HomePage> {
       double r1055 = r(1055.0);
       double r1190 = r(1190.0);
       _r = wRes;
-
       return Scaffold(
           backgroundColor: Colors.transparent,
-          body: Stack(fit: StackFit.expand, children: <Widget>[
-            // デッキカード
-            Positioned(
-                left: r(340.0),
-                top: r(403.0),
-                child: Row(children: <Widget>[
-                  gameProgressStatus >= 1 && gameStarted
-                      ? widget.isMobile == true
-                          ? Row(
-                              children: [
-                                for (var i = 0; i < handCards.length; i++)
-                                  GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          tappedCardId = handCards[i];
-                                        });
-                                      },
-                                      child: DragBox(
-                                          i,
-                                          handCards[i],
-                                          putCard,
-                                          cardInfos[handCards[i].toString()],
-                                          r,
-                                          widget.isMobile)),
-                              ],
+          body: isMainWindow == false
+              ? Stack(children: [
+                  Center(
+                      child: Image.asset(
+                    width: r(1280.0),
+                    height: r(480.0),
+                    '${lottiePath}images/img_1.jpg',
+                    fit: BoxFit.cover,
+                  )),
+                  Visibility(
+                      visible: eyeCatchSequence == 0,
+                      child: Center(
+                          child: Text(
+                        'For every 1000 battle games played in the\nworld, the1st to 3rd place will be determined\nin the smart contract! Non-stop battle,\nwith a total of 35 FLOW paid out immediately\nafter 1000 battles are done!\nThe next ranking battle starts immediately!',
+                        style:
+                            TextStyle(color: Colors.white, fontSize: r(42.0)),
+                      ))),
+                  Visibility(
+                      visible: eyeCatchSequence == 1,
+                      child: Center(
+                          child: Text(
+                        '世界で1000バトル、ゲームされる毎に\nスマートコントラクト内で1位から3位を\n決定！合計35FLOWが1000バトル行われ\nた直後に支払われる、ノンストップバトル！\nすぐに次のランキングバトルが始まる！',
+                        style:
+                            TextStyle(color: Colors.white, fontSize: r(42.0)),
+                      ))),
+                  Visibility(
+                      visible: eyeCatchSequence == 2,
+                      child: Center(
+                          child: Image.asset(
+                        width: r(980.0),
+                        height: r(460.0),
+                        '${lottiePath}images/img_0.jpg',
+                        fit: BoxFit.cover,
+                      ))),
+                ])
+              : Stack(fit: StackFit.expand, children: <Widget>[
+                  // デッキカード
+                  Positioned(
+                      left: r(340.0),
+                      top: r(403.0),
+                      child: Row(children: <Widget>[
+                        gameProgressStatus >= 1 && gameStarted
+                            ? widget.isMobile == true
+                                ? Row(
+                                    children: [
+                                      for (var i = 0; i < handCards.length; i++)
+                                        GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                tappedCardId = handCards[i];
+                                              });
+                                            },
+                                            child: DragBox(
+                                                i,
+                                                handCards[i],
+                                                putCard,
+                                                cardInfos[
+                                                    handCards[i].toString()],
+                                                r,
+                                                widget.isMobile)),
+                                    ],
+                                  )
+                                : AnimatedContainer(
+                                    margin: EdgeInsetsDirectional.only(
+                                        top: cardPosition),
+                                    duration: const Duration(milliseconds: 900),
+                                    curve: Curves.linear,
+                                    child: Row(
+                                      children: [
+                                        for (var i = 0;
+                                            i < handCards.length;
+                                            i++)
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  tappedCardId = handCards[i];
+                                                });
+                                              },
+                                              child: DragBox(
+                                                  i,
+                                                  handCards[i],
+                                                  putCard,
+                                                  cardInfos[
+                                                      handCards[i].toString()],
+                                                  r,
+                                                  widget.isMobile)),
+                                      ],
+                                    ),
+                                  )
+                            : widget.isMobile == true
+                                ? Row(
+                                    children: [
+                                      for (var cardId in [
+                                        16,
+                                        13,
+                                        4,
+                                        3,
+                                        25,
+                                        20,
+                                        26
+                                      ])
+                                        GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                tappedCardId = cardId;
+                                              });
+                                            },
+                                            child: DragBox(
+                                                null,
+                                                cardId,
+                                                putCard,
+                                                cardInfos != null
+                                                    ? cardInfos[
+                                                        cardId.toString()]
+                                                    : null,
+                                                r,
+                                                widget.isMobile)),
+                                    ],
+                                  )
+                                : AnimatedContainer(
+                                    margin: EdgeInsetsDirectional.only(
+                                        top: cardPosition),
+                                    duration: const Duration(milliseconds: 900),
+                                    curve: Curves.linear,
+                                    child: Row(
+                                      children: [
+                                        for (var cardId in [
+                                          16,
+                                          13,
+                                          4,
+                                          3,
+                                          25,
+                                          20,
+                                          26
+                                        ])
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  tappedCardId = cardId;
+                                                });
+                                              },
+                                              child: DragBox(
+                                                  null,
+                                                  cardId,
+                                                  putCard,
+                                                  cardInfos != null
+                                                      ? cardInfos[
+                                                          cardId.toString()]
+                                                      : null,
+                                                  r,
+                                                  widget.isMobile)),
+                                      ],
+                                    ),
+                                  ),
+                      ])),
+                  Positioned(
+                    left: r(470.0),
+                    top: r90,
+                    child: Container(
+                      width: r125,
+                      height: r(45.0),
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image:
+                                      AssetImage('image/trigger/trigger.png'),
+                                  fit: BoxFit.cover),
                             )
-                          : AnimatedContainer(
-                              margin:
-                                  EdgeInsetsDirectional.only(top: cardPosition),
-                              duration: const Duration(milliseconds: 900),
-                              curve: Curves.linear,
-                              child: Row(
-                                children: [
-                                  for (var i = 0; i < handCards.length; i++)
-                                    GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            tappedCardId = handCards[i];
-                                          });
-                                        },
-                                        child: DragBox(
-                                            i,
-                                            handCards[i],
-                                            putCard,
-                                            cardInfos[handCards[i].toString()],
-                                            r,
-                                            widget.isMobile)),
-                                ],
-                              ),
-                            )
-                      : widget.isMobile == true
-                          ? Row(
-                              children: [
-                                for (var cardId in [16, 13, 4, 3, 25, 20, 26])
-                                  GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          tappedCardId = cardId;
-                                        });
-                                      },
-                                      child: DragBox(
-                                          null,
-                                          cardId,
-                                          putCard,
-                                          cardInfos != null
-                                              ? cardInfos[cardId.toString()]
-                                              : null,
-                                          r,
-                                          widget.isMobile)),
-                              ],
-                            )
-                          : AnimatedContainer(
-                              margin:
-                                  EdgeInsetsDirectional.only(top: cardPosition),
-                              duration: const Duration(milliseconds: 900),
-                              curve: Curves.linear,
-                              child: Row(
-                                children: [
-                                  for (var cardId in [16, 13, 4, 3, 25, 20, 26])
-                                    GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            tappedCardId = cardId;
-                                          });
-                                        },
-                                        child: DragBox(
-                                            null,
-                                            cardId,
-                                            putCard,
-                                            cardInfos != null
-                                                ? cardInfos[cardId.toString()]
-                                                : null,
-                                            r,
-                                            widget.isMobile)),
-                                ],
-                              ),
+                          : const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage(
+                                      'assets/image/trigger/trigger.png'),
+                                  fit: BoxFit.cover),
                             ),
-                ])),
-            Positioned(
-              left: r(470.0),
-              top: r90,
-              child: Container(
-                width: r125,
-                height: r(45.0),
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/trigger/trigger.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image:
-                                AssetImage('assets/image/trigger/trigger.png'),
-                            fit: BoxFit.cover),
-                      ),
-              ),
-            ),
-            gameObject != null && gameStarted == true
-                ? OnGoingGameInfo(
-                    gameObject,
-                    setCanOperate,
-                    attackStatusBloc.attack_stream,
-                    opponentDefendPosition,
-                    attackerUsedInterceptCard,
-                    defenderUsedInterceptCard,
-                    isEnemyAttack == true
-                        ? opponentDefendPosition != null &&
-                                gameObject!.yourFieldUnit[
-                                        opponentDefendPosition.toString()] !=
-                                    null
-                            ? gameObject!.yourFieldUnit[
-                                opponentDefendPosition.toString()]
-                            : ''
-                        : actedCardPosition != null &&
-                                gameObject!.yourFieldUnit[
-                                        (actedCardPosition! + 1).toString()] !=
-                                    null
-                            ? gameObject!.yourFieldUnit[
-                                (actedCardPosition! + 1).toString()]
-                            : '',
-                    isEnemyAttack == true
-                        ? onBattlePosition != null &&
-                                gameObject!.opponentFieldUnit[onBattlePosition.toString()] !=
-                                    null
-                            ? gameObject!
-                                .opponentFieldUnit[onBattlePosition.toString()]
-                            : ''
-                        : opponentDefendPosition != null &&
-                                gameObject!.opponentFieldUnit[
-                                        opponentDefendPosition.toString()] !=
-                                    null
-                            ? gameObject!.opponentFieldUnit[
-                                opponentDefendPosition.toString()]
-                            : '',
-                    cardInfos,
-                    onChainYourTriggerCards,
-                    isEnemyAttack,
-                    attackerUsedCardIds,
-                    defenderUsedCardIds,
-                    r,
-                    widget.isMobile)
-                : Container(),
-            DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
-                widget.enLocale, r),
-            // DragTargetWidget
-            Positioned(
-                left: r(35.0),
-                top: 0.0,
-                child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            r(150.0), r(200.0), r(30.0), r(0.0)),
-                        child: DragTargetWidget(
-                            'trigger',
-                            '${imagePath}trigger/trigger.png',
-                            gameObject,
-                            cardInfos,
-                            tapCard,
-                            actedCardPosition,
-                            canOperate,
-                            attackStatusBloc.attack_stream,
-                            defaultTriggerCards,
-                            onChainYourTriggerCards,
-                            const [],
-                            const [],
-                            null,
-                            '',
-                            canOperateTmp,
-                            attackIsReady,
-                            r,
-                            widget.isMobile),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                            r(30.0), r(20.0), r(130.0), r(85.0)),
-                        child: DragTargetWidget(
-                            'unit',
-                            '${imagePath}unit/bg-2.jpg',
-                            gameObject,
-                            cardInfos,
-                            tapCard,
-                            actedCardPosition,
-                            canOperate,
-                            attackStatusBloc.attack_stream,
-                            defaultDropedList,
-                            onChainYourTriggerCards,
-                            usedInterceptCardPosition,
-                            usedTriggers,
-                            enemySkillTargetPosition,
-                            skillMessage,
-                            canOperateTmp,
-                            attackIsReady,
-                            r,
-                            widget.isMobile),
-                      ),
-                    ])),
-            // マリガンタイマー
-            Visibility(
-                visible: gameProgressStatus == 1,
-                child: Positioned(
-                    left: r(800),
-                    top: r(480),
-                    child: SizedBox(
-                        width: r100,
-                        child: StreamBuilder<int>(
-                            stream: _timer.events.stream,
-                            builder: (BuildContext context,
-                                AsyncSnapshot<int> snapshot) {
-                              return Visibility(
-                                  visible: snapshot.data != null &&
-                                      snapshot.data != 0,
-                                  child: Center(
-                                      child: Text(
-                                    '0:0${snapshot.data.toString()}',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: r(42.0)),
-                                  )));
-                            })))),
-            // マリガンボタン
-            Visibility(
-                visible: mariganClickCount < 5 && gameProgressStatus == 1,
-                child: Positioned(
-                    left: r(900),
-                    top: r(500),
-                    child: StreamBuilder<int>(
-                        stream: _timer.events.stream,
-                        builder: (BuildContext context,
-                            AsyncSnapshot<int> snapshot) {
-                          return Visibility(
-                              visible: snapshot.data != 0,
-                              child: SizedBox(
-                                  width: snapshot.data != 0 ? r100 : 0.0,
-                                  height: r(25.0),
+                    ),
+                  ),
+                  gameObject != null && gameStarted == true
+                      ? OnGoingGameInfo(
+                          gameObject,
+                          setCanOperate,
+                          attackStatusBloc.attack_stream,
+                          opponentDefendPosition,
+                          attackerUsedInterceptCard,
+                          defenderUsedInterceptCard,
+                          isEnemyAttack == true
+                              ? opponentDefendPosition != null &&
+                                      gameObject!.yourFieldUnit[opponentDefendPosition.toString()] !=
+                                          null
+                                  ? gameObject!.yourFieldUnit[
+                                      opponentDefendPosition.toString()]
+                                  : ''
+                              : actedCardPosition != null &&
+                                      gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()] !=
+                                          null
+                                  ? gameObject!.yourFieldUnit[
+                                      (actedCardPosition! + 1).toString()]
+                                  : '',
+                          isEnemyAttack == true
+                              ? onBattlePosition != null &&
+                                      gameObject!.opponentFieldUnit[
+                                              onBattlePosition.toString()] !=
+                                          null
+                                  ? gameObject!.opponentFieldUnit[
+                                      onBattlePosition.toString()]
+                                  : ''
+                              : opponentDefendPosition != null &&
+                                      gameObject!.opponentFieldUnit[
+                                              opponentDefendPosition.toString()] !=
+                                          null
+                                  ? gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]
+                                  : '',
+                          cardInfos,
+                          onChainYourTriggerCards,
+                          isEnemyAttack,
+                          attackerUsedCardIds,
+                          defenderUsedCardIds,
+                          r,
+                          widget.isMobile)
+                      : Container(),
+                  DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
+                      widget.enLocale, r),
+                  // DragTargetWidget
+                  Positioned(
+                      left: r(35.0),
+                      top: 0.0,
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                  r(150.0), r(200.0), r(30.0), r(0.0)),
+                              child: DragTargetWidget(
+                                  'trigger',
+                                  '${imagePath}trigger/trigger.png',
+                                  gameObject,
+                                  cardInfos,
+                                  tapCard,
+                                  actedCardPosition,
+                                  canOperate,
+                                  attackStatusBloc.attack_stream,
+                                  defaultTriggerCards,
+                                  onChainYourTriggerCards,
+                                  const [],
+                                  const [],
+                                  null,
+                                  '',
+                                  canOperateTmp,
+                                  attackIsReady,
+                                  r,
+                                  widget.isMobile),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                  r(30.0), r(20.0), r(130.0), r(85.0)),
+                              child: DragTargetWidget(
+                                  'unit',
+                                  '${imagePath}unit/bg-2.jpg',
+                                  gameObject,
+                                  cardInfos,
+                                  tapCard,
+                                  actedCardPosition,
+                                  canOperate,
+                                  attackStatusBloc.attack_stream,
+                                  defaultDropedList,
+                                  onChainYourTriggerCards,
+                                  usedInterceptCardPosition,
+                                  usedTriggers,
+                                  enemySkillTargetPosition,
+                                  skillMessage,
+                                  canOperateTmp,
+                                  attackIsReady,
+                                  r,
+                                  widget.isMobile),
+                            ),
+                          ])),
+                  // マリガンタイマー
+                  Visibility(
+                      visible: gameProgressStatus == 1,
+                      child: Positioned(
+                          left: r(800),
+                          top: r(480),
+                          child: SizedBox(
+                              width: r100,
+                              child: StreamBuilder<int>(
+                                  stream: _timer.events.stream,
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<int> snapshot) {
+                                    return Visibility(
+                                        visible: snapshot.data != null &&
+                                            snapshot.data != 0,
+                                        child: Center(
+                                            child: Text(
+                                          '0:0${snapshot.data.toString()}',
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: r(42.0)),
+                                        )));
+                                  })))),
+                  // マリガンボタン
+                  Visibility(
+                      visible: mariganClickCount < 5 && gameProgressStatus == 1,
+                      child: Positioned(
+                          left: r(900),
+                          top: r(500),
+                          child: StreamBuilder<int>(
+                              stream: _timer.events.stream,
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<int> snapshot) {
+                                return Visibility(
+                                    visible: snapshot.data != 0,
+                                    child: SizedBox(
+                                        width: snapshot.data != 0 ? r100 : 0.0,
+                                        height: r(25.0),
+                                        child: FloatingActionButton(
+                                            backgroundColor: Colors.transparent,
+                                            onPressed: () {
+                                              if (mariganClickCount < 5) {
+                                                setState(() =>
+                                                    mariganClickCount =
+                                                        mariganClickCount + 1);
+                                                setState(() => handCards =
+                                                    mariganCardIdList[
+                                                        mariganClickCount]);
+                                              } else {
+                                                // 6回目は1回目をセット
+                                                setState(() => handCards =
+                                                    mariganCardIdList[0]);
+                                              }
+                                            },
+                                            tooltip: 'Redraw',
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                              child: Image.asset(
+                                                width: r(65.0),
+                                                height: r(25.0),
+                                                '${imagePath}button/redo.png',
+                                                fit: BoxFit
+                                                    .cover, //prefer cover over fill
+                                              ),
+                                            ))));
+                              }))),
+                  // AttackTarget
+                  Visibility(
+                      visible: attackSignalPosition != null,
+                      child: Positioned(
+                        left: r(attackSignalPosition != null &&
+                                (attackSignalPosition! == 2 ||
+                                    attackSignalPosition! == 0)
+                            ? 760.0
+                            : 850.0),
+                        top: r(-2.0),
+                        child: Container(
+                          width: r(75.0),
+                          height: r(75.0),
+                          decoration: envFlavor != 'prod'
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.7,
+                                      image: AssetImage(
+                                          'image/unit/attackTarget.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.7,
+                                      image: AssetImage(
+                                          'assets/image/unit/attackTarget.png'),
+                                      fit: BoxFit.cover),
+                                ),
+                        ),
+                      )),
+
+                  Positioned(
+                    left: r(648.0),
+                    top: r122,
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Enemy's 1st Unit Name
+                  Positioned(
+                      left: r650,
+                      top: r125,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['1'] != null
+                              ? (gameObject!.opponentFieldUnitAction['1'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(
+                                      gameObject!.opponentFieldUnit['1'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Enemy's 1st Unit BP
+                  Positioned(
+                      left: r650,
+                      top: r(147.0),
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['1'] != null
+                              ? (gameObject!.opponentFieldUnitAction['1'] ==
+                                              '1' ||
+                                          gameObject!.opponentFieldUnitAction[
+                                                  '1'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.opponentFiledUnitBps['1']
+                                      .toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.opponentFieldUnitBpAmountOfChange[
+                                            '1'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .opponentFieldUnitBpAmountOfChange[
+                                            '1']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+
+                  Positioned(
+                    left: r(783.0),
+                    top: r122,
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Enemy's 2st Unit Name
+                  Positioned(
+                      left: r785,
+                      top: r125,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['2'] != null
+                              ? (gameObject!.opponentFieldUnitAction['2'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(
+                                      gameObject!.opponentFieldUnit['2'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Enemy's 2st Unit BP
+                  Positioned(
+                      left: r785,
+                      top: r(147.0),
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['2'] != null
+                              ? (gameObject!.opponentFieldUnitAction['2'] ==
+                                              '1' ||
+                                          gameObject!.opponentFieldUnitAction[
+                                                  '2'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.opponentFiledUnitBps['2']
+                                      .toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.opponentFieldUnitBpAmountOfChange[
+                                            '2'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .opponentFieldUnitBpAmountOfChange[
+                                            '2']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+
+                  Positioned(
+                    left: r(918.0),
+                    top: r122,
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Enemy's 3st Unit Name
+                  Positioned(
+                      left: r920,
+                      top: r125,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['3'] != null
+                              ? (gameObject!.opponentFieldUnitAction['3'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(
+                                      gameObject!.opponentFieldUnit['3'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Enemy's 3st Unit BP
+                  Positioned(
+                      left: r920,
+                      top: r(147.0),
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['3'] != null
+                              ? (gameObject!.opponentFieldUnitAction['3'] ==
+                                              '1' ||
+                                          gameObject!.opponentFieldUnitAction[
+                                                  '3'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.opponentFiledUnitBps['3']
+                                      .toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.opponentFieldUnitBpAmountOfChange[
+                                            '3'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .opponentFieldUnitBpAmountOfChange[
+                                            '3']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(1053.0),
+                    top: r122,
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Enemy's 4st Unit Name
+                  Positioned(
+                      left: r1055,
+                      top: r125,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['4'] != null
+                              ? (gameObject!.opponentFieldUnitAction['4'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(
+                                      gameObject!.opponentFieldUnit['4'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Enemy's 4st Unit BP
+                  Positioned(
+                      left: r1055,
+                      top: r(147.0),
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['4'] != null
+                              ? (gameObject!.opponentFieldUnitAction['4'] ==
+                                              '1' ||
+                                          gameObject!.opponentFieldUnitAction[
+                                                  '4'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.opponentFiledUnitBps['4']
+                                      .toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.opponentFieldUnitBpAmountOfChange[
+                                            '4'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .opponentFieldUnitBpAmountOfChange[
+                                            '4']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(1188.0),
+                    top: r122,
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Enemy's 5st Unit Name
+                  Positioned(
+                      left: r1190,
+                      top: r125,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['5'] != null
+                              ? (gameObject!.opponentFieldUnitAction['5'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(
+                                      gameObject!.opponentFieldUnit['5'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Enemy's 5st Unit BP
+                  Positioned(
+                      left: r1190,
+                      top: r(147.0),
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.opponentFieldUnit['5'] != null
+                              ? (gameObject!.opponentFieldUnitAction['5'] ==
+                                              '1' ||
+                                          gameObject!.opponentFieldUnitAction[
+                                                  '5'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.opponentFiledUnitBps['5']
+                                      .toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.opponentFieldUnitBpAmountOfChange[
+                                            '5'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .opponentFieldUnitBpAmountOfChange[
+                                            '5']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(648.0),
+                    top: r(348.0),
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Your 1st Unit Name
+                  Positioned(
+                      left: r650,
+                      top: r351,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['1'] != null
+                              ? (gameObject!.yourFieldUnitAction['1'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(gameObject!.yourFieldUnit['1'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Your 1st Unit BP
+                  Positioned(
+                      left: r650,
+                      top: r373,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['1'] != null
+                              ? (gameObject!.yourFieldUnitAction['1'] == '1' ||
+                                          gameObject!
+                                                  .yourFieldUnitAction['1'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.yourFiledUnitBps['1'].toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.yourFieldUnitBpAmountOfChange[
+                                            '1'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .yourFieldUnitBpAmountOfChange[
+                                            '1']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(783.0),
+                    top: r(348.0),
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Your 2st Unit Name
+                  Positioned(
+                      left: r785,
+                      top: r351,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['2'] != null
+                              ? (gameObject!.yourFieldUnitAction['2'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(gameObject!.yourFieldUnit['2'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Your 2st Unit BP
+                  Positioned(
+                      left: r785,
+                      top: r373,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['2'] != null
+                              ? (gameObject!.yourFieldUnitAction['2'] == '1' ||
+                                          gameObject!
+                                                  .yourFieldUnitAction['2'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.yourFiledUnitBps['2'].toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.yourFieldUnitBpAmountOfChange[
+                                            '2'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .yourFieldUnitBpAmountOfChange[
+                                            '2']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(918.0),
+                    top: r(348.0),
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Your 3st Unit Name
+                  Positioned(
+                      left: r920,
+                      top: r351,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['3'] != null
+                              ? (gameObject!.yourFieldUnitAction['3'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(gameObject!.yourFieldUnit['3'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Your 3st Unit BP
+                  Positioned(
+                      left: r920,
+                      top: r373,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['3'] != null
+                              ? (gameObject!.yourFieldUnitAction['3'] == '1' ||
+                                          gameObject!
+                                                  .yourFieldUnitAction['3'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.yourFiledUnitBps['3'].toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.yourFieldUnitBpAmountOfChange[
+                                            '3'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .yourFieldUnitBpAmountOfChange[
+                                            '3']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(1053.0),
+                    top: r(348.0),
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Your 4st Unit Name
+                  Positioned(
+                      left: r1055,
+                      top: r351,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['4'] != null
+                              ? (gameObject!.yourFieldUnitAction['4'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(gameObject!.yourFieldUnit['4'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Your 4st Unit BP
+                  Positioned(
+                      left: r1055,
+                      top: r373,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['4'] != null
+                              ? (gameObject!.yourFieldUnitAction['4'] == '1' ||
+                                          gameObject!
+                                                  .yourFieldUnitAction['4'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.yourFiledUnitBps['4'].toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.yourFieldUnitBpAmountOfChange[
+                                            '4'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .yourFieldUnitBpAmountOfChange[
+                                            '4']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  Positioned(
+                    left: r(1188.0),
+                    top: r(348.0),
+                    child: Container(
+                      width: r90,
+                      height: r50,
+                      decoration: envFlavor != 'prod'
+                          ? const BoxDecoration(
+                              color: Colors.transparent,
+                              image: DecorationImage(
+                                  opacity: 0.5,
+                                  image: AssetImage('image/unit/status.png'),
+                                  fit: BoxFit.cover),
+                            )
+                          : (widget.isMobile == true
+                              ? const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )
+                              : const BoxDecoration(
+                                  color: Colors.transparent,
+                                  image: DecorationImage(
+                                      opacity: 0.5,
+                                      image: AssetImage(
+                                          'assets/image/unit/status.png'),
+                                      fit: BoxFit.cover),
+                                )),
+                    ),
+                  ),
+                  // Your 5st Unit Name
+                  Positioned(
+                      left: r1190,
+                      top: r351,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['5'] != null
+                              ? (gameObject!.yourFieldUnitAction['5'] == '2'
+                                      ? '🗡️'
+                                      : '　') +
+                                  getCardName(gameObject!.yourFieldUnit['5'])
+                              : '',
+                          style: TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // Your 5st Unit BP
+                  Positioned(
+                      left: r1190,
+                      top: r373,
+                      width: r100,
+                      child: Text(
+                          gameObject != null &&
+                                  gameObject!.yourFieldUnit['5'] != null
+                              ? (gameObject!.yourFieldUnitAction['5'] == '1' ||
+                                          gameObject!
+                                                  .yourFieldUnitAction['5'] ==
+                                              '2'
+                                      ? '🛡️'
+                                      : '　') +
+                                  gameObject!.yourFiledUnitBps['5'].toString()
+                              : '',
+                          style: TextStyle(
+                            color: gameObject != null &&
+                                    gameObject!.yourFieldUnitBpAmountOfChange[
+                                            '5'] !=
+                                        null
+                                ? (int.parse(gameObject!
+                                                .yourFieldUnitBpAmountOfChange[
+                                            '5']) >
+                                        0
+                                    ? Colors.blue
+                                    : Colors.red)
+                                : Colors.white,
+                            decoration: TextDecoration.none,
+                            fontSize: r(16.0),
+                          ))),
+                  // ランキングボタン
+                  Visibility(
+                      visible: gameStarted == false,
+                      child: Positioned(
+                          top: r(160.0),
+                          left: r(330.0),
+                          child: SizedBox(
+                              width: r50,
+                              height: r50,
+                              child: FittedBox(
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
                                       onPressed: () {
-                                        if (mariganClickCount < 5) {
-                                          setState(() => mariganClickCount =
-                                              mariganClickCount + 1);
-                                          setState(() => handCards =
-                                              mariganCardIdList[
-                                                  mariganClickCount]);
-                                        } else {
-                                          // 6回目は1回目をセット
-                                          setState(() =>
-                                              handCards = mariganCardIdList[0]);
-                                        }
+                                        html.window.location.href = 'ranking';
                                       },
-                                      tooltip: 'Redraw',
+                                      tooltip: 'RANKING!',
+                                      // elevation: 0.0,
                                       child: ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(20.0),
+                                            BorderRadius.circular(r(4.0)),
                                         child: Image.asset(
-                                          width: r(65.0),
-                                          height: r(25.0),
-                                          '${imagePath}button/redo.png',
-                                          fit: BoxFit
-                                              .cover, //prefer cover over fill
+                                          '${imagePath}button/home_ranking.png',
+                                          fit: BoxFit.cover,
                                         ),
-                                      ))));
-                        }))),
-            // AttackTarget
-            Visibility(
-                visible: attackSignalPosition != null,
-                child: Positioned(
-                  left: r(attackSignalPosition != null &&
-                          (attackSignalPosition! == 2 ||
-                              attackSignalPosition! == 0)
-                      ? 760.0
-                      : 850.0),
-                  top: r(-2.0),
-                  child: Container(
-                    width: r(75.0),
-                    height: r(75.0),
-                    decoration: envFlavor != 'prod'
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.7,
-                                image:
-                                    AssetImage('image/unit/attackTarget.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.7,
-                                image: AssetImage(
-                                    'assets/image/unit/attackTarget.png'),
-                                fit: BoxFit.cover),
-                          ),
-                  ),
-                )),
-
-            Positioned(
-              left: r(648.0),
-              top: r122,
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Enemy's 1st Unit Name
-            Positioned(
-                left: r650,
-                top: r125,
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['1'] != null
-                        ? (gameObject!.opponentFieldUnitAction['1'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.opponentFieldUnit['1'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Enemy's 1st Unit BP
-            Positioned(
-                left: r650,
-                top: r(147.0),
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['1'] != null
-                        ? (gameObject!.opponentFieldUnitAction['1'] == '1' ||
-                                    gameObject!.opponentFieldUnitAction['1'] ==
-                                        '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.opponentFiledUnitBps['1'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['1'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['1']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-
-            Positioned(
-              left: r(783.0),
-              top: r122,
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Enemy's 2st Unit Name
-            Positioned(
-                left: r785,
-                top: r125,
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['2'] != null
-                        ? (gameObject!.opponentFieldUnitAction['2'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.opponentFieldUnit['2'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Enemy's 2st Unit BP
-            Positioned(
-                left: r785,
-                top: r(147.0),
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['2'] != null
-                        ? (gameObject!.opponentFieldUnitAction['2'] == '1' ||
-                                    gameObject!.opponentFieldUnitAction['2'] ==
-                                        '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.opponentFiledUnitBps['2'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['2'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['2']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-
-            Positioned(
-              left: r(918.0),
-              top: r122,
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Enemy's 3st Unit Name
-            Positioned(
-                left: r920,
-                top: r125,
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['3'] != null
-                        ? (gameObject!.opponentFieldUnitAction['3'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.opponentFieldUnit['3'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Enemy's 3st Unit BP
-            Positioned(
-                left: r920,
-                top: r(147.0),
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['3'] != null
-                        ? (gameObject!.opponentFieldUnitAction['3'] == '1' ||
-                                    gameObject!.opponentFieldUnitAction['3'] ==
-                                        '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.opponentFiledUnitBps['3'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['3'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['3']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(1053.0),
-              top: r122,
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Enemy's 4st Unit Name
-            Positioned(
-                left: r1055,
-                top: r125,
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['4'] != null
-                        ? (gameObject!.opponentFieldUnitAction['4'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.opponentFieldUnit['4'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Enemy's 4st Unit BP
-            Positioned(
-                left: r1055,
-                top: r(147.0),
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['4'] != null
-                        ? (gameObject!.opponentFieldUnitAction['4'] == '1' ||
-                                    gameObject!.opponentFieldUnitAction['4'] ==
-                                        '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.opponentFiledUnitBps['4'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['4'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['4']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(1188.0),
-              top: r122,
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Enemy's 5st Unit Name
-            Positioned(
-                left: r1190,
-                top: r125,
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['5'] != null
-                        ? (gameObject!.opponentFieldUnitAction['5'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.opponentFieldUnit['5'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Enemy's 5st Unit BP
-            Positioned(
-                left: r1190,
-                top: r(147.0),
-                width: r100,
-                child: Text(
-                    gameObject != null &&
-                            gameObject!.opponentFieldUnit['5'] != null
-                        ? (gameObject!.opponentFieldUnitAction['5'] == '1' ||
-                                    gameObject!.opponentFieldUnitAction['5'] ==
-                                        '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.opponentFiledUnitBps['5'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['5'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .opponentFieldUnitBpAmountOfChange['5']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(648.0),
-              top: r(348.0),
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Your 1st Unit Name
-            Positioned(
-                left: r650,
-                top: r351,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['1'] != null
-                        ? (gameObject!.yourFieldUnitAction['1'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.yourFieldUnit['1'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Your 1st Unit BP
-            Positioned(
-                left: r650,
-                top: r373,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['1'] != null
-                        ? (gameObject!.yourFieldUnitAction['1'] == '1' ||
-                                    gameObject!.yourFieldUnitAction['1'] == '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.yourFiledUnitBps['1'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!.yourFieldUnitBpAmountOfChange['1'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .yourFieldUnitBpAmountOfChange['1']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(783.0),
-              top: r(348.0),
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Your 2st Unit Name
-            Positioned(
-                left: r785,
-                top: r351,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['2'] != null
-                        ? (gameObject!.yourFieldUnitAction['2'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.yourFieldUnit['2'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Your 2st Unit BP
-            Positioned(
-                left: r785,
-                top: r373,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['2'] != null
-                        ? (gameObject!.yourFieldUnitAction['2'] == '1' ||
-                                    gameObject!.yourFieldUnitAction['2'] == '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.yourFiledUnitBps['2'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!.yourFieldUnitBpAmountOfChange['2'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .yourFieldUnitBpAmountOfChange['2']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(918.0),
-              top: r(348.0),
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Your 3st Unit Name
-            Positioned(
-                left: r920,
-                top: r351,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['3'] != null
-                        ? (gameObject!.yourFieldUnitAction['3'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.yourFieldUnit['3'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Your 3st Unit BP
-            Positioned(
-                left: r920,
-                top: r373,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['3'] != null
-                        ? (gameObject!.yourFieldUnitAction['3'] == '1' ||
-                                    gameObject!.yourFieldUnitAction['3'] == '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.yourFiledUnitBps['3'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!.yourFieldUnitBpAmountOfChange['3'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .yourFieldUnitBpAmountOfChange['3']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(1053.0),
-              top: r(348.0),
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Your 4st Unit Name
-            Positioned(
-                left: r1055,
-                top: r351,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
-                        ? (gameObject!.yourFieldUnitAction['4'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.yourFieldUnit['4'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Your 4st Unit BP
-            Positioned(
-                left: r1055,
-                top: r373,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['4'] != null
-                        ? (gameObject!.yourFieldUnitAction['4'] == '1' ||
-                                    gameObject!.yourFieldUnitAction['4'] == '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.yourFiledUnitBps['4'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!.yourFieldUnitBpAmountOfChange['4'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .yourFieldUnitBpAmountOfChange['4']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            Positioned(
-              left: r(1188.0),
-              top: r(348.0),
-              child: Container(
-                width: r90,
-                height: r50,
-                decoration: envFlavor != 'prod'
-                    ? const BoxDecoration(
-                        color: Colors.transparent,
-                        image: DecorationImage(
-                            opacity: 0.5,
-                            image: AssetImage('image/unit/status.png'),
-                            fit: BoxFit.cover),
-                      )
-                    : (widget.isMobile == true
-                        ? const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )
-                        : const BoxDecoration(
-                            color: Colors.transparent,
-                            image: DecorationImage(
-                                opacity: 0.5,
-                                image:
-                                    AssetImage('assets/image/unit/status.png'),
-                                fit: BoxFit.cover),
-                          )),
-              ),
-            ),
-            // Your 5st Unit Name
-            Positioned(
-                left: r1190,
-                top: r351,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['5'] != null
-                        ? (gameObject!.yourFieldUnitAction['5'] == '2'
-                                ? '🗡️'
-                                : '　') +
-                            getCardName(gameObject!.yourFieldUnit['5'])
-                        : '',
-                    style: TextStyle(
-                      color: Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // Your 5st Unit BP
-            Positioned(
-                left: r1190,
-                top: r373,
-                width: r100,
-                child: Text(
-                    gameObject != null && gameObject!.yourFieldUnit['5'] != null
-                        ? (gameObject!.yourFieldUnitAction['5'] == '1' ||
-                                    gameObject!.yourFieldUnitAction['5'] == '2'
-                                ? '🛡️'
-                                : '　') +
-                            gameObject!.yourFiledUnitBps['5'].toString()
-                        : '',
-                    style: TextStyle(
-                      color: gameObject != null &&
-                              gameObject!.yourFieldUnitBpAmountOfChange['5'] !=
-                                  null
-                          ? (int.parse(gameObject!
-                                      .yourFieldUnitBpAmountOfChange['5']) >
-                                  0
-                              ? Colors.blue
-                              : Colors.red)
-                          : Colors.white,
-                      decoration: TextDecoration.none,
-                      fontSize: r(16.0),
-                    ))),
-            // ランキングボタン
-            Visibility(
-                visible: gameStarted == false,
-                child: Positioned(
-                    top: r(160.0),
-                    left: r(330.0),
-                    child: SizedBox(
-                        width: r50,
-                        height: r50,
-                        child: FittedBox(
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  html.window.location.href = 'ranking';
-                                },
-                                tooltip: 'RANKING!',
-                                // elevation: 0.0,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(r(4.0)),
-                                  child: Image.asset(
-                                    '${imagePath}button/home_ranking.png',
-                                    fit: BoxFit.cover,
-                                  ),
-                                )))))),
-            // ホワイトペーパー
-            Visibility(
-                visible: gameStarted == false,
-                child: Positioned(
-                    top: r(160.0),
-                    left: r(205.0),
-                    child: SizedBox(
-                        width: r(52.0),
-                        height: r(52.0),
-                        child: FittedBox(
-                            child: FloatingActionButton(
-                                backgroundColor: Colors.transparent,
-                                onPressed: () {
-                                  html.window
-                                      .open('white_paper', 'white_paper');
-                                  // html.window.location.href = 'white_paper';
-                                },
-                                tooltip: 'White Paper',
-                                // elevation: 0.0,
-                                child: const ClipRRect(
-                                  child: Icon(
-                                    Icons.receipt_long,
-                                    size: 52.0,
-                                    color: Colors.white,
-                                  ),
-                                )))))),
-            // 敵のバトルカード
-            Visibility(
-              visible: gameObject != null &&
-                  ((isEnemyAttack == true &&
-                          onBattlePosition != null &&
-                          gameObject!.opponentFieldUnit[
-                                  onBattlePosition.toString()] !=
-                              null) ||
-                      (isEnemyAttack == false &&
-                          opponentDefendPosition != null &&
-                          gameObject!.opponentFieldUnit[
-                                  opponentDefendPosition.toString()] !=
-                              null)),
-              child: Positioned(
-                right: r80,
-                top: r90,
-                child: GFImageOverlay(
-                  width: r(200.0),
-                  height: r(300.0),
-                  image: AssetImage(gameObject == null
-                      ? ''
-                      : isEnemyAttack == true
-                          ? gameObject!.opponentFieldUnit[
-                                      onBattlePosition.toString()] !=
-                                  null
-                              ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
-                              : '${imagePath}unit/bg-2.jpg'
-                          : gameObject!.opponentFieldUnit[
-                                      opponentDefendPosition.toString()] !=
-                                  null
-                              ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]}.jpeg'
-                              : '${imagePath}unit/bg-2.jpg'),
-                ),
-              ),
-            ),
-            // あなたのバトルカード
-            Visibility(
-              visible: gameObject != null &&
-                  ((isEnemyAttack == true &&
-                          opponentDefendPosition != null &&
-                          gameObject!.yourFieldUnit[
-                                  opponentDefendPosition.toString()] !=
-                              null) ||
-                      (isEnemyAttack == false &&
-                          actedCardPosition != null &&
-                          attackerUsedCardIds.isNotEmpty &&
-                          gameObject!.yourFieldUnit[
-                                  (actedCardPosition! + 1).toString()] !=
-                              null)),
-              child: Positioned(
-                  right: r(400.0),
-                  top: r90,
-                  child: GFImageOverlay(
-                    width: r(200.0),
-                    height: r(300.0),
-                    shape: BoxShape.rectangle,
-                    image: AssetImage(gameObject == null
-                        ? ''
-                        : isEnemyAttack == true
-                            ? opponentDefendPosition != null &&
-                                    gameObject!.yourFieldUnit[
+                                      )))))),
+                  // ホワイトペーパー
+                  Visibility(
+                      visible: gameStarted == false,
+                      child: Positioned(
+                          top: r(160.0),
+                          left: r(205.0),
+                          child: SizedBox(
+                              width: r(52.0),
+                              height: r(52.0),
+                              child: FittedBox(
+                                  child: FloatingActionButton(
+                                      backgroundColor: Colors.transparent,
+                                      onPressed: () {
+                                        html.window
+                                            .open('white_paper', 'white_paper');
+                                        // html.window.location.href = 'white_paper';
+                                      },
+                                      tooltip: 'White Paper',
+                                      // elevation: 0.0,
+                                      child: const ClipRRect(
+                                        child: Icon(
+                                          Icons.receipt_long,
+                                          size: 52.0,
+                                          color: Colors.white,
+                                        ),
+                                      )))))),
+                  // 敵のバトルカード
+                  Visibility(
+                    visible: gameObject != null &&
+                        ((isEnemyAttack == true &&
+                                onBattlePosition != null &&
+                                gameObject!.opponentFieldUnit[
+                                        onBattlePosition.toString()] !=
+                                    null) ||
+                            (isEnemyAttack == false &&
+                                opponentDefendPosition != null &&
+                                gameObject!.opponentFieldUnit[
+                                        opponentDefendPosition.toString()] !=
+                                    null)),
+                    child: Positioned(
+                      right: r80,
+                      top: r90,
+                      child: GFImageOverlay(
+                        width: r(200.0),
+                        height: r(300.0),
+                        image: AssetImage(gameObject == null
+                            ? ''
+                            : isEnemyAttack == true
+                                ? gameObject!.opponentFieldUnit[
+                                            onBattlePosition.toString()] !=
+                                        null
+                                    ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[onBattlePosition.toString()]}.jpeg'
+                                    : '${imagePath}unit/bg-2.jpg'
+                                : gameObject!.opponentFieldUnit[
                                             opponentDefendPosition
                                                 .toString()] !=
                                         null
-                                ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
-                                : '${imagePath}unit/bg-2.jpg'
-                            : actedCardPosition != null &&
-                                    gameObject!.yourFieldUnit[
-                                            (actedCardPosition! + 1)
-                                                .toString()] !=
-                                        null
-                                ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
-                                : '${imagePath}unit/bg-2.jpg'),
-                  )),
-            ),
-            // 攻撃側の使用したトリガー・インターセプトカード
-            Visibility(
-                visible: gameObject != null && attackerUsedCardIds.isNotEmpty,
-                child: Positioned(
-                    right: isEnemyAttack == true ? r80 : r(400.0),
-                    top: r(340.0),
-                    child: Row(
-                      children: [
-                        for (var cardId in attackerUsedCardIds)
-                          GFImageOverlay(
-                            width: r80,
-                            height: r(120.0),
-                            image: AssetImage(gameObject == null
-                                ? ''
-                                : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
-                          ),
-                      ],
-                    ))),
-            // 防御側の使用したトリガー・インターセプトカード
-            Visibility(
-                visible: gameObject != null && defenderUsedCardIds.isNotEmpty,
-                child: Positioned(
-                    right: isEnemyAttack == true ? r(400.0) : r80,
-                    top: r(340.0),
-                    child: Row(
-                      children: [
-                        for (var cardId in defenderUsedCardIds)
-                          GFImageOverlay(
-                            width: r80,
-                            height: r(120.0),
-                            image: AssetImage(gameObject == null
-                                ? ''
-                                : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
-                          ),
-                      ],
-                    ))),
-            // Choose target unit
-            Visibility(
-                visible: showUnitTargetCarousel == true,
-                child: Column(children: <Widget>[
-                  CarouselSlider.builder(
-                    carouselController: cController,
-                    options: CarouselOptions(
-                        height: r(250),
-                        aspectRatio: 14 / 9,
-                        viewportFraction: 0.6, // 1.0:1つが全体に出る
-                        initialPage: 0,
-                        // enableInfiniteScroll: true,
-                        enlargeCenterPage: true,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            activeIndex = index;
-                          });
-                        }),
-                    itemCount: gameObject == null
-                        ? 0
-                        : (cannotDefendUnitPositions.isNotEmpty
+                                    ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.opponentFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                                    : '${imagePath}unit/bg-2.jpg'),
+                      ),
+                    ),
+                  ),
+                  // あなたのバトルカード
+                  Visibility(
+                    visible: gameObject != null &&
+                        ((isEnemyAttack == true &&
+                                opponentDefendPosition != null &&
+                                gameObject!.yourFieldUnit[
+                                        opponentDefendPosition.toString()] !=
+                                    null) ||
+                            (isEnemyAttack == false &&
+                                actedCardPosition != null &&
+                                attackerUsedCardIds.isNotEmpty &&
+                                gameObject!.yourFieldUnit[
+                                        (actedCardPosition! + 1).toString()] !=
+                                    null)),
+                    child: Positioned(
+                        right: r(400.0),
+                        top: r90,
+                        child: GFImageOverlay(
+                          width: r(200.0),
+                          height: r(300.0),
+                          shape: BoxShape.rectangle,
+                          image: AssetImage(gameObject == null
+                              ? ''
+                              : isEnemyAttack == true
+                                  ? opponentDefendPosition != null &&
+                                          gameObject!.yourFieldUnit[
+                                                  opponentDefendPosition
+                                                      .toString()] !=
+                                              null
+                                      ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[opponentDefendPosition.toString()]}.jpeg'
+                                      : '${imagePath}unit/bg-2.jpg'
+                                  : actedCardPosition != null &&
+                                          gameObject!.yourFieldUnit[
+                                                  (actedCardPosition! + 1)
+                                                      .toString()] !=
+                                              null
+                                      ? '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_${gameObject!.yourFieldUnit[(actedCardPosition! + 1).toString()]}.jpeg'
+                                      : '${imagePath}unit/bg-2.jpg'),
+                        )),
+                  ),
+                  // 攻撃側の使用したトリガー・インターセプトカード
+                  Visibility(
+                      visible:
+                          gameObject != null && attackerUsedCardIds.isNotEmpty,
+                      child: Positioned(
+                          right: isEnemyAttack == true ? r80 : r(400.0),
+                          top: r(340.0),
+                          child: Row(
+                            children: [
+                              for (var cardId in attackerUsedCardIds)
+                                GFImageOverlay(
+                                  width: r80,
+                                  height: r(120.0),
+                                  image: AssetImage(gameObject == null
+                                      ? ''
+                                      : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
+                                ),
+                            ],
+                          ))),
+                  // 防御側の使用したトリガー・インターセプトカード
+                  Visibility(
+                      visible:
+                          gameObject != null && defenderUsedCardIds.isNotEmpty,
+                      child: Positioned(
+                          right: isEnemyAttack == true ? r(400.0) : r80,
+                          top: r(340.0),
+                          child: Row(
+                            children: [
+                              for (var cardId in defenderUsedCardIds)
+                                GFImageOverlay(
+                                  width: r80,
+                                  height: r(120.0),
+                                  image: AssetImage(gameObject == null
+                                      ? ''
+                                      : '${imagePath}trigger/${widget.isMobile ? 'mobile/' : ''}card_${cardId.toString()}.jpeg'),
+                                ),
+                            ],
+                          ))),
+                  // Choose target unit
+                  Visibility(
+                      visible: showUnitTargetCarousel == true,
+                      child: Column(children: <Widget>[
+                        CarouselSlider.builder(
+                          carouselController: cController,
+                          options: CarouselOptions(
+                              height: r(250),
+                              aspectRatio: 14 / 9,
+                              viewportFraction: 0.6, // 1.0:1つが全体に出る
+                              initialPage: 0,
+                              // enableInfiniteScroll: true,
+                              enlargeCenterPage: true,
+                              scrollDirection: Axis.horizontal,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  activeIndex = index;
+                                });
+                              }),
+                          itemCount: gameObject == null
+                              ? 0
+                              : (cannotDefendUnitPositions.isNotEmpty
+                                  ? cannotDefendUnitPositions.length
+                                  : opponentFieldUnitPositions.length),
+                          itemBuilder: (context, index, realIndex) {
+                            // 行動済みのみ
+                            if (cannotDefendUnitPositions.isNotEmpty) {
+                              var target = cannotDefendUnitPositions[index];
+                              var cardId = gameObject!
+                                  .opponentFieldUnit[(target).toString()];
+                              return Image.asset(
+                                '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                                fit: BoxFit.cover,
+                              );
+                            } else {
+                              // 全体から
+                              var target = opponentFieldUnitPositions[index];
+                              var cardId = gameObject!
+                                  .opponentFieldUnit[(target).toString()];
+                              return Image.asset(
+                                '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                                fit: BoxFit.cover,
+                              );
+                            }
+                          },
+                        ),
+                        SizedBox(height: r10),
+                        buildIndicator(cannotDefendUnitPositions.isNotEmpty
                             ? cannotDefendUnitPositions.length
                             : opponentFieldUnitPositions.length),
-                    itemBuilder: (context, index, realIndex) {
-                      // 行動済みのみ
-                      if (cannotDefendUnitPositions.isNotEmpty) {
-                        var target = cannotDefendUnitPositions[index];
-                        var cardId =
-                            gameObject!.opponentFieldUnit[(target).toString()];
-                        return Image.asset(
-                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                          fit: BoxFit.cover,
-                        );
-                      } else {
-                        // 全体から
-                        var target = opponentFieldUnitPositions[index];
-                        var cardId =
-                            gameObject!.opponentFieldUnit[(target).toString()];
-                        return Image.asset(
-                          '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                          fit: BoxFit.cover,
-                        );
-                      }
-                    },
-                  ),
-                  SizedBox(height: r10),
-                  buildIndicator(cannotDefendUnitPositions.isNotEmpty
-                      ? cannotDefendUnitPositions.length
-                      : opponentFieldUnitPositions.length),
-                  SizedBox(height: r10),
+                        SizedBox(height: r10),
+                        Visibility(
+                            visible: cannotDefendUnitPositions.isNotEmpty
+                                ? cannotDefendUnitPositions.length > 1
+                                : opponentFieldUnitPositions.length > 1,
+                            child: ElevatedButton(
+                              onPressed: () =>
+                                  cController.animateToPage(activeIndex + 1),
+                              child: Text('Next->',
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: r(28.0))),
+                            )),
+                        SizedBox(height: r10),
+                        ElevatedButton(
+                          onPressed: () {
+                            showUnitTargetCarousel = false;
+                            selectTarget(activeIndex);
+                          },
+                          child: Text('Choice',
+                              style: TextStyle(
+                                  color: Colors.black, fontSize: r(28.0))),
+                        ),
+                      ])),
+                  // 攻撃をブロックするユニットを選ぶ
                   Visibility(
-                      visible: cannotDefendUnitPositions.isNotEmpty
-                          ? cannotDefendUnitPositions.length > 1
-                          : opponentFieldUnitPositions.length > 1,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            cController.animateToPage(activeIndex + 1),
-                        child: Text('Next->',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: r(28.0))),
-                      )),
-                  SizedBox(height: r10),
-                  ElevatedButton(
-                    onPressed: () {
-                      showUnitTargetCarousel = false;
-                      selectTarget(activeIndex);
-                    },
-                    child: Text('Choice',
-                        style:
-                            TextStyle(color: Colors.black, fontSize: r(28.0))),
-                  ),
-                ])),
-            // 攻撃をブロックするユニットを選ぶ
-            Visibility(
-                visible: showDefenceUnitsCarousel == true,
-                child: Column(children: <Widget>[
-                  CarouselSlider.builder(
-                    carouselController: cController,
-                    options: CarouselOptions(
-                        height: r(250),
-                        aspectRatio: 14 / 9,
-                        viewportFraction: 0.6, // 1.0:1つが全体に出る
-                        initialPage: 0,
-                        // enableInfiniteScroll: true,
-                        enlargeCenterPage: true,
-                        scrollDirection: Axis.horizontal,
-                        onPageChanged: (index, reason) {
-                          setState(() {
-                            activeIndex = index;
-                          });
-                        }),
-                    itemCount: yourDefendableUnitPositions.length,
-                    itemBuilder: (context, index, realIndex) {
-                      var target = yourDefendableUnitPositions[index];
-                      var cardId =
-                          gameObject!.yourFieldUnit[(target).toString()];
-                      return Image.asset(
-                        '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
-                        fit: BoxFit.cover,
-                      );
-                    },
-                  ),
-                  SizedBox(height: r10),
-                  buildIndicator(yourDefendableUnitPositions.length),
-                  SizedBox(height: r10),
-                  SizedBox(
-                      height: r35,
-                      child: ElevatedButton(
-                        onPressed: () =>
-                            cController.animateToPage(activeIndex + 1),
-                        child: Text('Next->',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: r(28.0))),
-                      )),
-                  SizedBox(height: r10),
-                  SizedBox(
-                      height: r35,
-                      child: ElevatedButton(
-                        onPressed: () => block(activeIndex),
-                        child: Text('Block',
-                            style: TextStyle(
-                                color: Colors.black, fontSize: r(28.0))),
-                      )),
-                ])),
-            // 相手ユニット選択タイマー 兼 防御側タイマー
-            Visibility(
-                // visible: (canUseIntercept == true || showUnitTargetCarousel == true) ||
-                visible: showUnitTargetCarousel == true ||
-                    (isBattling == true &&
-                        yourDefendableUnitPositions.isNotEmpty &&
-                        !(onBattlePosition != null &&
-                            gameObject!.opponentFieldUnit[
-                                    onBattlePosition.toString()] ==
-                                '6')),
-                child: Center(
-                    child: Padding(
-                        padding: EdgeInsets.only(bottom: r(300.0)),
-                        child: SizedBox(
-                            width: r(180.0),
-                            child: StreamBuilder<int>(
-                                stream: _timer.events.stream,
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<int> snapshot) {
-                                  return Visibility(
-                                      visible: snapshot.data != null &&
-                                          snapshot.data != 0,
-                                      child: Center(
-                                          child: Text(
-                                        '0:0${snapshot.data.toString()}',
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: r(60.0)),
-                                      )));
-                                }))))),
-          ]),
+                      visible: showDefenceUnitsCarousel == true,
+                      child: Column(children: <Widget>[
+                        CarouselSlider.builder(
+                          carouselController: cController,
+                          options: CarouselOptions(
+                              height: r(250),
+                              aspectRatio: 14 / 9,
+                              viewportFraction: 0.6, // 1.0:1つが全体に出る
+                              initialPage: 0,
+                              // enableInfiniteScroll: true,
+                              enlargeCenterPage: true,
+                              scrollDirection: Axis.horizontal,
+                              onPageChanged: (index, reason) {
+                                setState(() {
+                                  activeIndex = index;
+                                });
+                              }),
+                          itemCount: yourDefendableUnitPositions.length,
+                          itemBuilder: (context, index, realIndex) {
+                            var target = yourDefendableUnitPositions[index];
+                            var cardId =
+                                gameObject!.yourFieldUnit[(target).toString()];
+                            return Image.asset(
+                              '${imagePath}unit/${widget.isMobile ? 'mobile/' : ''}card_$cardId.jpeg',
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
+                        SizedBox(height: r10),
+                        buildIndicator(yourDefendableUnitPositions.length),
+                        SizedBox(height: r10),
+                        SizedBox(
+                            height: r35,
+                            child: ElevatedButton(
+                              onPressed: () =>
+                                  cController.animateToPage(activeIndex + 1),
+                              child: Text('Next->',
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: r(28.0))),
+                            )),
+                        SizedBox(height: r10),
+                        SizedBox(
+                            height: r35,
+                            child: ElevatedButton(
+                              onPressed: () => block(activeIndex),
+                              child: Text('Block',
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: r(28.0))),
+                            )),
+                      ])),
+                  // 相手ユニット選択タイマー 兼 防御側タイマー
+                  Visibility(
+                      // visible: (canUseIntercept == true || showUnitTargetCarousel == true) ||
+                      visible: showUnitTargetCarousel == true ||
+                          (isBattling == true &&
+                              yourDefendableUnitPositions.isNotEmpty &&
+                              !(onBattlePosition != null &&
+                                  gameObject!.opponentFieldUnit[
+                                          onBattlePosition.toString()] ==
+                                      '6')),
+                      child: Center(
+                          child: Padding(
+                              padding: EdgeInsets.only(bottom: r(300.0)),
+                              child: SizedBox(
+                                  width: r(180.0),
+                                  child: StreamBuilder<int>(
+                                      stream: _timer.events.stream,
+                                      builder: (BuildContext context,
+                                          AsyncSnapshot<int> snapshot) {
+                                        return Visibility(
+                                            visible: snapshot.data != null &&
+                                                snapshot.data != 0,
+                                            child: Center(
+                                                child: Text(
+                                              '0:0${snapshot.data.toString()}',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: r(60.0)),
+                                            )));
+                                      }))))),
+                  // Load a Lottie file from your assets
+                ]),
           floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
           floatingActionButton: StartButtons(gameProgressStatus,
               (status, _playerId, data, mariganCardIds, cardInfo) {

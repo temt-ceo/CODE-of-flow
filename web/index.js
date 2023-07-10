@@ -14,7 +14,7 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 fcl.config({
   'accessNode.api': 'https://rest-mainnet.onflow.org',
-  'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+  'discovery.wallet': 'https://wallet-v2.blocto.app/4bff3347-0658-419e-b504-3002054fd5e7/flow/authn',
   'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
   'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
 });

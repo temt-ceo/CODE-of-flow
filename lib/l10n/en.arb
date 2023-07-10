@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   "langurage": "English",
-  "homePageTitle": "Welcome to the Virtual Game Arcade! | \"Code Of Flow\"",
+  "homePageTitle": "Welcome to the Virtual Game Arcade! | \"COF.ninja\"",
   "deckEditPageTitle": "Deck Editor",
   "balance": "Balance: ",
   "cardDescription": "No skills|When this unit attacks, this unit's BP is +2000 until end of turn.|When this unit attacks, choose an opponent's unit. Deal 1000 damage to it.|When this unit enters the field, a card in the opponent's trigger zone is randomly destroyed.|This unit is not affected by action restrictions for the turn it enters the field.|This unit is not blocked.|When this unit enters the field, choose one of your opponent's units. Deal 4000 damage to it. \nWhen this unit attacks, destroy a card in your opponent's Trigger Zone at random.|When this unit enters the field, it deals 3000 damage to all of your opponent's units.|When this unit blocks, this unit's BP is +2000 until end of turn.|No Skills|When this unit enters the field, choose one of your opponent's units. Consume it's right of action.||When this unit enters the field, you draw a card.|At the end of your turn, restore this unit's right of action.|When this unit blocks, this unit's BP is +2000 until end of turn.|When this unit enters the field, choose one of your opponent's acted-up units. Deal 7000 damage to it.|When your unit attacks, its BP is +3000 until end of turn.|When your unit enters the field, choose one of your opponent's units. Deal 1000 damage to it.|When your unit enters the field, you draw a card.|When your unit enters the field, choose one of your opponent's units. Deal 3000 damage to it.|When your unit enters the field, grant that unit the ability to be unaffected by action restrictions for the turn it enters the field.(unless it's first turn)|When your unit attacks, destroy a card in your opponent's trigger zone at random.|When your unit enters the field, choose one of your opponent's acted-up units. Deal 3000 damage to it.|When your unit attacks, choose one of your opponent's units. Consume it's right of action.|When your unit attacks, consumes the right of action of all opposing units.|When your unit fights, it gets +2000 BP until end of turn.|When your unit enters the field, it gives all your units [Speed Move] (this unit is not affected by action restrictions for the turn it enters the field) until end of turn.",
@@ -160,10 +160,10 @@
   "whitepaper34": "https://github.com/temt-ceo/CODE-of-flow/blob/develop/aws_lambda/src/index.js",
   "whitepaper35": "Flow Blockchain Smart Contract:",
   "whitepaper36": "https://contractbrowser.com/A.24466f7fc36e3388.CodeOfFlow",
-  "inputPlayerName": "Please input a Player Name.",
+  "inputPlayerName": "Enter the name of the player who will play the game. Player names will be displayed on the ranking page.",
   "nameConfirmText": "If you are satisfied with {name} in player name, please click the button below.",
   "insufficientEN": "You currently have {balance} FLOW coins.\n By pressing the button, you are asked to pay 1 FLOW coin.",
-  "insufficientEN2": "Press \"Approve\" button, then 100 EN will be added.\n\n In this arcade game, when you won a game, you will get 0.5 FLOW at that time.",
+  "insufficientEN2": "Press \"Approve\" button, then 100 EN will be added (if you have coins).\nIn this arcade game, when you won a game, you will get 0.5 FLOW at that time.",
   "insufficientEN3": "",
   "isFirst": "First turn acting",
   "isNotFirst": "Second turn acting",
@@ -184,5 +184,6 @@
   "cannotMove": " cannot move!",
   "rollScreen": "When the game starts, roll the screen sideways to play!",
   "crashHappen": "Mac and PCs are recommended because smartphones are prone to crashes.",
-  "rewardRace": "Reward Ranking Race (Last {count} games)"
+  "rewardRace": "Rewards Ranking Race ({count} games left)",
+  "waitTransaction": "Please press 'Approve' and wait a few seconds for processing."
 }

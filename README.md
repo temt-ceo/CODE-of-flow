@@ -38,15 +38,7 @@ And then, Configuration file location: will be set to ./lib/<br><br>
 Refer to https://docs.amplify.aws/start/getting-started/integrate/q/integration/flutter/<br>
 or https://www.youtube.com/watch?v=KVAaQoV4c6I<br><br>
 Official document: https://docs.amplify.aws/lib/graphqlapi/mutate-data/q/platform/flutter/<br><br>
-<h4>amplify add auth</h4>
-<h4>implement _configureAmplify inside main.dar.</h4>
-<h4>amplify push</h4>
-
-```
-amplify push
-```
 <h4>amplify add api</h4>
-/backend/api/[prj_name]/stacksにschema.graphql file will be created.
 <h4>amplify codegen models</h4>
 The model files will be created inside /lib/models folder.
 <h4>amplify push</h4>

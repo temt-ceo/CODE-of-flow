@@ -11,6 +11,7 @@ https://medium.com/@tickets.on.flow/how-to-call-blockchains-wallet-in-flutter-ap
 https://docs.flutter.dev/get-started/install/macos
 
 <h3>How to build web app</h3>
+
 ```
 flutter build web
 ```
@@ -40,6 +41,7 @@ Official document: https://docs.amplify.aws/lib/graphqlapi/mutate-data/q/platfor
 <h4>amplify add auth</h4>
 <h4>implement _configureAmplify inside main.dar.</h4>
 <h4>amplify push</h4>
+
 ```
 amplify push
 ```
@@ -48,10 +50,12 @@ amplify push
 <h4>amplify codegen models</h4>
 The model files will be created inside /lib/models folder.
 <h4>amplify push</h4>
+
 ```
 amplify push
 ```
 <h3>How to use DevTools to analyze the performance such as memory or cpu.</h3>
+
 ```
 dart devtools
 ```

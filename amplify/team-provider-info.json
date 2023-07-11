@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-codeofflowflutter-dev-163110-authRole",
+      "UnauthRoleArn": "arn:aws:iam::827938411447:role/amplify-codeofflowflutter-dev-163110-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::827938411447:role/amplify-codeofflowflutter-dev-163110-authRole",
+      "Region": "ap-northeast-1",
+      "DeploymentBucketName": "amplify-codeofflowflutter-dev-163110-deployment",
+      "UnauthRoleName": "amplify-codeofflowflutter-dev-163110-unauthRole",
+      "StackName": "amplify-codeofflowflutter-dev-163110",
+      "StackId": "arn:aws:cloudformation:ap-northeast-1:827938411447:stack/amplify-codeofflowflutter-dev-163110/f3b5c9b0-febb-11ed-a70e-0e0c76e2a4cf",
+      "AmplifyAppId": "d3k9gl48040g8c"
+    },
+    "categories": {
+      "api": {
+        "codeofflowflutter": {}
+      },
+      "hosting": {
+        "S3AndCloudFront": {}
+      }
+    }
+  }
+}

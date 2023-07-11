@@ -1,22 +1,21 @@
 # CodeOfFlow(COF.ninja)
 
-This game is paying an homage to the SEGA's arcade game, Code Of Joker.
+This game is paying an homage to the SEGA's arcade game, Code Of Joker.<br><br>
 
-<h3>JavascriptをDartの中から呼ぶ方法については以下のREADMEに記載しています。</h3>
-https://github.com/temt-ceo/CODE-of-flow/tree/develop/es6_to_script
-<br>
+COF.ninja is a tribute to SEGA's Code Of Joker.  So let's enjoy the game COF.ninja and wait the revival of Code Of Joker which runs on the Flow! <br><br>
 
-<h3>Flutter SDKのインストール</h3>
-以下よりダウンロード<br>
+<h3>The following webpage describes how to call Javascript from within Dart.</h3>
+https://medium.com/@tickets.on.flow/how-to-call-blockchains-wallet-in-flutter-apps-633416720f23<br>
+
+<h3>Install Flutter SDK</h3>
 https://docs.flutter.dev/get-started/install/macos
 
-<h3>Webアプリビルド方法</h3>
-
+<h3>How to build web app</h3>
 ```
 flutter build web
 ```
 
-<h4>amplify-cliをインストールする</h4>
+<h3>Install amplify-cli</h3>
 
 ```
 curl -sL https://aws-amplify.github.io/amplify-cli/install | bash && $SHELL
@@ -29,62 +28,56 @@ export PATH="$HOME/.amplify/bin:$PATH"
 
 Restart your terminal
 ```
-
 <h4>amplify configure</h4>
-<br>
 <h4>amplify init</h4>
-> App type: にflutterを選ぶ。すると、<br>
-Configuration file location: ./lib/<br>
-が表示されるはず。<br>
+Choose flutter as App type.<br>
+And then, Configuration file location: will be set to ./lib/<br><br>
 
-<h4>main.dartに設定用のコード追加</h4>
-https://docs.amplify.aws/start/getting-started/integrate/q/integration/flutter/<br>
-を参考にする。又は、<br>
-https://www.youtube.com/watch?v=KVAaQoV4c6I
-<br>
-コーディングの参考はこちら: https://docs.amplify.aws/lib/graphqlapi/mutate-data/q/platform/flutter/<br>
-<br>
+<h4>Configuration inside main.dart</h4>
+Refer to https://docs.amplify.aws/start/getting-started/integrate/q/integration/flutter/<br>
+or https://www.youtube.com/watch?v=KVAaQoV4c6I<br><br>
+Official document: https://docs.amplify.aws/lib/graphqlapi/mutate-data/q/platform/flutter/<br><br>
 <h4>amplify add auth</h4>
-<h4>main.dartの _configureAmplify に必要なコードを追加する</h4>
-<h4>amplify push 実行</h4>
-
+<h4>implement _configureAmplify inside main.dar.</h4>
+<h4>amplify push</h4>
 ```
 amplify push
 ```
-
 <h4>amplify add api</h4>
-/backend/api/[prj_name]/stacksにschema.graphqlファイルが生成される
-
+/backend/api/[prj_name]/stacksにschema.graphql file will be created.
 <h4>amplify codegen models</h4>
-でモデルが/lib/modelsフォルダに生成される。
-
-<h4>amplify push 実行</h4>
-
+The model files will be created inside /lib/models folder.
+<h4>amplify push</h4>
 ```
 amplify push
 ```
-
-<h4>masonを使うとmason make amplify_startetが使える</h4>
-
-<h3>DevToolsでパフォーマンスを計測する方法</h3>
+<h3>How to use DevTools to analyze the performance such as memory or cpu.</h3>
 ```
 dart devtools
 ```
-又はVSCode上でcommand + shift + pを押し
+or type below after "command + shift + p"
 ```
 > devtools
 ```
-と入力するとVSCode上で計測ができるパネルを表示することが出来る。
 
-## Getting Started
+<h3>The following webpage describes how to setup Direct Lambda Resolver.</h3>
+https://medium.com/@tickets.on.flow/how-to-build-a-wallet-less-blockchain-game-with-graphql-80ab28d099a1<br>
 
-This project is a starting point for a Flutter application.
+<h3>The diagram of this app's program sequence</h3>
+<h4>Except at battle</h4>
 
-A few resources to get you started if this is your first Flutter project:
+<h4>When battling</h4>
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+<h4>Youtube Channel</h4>
+https://www.youtube.com/watch?v=brActSNMiZk<br>
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<h4>Babeled js file ↓</h4>
+https://github.com/temt-ceo/CODE-of-flow/blob/develop/web/index.js<br>
+
+<h4>Lambda file used for GraphQL Server using Direct Lambda Resolver with AWS AppSync.</h4>
+https://github.com/temt-ceo/CODE-of-flow/blob/develop/aws_lambda/src/index.js
+
+<h4>Smart Contract</h4>
+https://github.com/temt-ceo/game-built-on-flow/blob/hackathon/cadence/contracts/CODEOfFlow.cdc<br>
+https://flow-view-source.com/mainnet/account/0x24466f7fc36e3388/contract/CodeOfFlow<br>
+

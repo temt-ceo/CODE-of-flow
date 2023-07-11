@@ -122,6 +122,7 @@ class _NestedTabBarState extends State<NestedTabBar>
         .sort((a, b) => int.parse(b['point']).compareTo(int.parse(a['point'])));
     setState(() {
       for (int i = 0; i < objJs.length; i++) {
+        print(objJs[i]);
         rankings.add(RankingInfo(
           rank: i + 1,
           point: int.parse(objJs[i]['point']),
@@ -194,6 +195,8 @@ class _NestedTabBarState extends State<NestedTabBar>
 
   Future<void> getRewardRaceBattles() async {
     var ret = await promiseToFuture(getRewardRaceBattleCount());
+    print(ret);
+    print(444);
     if (widget.chain == 'Mainnet') {
       setState(() => battleCount = int.parse(ret));
     } else {

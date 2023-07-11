@@ -46,19 +46,21 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: PreferredSize(
-          preferredSize: Size.fromHeight(45.0), // here the desired height
+          preferredSize: widget.route == 'Home'
+              ? Size.fromHeight(14.0)
+              : Size.fromHeight(45.0), // here the desired height
           child: widget.route == 'Home'
               ? AppBar(
                   backgroundColor: Colors.transparent,
                   title: Text(widget.title,
-                      style: TextStyle(color: Colors.white, fontSize: r(30.0))),
+                      style: TextStyle(color: Colors.white, fontSize: r(18.0))),
                   flexibleSpace: Stack(children: <Widget>[
                     Positioned(
-                        top: r(28.0),
+                        top: r(2.0),
                         right: r(50.0),
                         child: SizedBox(
-                            width: r(50),
-                            height: r(35),
+                            width: r(40),
+                            height: r(25),
                             child: FittedBox(
                                 fit: BoxFit.fill,
                                 child: Switch(
@@ -70,12 +72,12 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
                                   onChanged: changeSwitch,
                                 )))),
                     Positioned(
-                      top: r(35.0),
+                      top: r(5.0),
                       right: r(100.0),
                       child: Text(activeLocale == true ? 'EN' : 'JP',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: r(20.0),
+                            fontSize: r(15.0),
                           )),
                     ),
                     // Positioned(
@@ -96,7 +98,7 @@ class MobileBodyHorizenState extends State<MobileBodyHorizen> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking of COF.ninja 👑",
+                      title: Text("👑 COF.ninja Player's Ranking 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(40.0))),
                       flexibleSpace: Stack(children: <Widget>[

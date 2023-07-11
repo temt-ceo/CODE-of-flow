@@ -83,9 +83,10 @@ class StartButtons extends StatefulWidget {
   final bool isEnglish;
   final ResponsiveSizeChangeFunction r;
   final bool isMobile;
+  final bool needEyeCatch;
 
   StartButtons(this.gameProgressStatus, this.callback, this.isEnglish, this.r,
-      this.isMobile);
+      this.isMobile, this.needEyeCatch);
 
   @override
   StartButtonsState createState() => StartButtonsState();
@@ -861,17 +862,15 @@ class StartButtonsState extends State<StartButtons> {
                 ))),
         Visibility(
             visible: walletUser.addr == '',
-            child: Padding(
-                padding: EdgeInsets.only(top: widget.r(7.0)),
-                child: SizedBox(
-                    width: widget.isMobile ? widget.r(50.0) : widget.r(45.0),
-                    height: widget.isMobile ? widget.r(50.0) : widget.r(45.0),
-                    child: const FittedBox(
-                        child: FloatingActionButton(
-                      onPressed: authenticate,
-                      tooltip: 'Authenticate',
-                      child: Icon(Icons.key_outlined, size: 30.0),
-                    ))))),
+            child: SizedBox(
+                width: widget.isMobile ? 26.0 : widget.r(45.0),
+                height: widget.isMobile ? 26.0 : widget.r(45.0),
+                child: const FittedBox(
+                    child: FloatingActionButton(
+                  onPressed: authenticate,
+                  tooltip: 'Authenticate',
+                  child: Icon(Icons.key_outlined, size: 30.0),
+                )))),
         Visibility(
             visible: walletUser.addr != '' &&
                 player.uuid != '' &&
@@ -879,8 +878,8 @@ class StartButtonsState extends State<StartButtons> {
             child: Padding(
                 padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
-                    width: widget.r(120.0),
-                    height: widget.r(50.0),
+                    width: widget.r(144.0),
+                    height: widget.r(60.0),
                     child: FloatingActionButton(
                         backgroundColor: Colors.transparent,
                         onPressed: () async {
@@ -899,8 +898,8 @@ class StartButtonsState extends State<StartButtons> {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12.0),
                           child: Image.asset(
-                            width: widget.r(96.0),
-                            height: widget.r(40.0),
+                            width: widget.r(120.0),
+                            height: widget.r(48.0),
                             '${imagePath}button/playButton.png',
                           ),
                         ))))),
@@ -916,8 +915,8 @@ class StartButtonsState extends State<StartButtons> {
             child: Padding(
                 padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
-                    width: widget.r(40.0),
-                    height: widget.r(40.0),
+                    width: widget.r(50.0),
+                    height: widget.r(50.0),
                     child: FittedBox(
                         child: FloatingActionButton(
                             backgroundColor: Colors.transparent,
@@ -1060,13 +1059,13 @@ class StartButtonsState extends State<StartButtons> {
       ),
       Stack(children: <Widget>[
         Positioned(
-            left: widget.r(18),
+            left: widget.r(0),
             top: widget.r(5),
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                           icon: const Icon(Icons.design_services,
@@ -1076,8 +1075,8 @@ class StartButtonsState extends State<StartButtons> {
                           },
                           tooltip: 'The rule of this game'))),
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                     icon: const Icon(Icons.view_carousel_outlined,
@@ -1088,8 +1087,8 @@ class StartButtonsState extends State<StartButtons> {
                     tooltip: 'How to Play',
                   ))),
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                     icon: const Icon(Icons.how_to_vote,
@@ -1166,7 +1165,6 @@ class StartButtonsState extends State<StartButtons> {
                 return buildCarouselImage2(index, messages[index]);
               },
             ),
-            SizedBox(height: widget.r(10.0)),
             buildIndicator(),
             SizedBox(height: widget.r(10.0)),
             ElevatedButton(
@@ -1183,7 +1181,7 @@ class StartButtonsState extends State<StartButtons> {
   }
 
   Widget buildCarouselImage(int index, dynamic card) => Padding(
-        padding: EdgeInsets.only(left: widget.r(80.0)),
+        padding: EdgeInsets.only(left: widget.r(5.0)),
         child: Row(children: <Widget>[
           card == null
               ? Container()
@@ -1231,18 +1229,25 @@ class StartButtonsState extends State<StartButtons> {
       );
   TableRow buildTableRow(List<String> cells, bool high) => TableRow(
           children: cells.map((cell) {
-        return TableCell(
-            child: high && cell != 'Ability'
-                ? Center(
-                    child: SizedBox(
-                        height: widget.r(165.0),
-                        width: widget.r(750.0),
+        return widget.needEyeCatch == false &&
+                (cells[0] == 'Attribute' || cells[0] == 'Card Type')
+            ? TableCell(child: Container())
+            : TableCell(
+                child: high && cell != 'Ability'
+                    ? Padding(
+                        padding: EdgeInsets.fromLTRB(widget.r(12), widget.r(12),
+                            widget.r(20), widget.r(12)),
+                        child: Center(
+                            child: SizedBox(
+                                height: widget.r(200.0),
+                                width: widget.r(750.0),
+                                child: Text(cell,
+                                    style:
+                                        TextStyle(fontSize: widget.r(22.0))))))
+                    : Padding(
+                        padding: EdgeInsets.all(widget.r(12)),
                         child: Text(cell,
-                            style: TextStyle(fontSize: widget.r(28.0)))))
-                : Padding(
-                    padding: EdgeInsets.all(widget.r(12)),
-                    child: Text(cell,
-                        style: TextStyle(fontSize: widget.r(28.0)))));
+                            style: TextStyle(fontSize: widget.r(28.0)))));
       }).toList());
   Widget buildCarouselImage2(int index, String message) => Column(children: [
         Image.asset(

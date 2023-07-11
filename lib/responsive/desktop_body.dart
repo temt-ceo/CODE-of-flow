@@ -87,7 +87,7 @@ class DesktopBodyState extends State<DesktopBody> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking of COF.ninja 👑",
+                      title: Text("👑 COF.ninja Player's Ranking 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(30.0))),
                       flexibleSpace: Stack(children: <Widget>[

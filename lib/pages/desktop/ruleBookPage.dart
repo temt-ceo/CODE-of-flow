@@ -393,9 +393,16 @@ class RuleBookPageState extends State<RuleBookPage> {
                     L10n.of(context)!.tutorial68,
                     style: const TextStyle(color: Colors.black, fontSize: 15.0),
                   ),
-                  Text(
-                    L10n.of(context)!.tutorial69,
-                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  InkWell(
+                    onTap: () => html.window
+                        .open(L10n.of(context)!.tutorial69, 'youtube'),
+                    child: Text(
+                      L10n.of(context)!.tutorial69,
+                      style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                          fontSize: 15.0),
+                    ),
                   ),
                   Text(
                     L10n.of(context)!.tutorial70,
@@ -439,6 +446,140 @@ class RuleBookPageState extends State<RuleBookPage> {
                   ),
                   Text(
                     L10n.of(context)!.tutorial80,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial81,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  // Text(
+                  //   L10n.of(context)!.tutorial82,
+                  //   style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  // ),
+                  // Text(
+                  //   L10n.of(context)!.tutorial83,
+                  //   style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  // ),
+                  // Text(
+                  //   L10n.of(context)!.tutorial84,
+                  //   style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  // ),
+                  // Text(
+                  //   L10n.of(context)!.tutorial85,
+                  //   style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  // ),
+                  Text(
+                    L10n.of(context)!.tutorial86,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial87,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial88,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial89,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  InkWell(
+                    onTap: () => html.window
+                        .open(L10n.of(context)!.tutorial90, 'ranking'),
+                    child: Text(
+                      L10n.of(context)!.tutorial90,
+                      style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                          fontSize: 15.0),
+                    ),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial91,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial92,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  InkWell(
+                    onTap: () => html.window
+                        .open(L10n.of(context)!.tutorial93, 'whitepaper'),
+                    child: Text(
+                      L10n.of(context)!.tutorial93,
+                      style: const TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Colors.blue,
+                          fontSize: 15.0),
+                    ),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial94,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial95,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial96,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial97,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial98,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial99,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial100,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial101,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial102,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial103,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial104,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial105,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial106,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial107,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial108,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial109,
+                    style: const TextStyle(color: Colors.black, fontSize: 15.0),
+                  ),
+                  Text(
+                    L10n.of(context)!.tutorial110,
                     style: const TextStyle(color: Colors.black, fontSize: 15.0),
                   ),
                 ])),

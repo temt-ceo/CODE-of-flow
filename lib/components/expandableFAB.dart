@@ -76,10 +76,10 @@ class ExpandableFABState extends State<ExpandableFAB>
   Widget _tapToClose() {
     return Positioned(
         left: widget.r(4.0),
-        top: widget.r(4.0),
+        top: widget.r(2.0),
         child: SizedBox(
-            height: widget.r(40.0),
-            width: widget.r(40.0),
+            height: 21.0,
+            width: 21.0,
             child: Center(
                 child: Material(
                     shape: const CircleBorder(),
@@ -90,8 +90,8 @@ class ExpandableFABState extends State<ExpandableFAB>
                         child: Padding(
                             padding: EdgeInsets.all(widget.r(7.0)),
                             child: SizedBox(
-                                height: widget.r(50.0),
-                                width: widget.r(50.0),
+                                height: 24.0,
+                                width: 24.0,
                                 child: FittedBox(
                                     child: Icon(Icons.close,
                                         size: 20.0,
@@ -116,8 +116,8 @@ class ExpandableFABState extends State<ExpandableFAB>
             curve: Curves.easeInOut,
             duration: const Duration(milliseconds: 250),
             child: SizedBox(
-                height: widget.r(50.0),
-                width: widget.r(50.0),
+                height: 25.0,
+                width: 25.0,
                 child: FittedBox(
                     child: FloatingActionButton(
                   shape: const CircleBorder(),

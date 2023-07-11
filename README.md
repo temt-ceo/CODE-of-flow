@@ -61,9 +61,11 @@ https://medium.com/@tickets.on.flow/how-to-build-a-wallet-less-blockchain-game-w
 
 <h3>The diagram of this app's program sequence</h3>
 <h4>Except at battle</h4>
+
 ![Direct Lambda Resolver (1)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/dc49ef42-3e14-46e3-a786-e169b80870e2)
 
 <h4>When battling</h4>
+
 ![Direct Lambda Resolver (3)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/6c99b93a-7a81-4a53-8500-5fff127232fe)
 
 <h4>Youtube Channel</h4>

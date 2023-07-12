@@ -119,7 +119,7 @@ class PlayerInfo extends StatelessWidget {
                           fontSize: r(18.0)))),
               Positioned(
                   left: r(500.0),
-                  top: r(7.0),
+                  top: r(10.0),
                   child: Text('$win Win',
                       style: TextStyle(
                           color: rank == 1 || rank == 3

@@ -367,41 +367,16 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     width: widget.r(18.0),
                     height: widget.r(18.0),
                     decoration: envFlavor == 'prod'
-                        ? (widget.isMobile == true
-                            ? const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/enemyLife.png'),
-                                    fit: BoxFit.cover),
-                              )
-                            : const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/enemyLife.png'),
-                                    fit: BoxFit.cover),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.yellow,
-                                    spreadRadius: 1,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                        1, 1), // changes position of shadow
-                                  ),
-                                ],
-                              ))
+                        ? const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/image/button/enemyLife.png'),
+                                fit: BoxFit.cover),
+                          )
                         : const BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage('image/button/enemyLife.png'),
                                 fit: BoxFit.cover),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.yellow,
-                                spreadRadius: 1,
-                                blurRadius: 1,
-                                offset:
-                                    Offset(1, 1), // changes position of shadow
-                              ),
-                            ],
                           ),
                   ),
                 ),
@@ -500,88 +475,38 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     width: widget.r(20.0),
                     height: widget.r(20.0),
                     decoration: envFlavor == 'prod'
-                        ? (widget.isMobile == true
-                            ? const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/enemyHand.png'),
-                                    fit: BoxFit.cover),
-                              )
-                            : const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/enemyHand.png'),
-                                    fit: BoxFit.cover),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color.fromARGB(255, 41, 39, 176),
-                                    spreadRadius: 1,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                        1, 1), // changes position of shadow
-                                  ),
-                                ],
-                              ))
+                        ? const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/image/button/enemyHand.png'),
+                                fit: BoxFit.cover),
+                          )
                         : const BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage('image/button/enemyHand.png'),
                                 fit: BoxFit.cover),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color.fromARGB(255, 41, 39, 176),
-                                spreadRadius: 1,
-                                blurRadius: 1,
-                                offset:
-                                    Offset(1, 1), // changes position of shadow
-                              ),
-                            ],
                           ),
                   ),
                 ),
             ]),
             for (var i = 0; i < widget.info!.opponentTriggerCards; i++)
               Positioned(
-                left: widget.r(471.0 + i * 31),
+                left: widget.r(474.0 + i * 31),
                 top: widget.r(93.0),
                 child: Container(
                   width: widget.r(27.0),
                   height: widget.r(27.0),
                   decoration: envFlavor == 'prod'
-                      ? (widget.isMobile == true
-                          ? const BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/image/button/enemyHand.png'),
-                                  fit: BoxFit.cover),
-                            )
-                          : const BoxDecoration(
-                              image: DecorationImage(
-                                  image: AssetImage(
-                                      'assets/image/button/enemyHand.png'),
-                                  fit: BoxFit.cover),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Color.fromARGB(255, 41, 39, 176),
-                                  spreadRadius: 1,
-                                  blurRadius: 1,
-                                  offset: Offset(
-                                      1, 1), // changes position of shadow
-                                ),
-                              ],
-                            ))
+                      ? const BoxDecoration(
+                          image: DecorationImage(
+                              image: AssetImage(
+                                  'assets/image/button/enemyHand.png'),
+                              fit: BoxFit.cover),
+                        )
                       : const BoxDecoration(
                           image: DecorationImage(
                               image: AssetImage('image/button/enemyHand.png'),
                               fit: BoxFit.cover),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Color.fromARGB(255, 41, 39, 176),
-                              spreadRadius: 1,
-                              blurRadius: 1,
-                              offset:
-                                  Offset(1, 1), // changes position of shadow
-                            ),
-                          ],
                         ),
                 ),
               ),
@@ -605,40 +530,15 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                     width: widget.r(23.0),
                     height: widget.r(23.0),
                     decoration: envFlavor == 'prod'
-                        ? widget.isMobile == true
-                            ? const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/yourLife.png'),
-                                    fit: BoxFit.cover))
-                            : const BoxDecoration(
-                                image: DecorationImage(
-                                    image: AssetImage(
-                                        'assets/image/button/yourLife.png'),
-                                    fit: BoxFit.cover),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Color.fromARGB(255, 41, 39, 176),
-                                    spreadRadius: 1,
-                                    blurRadius: 1,
-                                    offset: Offset(
-                                        1, 1), // changes position of shadow
-                                  ),
-                                ],
-                              )
+                        ? const BoxDecoration(
+                            image: DecorationImage(
+                                image: AssetImage(
+                                    'assets/image/button/yourLife.png'),
+                                fit: BoxFit.cover))
                         : const BoxDecoration(
                             image: DecorationImage(
                                 image: AssetImage('image/button/yourLife.png'),
                                 fit: BoxFit.cover),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Color.fromARGB(255, 41, 39, 176),
-                                spreadRadius: 1,
-                                blurRadius: 2,
-                                offset:
-                                    Offset(1, 1), // changes position of shadow
-                              ),
-                            ],
                           ),
                   ),
                 )
@@ -680,8 +580,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                     color: Colors.yellow,
                                     spreadRadius: 2,
                                     blurRadius: 2,
-                                    offset: Offset(
-                                        1, -1), // changes position of shadow
                                   ),
                                 ],
                               ))
@@ -694,8 +592,6 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
                                 color: Colors.yellow,
                                 spreadRadius: 2,
                                 blurRadius: 2,
-                                offset:
-                                    Offset(1, -1), // changes position of shadow
                               ),
                             ],
                           ),

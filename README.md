@@ -72,10 +72,10 @@ https://medium.com/@tickets.on.flow/how-to-build-a-wallet-less-blockchain-game-w
 https://www.youtube.com/watch?v=brActSNMiZk<br>
 
 <h4>Babeled js file ↓</h4>
-https://github.com/temt-ceo/CODE-of-flow/blob/develop/web/index.js<br>
+https://github.com/temt-ceo/CODE-of-flow/blob/master/web/index.js<br>
 
 <h4>Lambda file used for GraphQL Server using Direct Lambda Resolver with AWS AppSync.</h4>
-https://github.com/temt-ceo/CODE-of-flow/blob/develop/aws_lambda/src/index.js
+https://github.com/temt-ceo/CODE-of-flow/blob/master/aws_lambda/src/index.js
 
 <h4>Smart Contract</h4>
 https://github.com/temt-ceo/game-built-on-flow/blob/hackathon/cadence/contracts/CODEOfFlow.cdc<br>

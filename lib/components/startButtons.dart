@@ -1130,9 +1130,8 @@ class StartButtonsState extends State<StartButtons> {
                       showCarousel = false;
                     });
                   },
-                  child: Text('Close',
-                      style: TextStyle(
-                          color: Colors.black, fontSize: widget.r(28.0))),
+                  child: const Text('Close',
+                      style: TextStyle(color: Colors.black, fontSize: 22.0)),
                 )),
           ])),
       Visibility(
@@ -1141,7 +1140,7 @@ class StartButtonsState extends State<StartButtons> {
             CarouselSlider.builder(
               carouselController: cController,
               options: CarouselOptions(
-                  height: widget.r(450.0),
+                  height: widget.r(520.0),
                   // aspectRatio: 9 / 9,
                   viewportFraction: 0.4, // 1.0:1つが全体に出る
                   initialPage: 0,
@@ -1154,19 +1153,24 @@ class StartButtonsState extends State<StartButtons> {
                       activeIndex = index;
                     });
                   }),
-              itemCount: 4,
+              itemCount: 9,
               itemBuilder: (context, index, realIndex) {
                 List<String> messages = [
                   L10n.of(context)!.tutorial1,
                   L10n.of(context)!.tutorial2,
                   L10n.of(context)!.tutorial3,
-                  L10n.of(context)!.tutorial4
+                  L10n.of(context)!.tutorial4,
+                  L10n.of(context)!.tutorial5,
+                  L10n.of(context)!.tutorial6,
+                  L10n.of(context)!.tutorial7,
+                  L10n.of(context)!.tutorial8,
+                  L10n.of(context)!.tutorial9
                 ];
                 return buildCarouselImage2(index, messages[index]);
               },
             ),
             buildIndicator(),
-            SizedBox(height: widget.r(10.0)),
+            SizedBox(height: widget.r(5.0)),
             ElevatedButton(
               onPressed: () {
                 setState(() {
@@ -1251,24 +1255,26 @@ class StartButtonsState extends State<StartButtons> {
       }).toList());
   Widget buildCarouselImage2(int index, String message) => Column(children: [
         Image.asset(
+          width: widget.r(700.0),
+          height: widget.r(270.0),
           '${imagePath}button/how_to_play${index + 1}.png',
           fit: BoxFit.cover,
         ),
         Container(
             color: Colors.white,
-            height: widget.r(100.0),
+            height: widget.r(250.0),
             child: Padding(
-                padding: EdgeInsets.all(widget.r(20.0)),
+                padding: EdgeInsets.all(widget.r(18.0)),
                 child: Text(
                   message,
                   style:
-                      TextStyle(color: Colors.black, fontSize: widget.r(16.0)),
+                      TextStyle(color: Colors.black, fontSize: widget.r(30.0)),
                 ))),
       ]);
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
-        count: 4,
+        count: 9,
         onDotClicked: (index) {
           cController.animateToPage(index);
         },

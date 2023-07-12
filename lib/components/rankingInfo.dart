@@ -9,16 +9,17 @@ import 'package:percent_indicator/percent_indicator.dart';
 const envFlavor = String.fromEnvironment('flavor');
 
 class RankingInfo extends StatelessWidget {
-  const RankingInfo(
-      {Key? key,
-      required this.onPressed,
-      required this.rank,
-      required this.point,
-      required this.playerName,
-      required this.win,
-      required this.icon,
-      required this.wRes})
-      : super(key: key);
+  const RankingInfo({
+    Key? key,
+    required this.onPressed,
+    required this.rank,
+    required this.point,
+    required this.playerName,
+    required this.win,
+    required this.icon,
+    required this.wRes,
+    required this.prizePosition,
+  }) : super(key: key);
 
   final VoidCallback? onPressed;
   final int rank;
@@ -28,6 +29,7 @@ class RankingInfo extends StatelessWidget {
   final String icon;
   final double wRes;
   final String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
+  final int prizePosition;
   double r(double val) {
     return val * wRes;
   }
@@ -114,14 +116,59 @@ class RankingInfo extends StatelessWidget {
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(23.0)))),
               Positioned(
-                  left: r(500.0),
-                  top: r(9.0),
+                  left: r(480.0),
+                  top: r(12.0),
                   child: Text('$win Win',
                       style: TextStyle(
                           color: rank == 1 || rank == 3
                               ? const Color.fromARGB(255, 247, 245, 245)
                               : const Color.fromARGB(255, 0, 0, 0),
                           fontSize: r(19.0)))),
+              Visibility(
+                  visible: prizePosition == 1,
+                  child: Positioned(
+                    left: r(520.0),
+                    top: r(5.0),
+                    child: Container(
+                      width: r(129.0),
+                      height: r(36.0),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('${imagePath}button/20_FLOW.png'),
+                        ),
+                      ),
+                    ),
+                  )),
+              Visibility(
+                  visible: prizePosition == 2,
+                  child: Positioned(
+                    left: r(520.0),
+                    top: r(5.0),
+                    child: Container(
+                      width: r(129.0),
+                      height: r(36.0),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('${imagePath}button/10_FLOW.png'),
+                        ),
+                      ),
+                    ),
+                  )),
+              Visibility(
+                  visible: prizePosition == 3,
+                  child: Positioned(
+                    left: r(520.0),
+                    top: r(5.0),
+                    child: Container(
+                      width: r(129.0),
+                      height: r(36.0),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('${imagePath}button/5_FLOW.png'),
+                        ),
+                      ),
+                    ),
+                  )),
             ])));
   }
 }

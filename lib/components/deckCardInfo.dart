@@ -75,11 +75,11 @@ class DeckCardInfoState extends State<DeckCardInfo> {
           } else if (category == '1') {
             String ret = L10n.of(context)!.cardDescription;
             String ability = ret.split('|')[cardId! - 1];
-            return "[Trigger] * ${L10n.of(context)!.triggerDesc}\n\n$ability";
+            return "[Trigger] (${L10n.of(context)!.triggerDesc})\n$ability";
           } else if (category == '2') {
             String ret = L10n.of(context)!.cardDescription;
             String ability = ret.split('|')[cardId! - 1];
-            return "[Intercept] * ${L10n.of(context)!.interceptDesc}\n\n$ability";
+            return "[Intercept] (${L10n.of(context)!.interceptDesc})\n$ability";
           }
         }
       } else if (type == 'rarity') {

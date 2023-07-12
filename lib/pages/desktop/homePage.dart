@@ -123,11 +123,11 @@ class HomePageState extends State<HomePage> {
       setState(() => isMainWindow = true);
       return;
     }
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() => eyeCatchSequence = 1);
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 3300));
+    // setState(() => eyeCatchSequence = 1);
+    // await Future.delayed(const Duration(milliseconds: 1700));
     setState(() => eyeCatchSequence = 2);
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 1700));
     setState(() => isMainWindow = true);
   }
 
@@ -1703,41 +1703,187 @@ class HomePageState extends State<HomePage> {
       return Scaffold(
           backgroundColor: Colors.transparent,
           body: isMainWindow == false
-              ? Stack(children: [
-                  Center(
-                      child: Image.asset(
-                    width: r(1280.0),
-                    height: r(480.0),
-                    '${lottiePath}images/img_1.jpg',
-                    fit: BoxFit.cover,
-                  )),
-                  Visibility(
-                      visible: eyeCatchSequence == 0,
-                      child: Center(
-                          child: Text(
-                        'For every 1000 battle games played in the\nworld, the1st to 3rd place will be determined\nin the smart contract! Non-stop battle,\nwith a total of 35 FLOW paid out immediately\nafter 1000 battles are done!\nThe next ranking battle starts immediately!',
-                        style:
-                            TextStyle(color: Colors.white, fontSize: r(42.0)),
-                      ))),
-                  Visibility(
-                      visible: eyeCatchSequence == 1,
-                      child: Center(
-                          child: Text(
-                        '世界で1000バトル、ゲームされる毎に\nスマートコントラクト内で1位から3位を\n決定！合計35FLOWが1000バトル行われ\nた直後に支払われる、ノンストップバトル！\nすぐに次のランキングバトルが始まる！',
-                        style:
-                            TextStyle(color: Colors.white, fontSize: r(42.0)),
-                      ))),
-                  Visibility(
-                      visible: eyeCatchSequence == 2,
-                      child: Center(
-                          child: Image.asset(
-                        width: r(980.0),
-                        height: r(460.0),
-                        '${lottiePath}images/img_0.jpg',
-                        fit: BoxFit.cover,
-                      ))),
-                ])
+              ? Padding(
+                  padding: EdgeInsets.only(top: r(50.0)),
+                  child: Stack(children: [
+                    Center(
+                        child: Image.asset(
+                      width: r(1280.0),
+                      height: r(720.0),
+                      '${lottiePath}images/img_1.jpg',
+                      fit: BoxFit.cover,
+                    )),
+                    Visibility(
+                        visible:
+                            eyeCatchSequence == 0 && widget.enLocale == true,
+                        child: Center(
+                            child: Text(
+                          'For every 1000 battles played worldwide, \n20 FLOW will be paid to the first place \nin the ranking! The more people play, the more \nmoney you get! Earn more and more \$FLOW!',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: r(50.0) > 42 ? 42 : r(54.0)),
+                        ))),
+                    Visibility(
+                        visible:
+                            eyeCatchSequence == 0 && widget.enLocale == false,
+                        child: Center(
+                            child: Text(
+                          '全世界で1000バトルプレイされる度に20\$FLOW\nがランキング１位に支払われる！\nプレイ人口が増えれば増えるほど、\n金額も上がる！どんどん\$FLOWを稼ごう！',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: r(50.0) > 42 ? 42 : r(54.0)),
+                        ))),
+                    Visibility(
+                        visible: eyeCatchSequence == 2,
+                        child: Center(
+                            child: Image.asset(
+                          width: r(1113.0),
+                          height: r(560.0),
+                          '${lottiePath}images/img_0.jpg',
+                          fit: BoxFit.cover,
+                        ))),
+                  ]))
               : Stack(fit: StackFit.expand, children: <Widget>[
+                  widget.needEyeCatch == true &&
+                          widget.isMobile == true &&
+                          widget.enLocale == true
+                      ? Stack(children: [
+                          Positioned(
+                              left: r(50.0),
+                              bottom: r(10.0),
+                              child: Image.asset(
+                                width: r(1280.0),
+                                height: r(780.0),
+                                '${imagePath}unit/hazard.png',
+                                fit: BoxFit.cover,
+                              )),
+                          Positioned(
+                              left: r(20.0),
+                              bottom: r(800.0),
+                              child: Text(
+                                'You will own 78 cards to start with, so you can decide which cards you want \nto use in the game. You will be provided with a starter deck, so you can start \nplaying right away.\n\nYou can play 10 times for 3 \$FLOW, and if you win 10 games, you get 5 \$FLOW.\n\n',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(38.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(610.0),
+                              child: Text(
+                                '🚨Images may take a time to load on your phone and may not\nimmediately display at the drop site. Please wait until they are cached.',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(36.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(380.0),
+                              child: Text(
+                                '🚨Reloading seems to occur more frequently by the degraded \nbattery condition, if you have a Mac,PC I recommend you to use \nthat. This is implemented to work on a smartphone, but it is mainly \nsuitable for use on a laptop because of the bounty on it.',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(36.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(310.0),
+                              child: Text(
+                                "Discord channel:",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(42.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(256.0),
+                              child: InkWell(
+                                onTap: () => html.window.open(
+                                    'https://discord.com/invite/DV6VafmQ2S',
+                                    'discord'),
+                                child: const Text(
+                                  'https://discord.com/invite/DV6VafmQ2S',
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      color: Colors.blue,
+                                      fontSize: 12.0),
+                                ),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(90.0),
+                              child: Text(
+                                "Code Of Joker(COJ) debuted in SEGA's Game Arcade on July 11, \n 2013 (10 years ago!). I wanted to tell people that the revival is \npossible with BCG if it's built on Flow Blockchain.",
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(42.0)),
+                              )),
+                        ])
+                      : const SizedBox.shrink(),
+                  widget.needEyeCatch == true &&
+                          widget.isMobile == true &&
+                          widget.enLocale == false
+                      ? Stack(children: [
+                          Positioned(
+                              left: r(50.0),
+                              bottom: r(10.0),
+                              child: Image.asset(
+                                width: r(1280.0),
+                                height: r(780.0),
+                                '${imagePath}unit/hazard.png',
+                                fit: BoxFit.cover,
+                              )),
+                          Positioned(
+                              left: r(20.0),
+                              bottom: r(800.0),
+                              child: Text(
+                                '最初に78枚のカードを所有していますので、どのカードをゲームに使用するか\n決める事が出来ます。最初にスターターデッキがセットされていますので、いき\nなりゲームする事も出来ます。\n3 \$FLOWで10回プレイ出来、10回ゲームに勝利すると5 \$FLOWを得る事が出来\nます。\n\n',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(38.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(610.0),
+                              child: Text(
+                                '🚨画像はスマホでは読み込みに時間がかかり、すぐにドロップ先で\n表示されない可能性があります。キャッシュされるまでお待ち下さい。',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(36.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(380.0),
+                              child: Text(
+                                '🚨バッテリー状態が劣化しているとリロードが頻繁に発生するよう\nです。Mac,PCをお持ちでしたらそちらをお勧めします。\nスマホでも動くように実装しましたが、賞金がかかっているので\nノートパソコンの方をメインに使うのが合っていると思います。',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(36.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(310.0),
+                              child: Text(
+                                'Discord チャンネル:',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(42.0)),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(256.0),
+                              child: InkWell(
+                                onTap: () => html.window.open(
+                                    'https://discord.com/invite/DV6VafmQ2S',
+                                    'discord'),
+                                child: const Text(
+                                  'https://discord.com/invite/DV6VafmQ2S',
+                                  style: TextStyle(
+                                      decoration: TextDecoration.underline,
+                                      color: Colors.blue,
+                                      fontSize: 12.0),
+                                ),
+                              )),
+                          Positioned(
+                              left: r(90.0),
+                              bottom: r(90.0),
+                              child: Text(
+                                'Code Of Joker(COJ)は2013年の7月11日（今から10年前!）に\nSEGAのゲームセンターでデビューしました。Flow Blockchainの\nBCGなら復活が可能だと伝えたかったのです。',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: r(42.0)),
+                              )),
+                        ])
+                      : const SizedBox.shrink(),
                   // デッキカード
                   Positioned(
                       left: r(340.0),
@@ -1924,7 +2070,7 @@ class HomePageState extends State<HomePage> {
                           defenderUsedCardIds,
                           r,
                           widget.isMobile)
-                      : Container(),
+                      : const SizedBox.shrink(),
                   DeckCardInfo(gameObject, cardInfos, tappedCardId, 'home',
                       widget.enLocale, r),
                   // DragTargetWidget
@@ -2057,7 +2203,7 @@ class HomePageState extends State<HomePage> {
                                 (attackSignalPosition! == 2 ||
                                     attackSignalPosition! == 0)
                             ? 760.0
-                            : 850.0),
+                            : 830.0),
                         top: r(-2.0),
                         child: Container(
                           width: r(75.0),
@@ -2916,8 +3062,8 @@ class HomePageState extends State<HomePage> {
                           top: r(160.0),
                           left: r(330.0),
                           child: SizedBox(
-                              width: r50,
-                              height: r50,
+                              width: r50 < 26 ? 26 : r50,
+                              height: r50 < 26 ? 26 : r50,
                               child: FittedBox(
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
@@ -2941,8 +3087,8 @@ class HomePageState extends State<HomePage> {
                           top: r(160.0),
                           left: r(205.0),
                           child: SizedBox(
-                              width: r(52.0),
-                              height: r(52.0),
+                              width: r50 < 26 ? 26 : r50,
+                              height: r50 < 26 ? 26 : r50,
                               child: FittedBox(
                                   child: FloatingActionButton(
                                       backgroundColor: Colors.transparent,
@@ -3294,7 +3440,7 @@ class HomePageState extends State<HomePage> {
                 setCardInfo(cardInfo);
                 break;
             }
-          }, widget.enLocale, r, widget.isMobile));
+          }, widget.enLocale, r, widget.isMobile, widget.needEyeCatch));
     });
   }
 

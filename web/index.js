@@ -391,6 +391,27 @@ window.getRewardRaceBattleCount = async function () {
   return result
 };
 
+window.getCurrentRunkingWinners = async function () {
+  fcl.config({
+    'accessNode.api': 'https://rest-mainnet.onflow.org',
+    'discovery.wallet': 'https://fcl-discovery.onflow.org/authn',
+    'app.detail.title': 'COF.ninja', // Shows user what dapp is trying to connect
+    'app.detail.icon': 'https://cof.ninja/cof.png', // shows image to the user to display your dapp brand
+  });
+  const result = await fcl.query({
+    cadence: `
+    import CodeOfFlow from 0x24466f7fc36e3388
+    pub fun main(): [String] {
+        return CodeOfFlow.getCurrentRunkingWinners()
+    }
+    `,
+    args: (arg, t) => [
+    ]
+  });
+  // console.log(result);
+  return result
+};
+
 window.getPlayerName = function(player) {
   return player.nickname;
 };

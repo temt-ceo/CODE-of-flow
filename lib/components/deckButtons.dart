@@ -453,13 +453,13 @@ class DeckButtonsState extends State<DeckButtons> {
           ])),
       Stack(children: <Widget>[
         Positioned(
-            left: widget.r(215),
+            left: widget.r(200),
             top: 0.0,
             child:
                 ExpandableFAB(distance: widget.r(150), r: widget.r, children: [
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                           icon: const Icon(Icons.design_services,
@@ -469,8 +469,8 @@ class DeckButtonsState extends State<DeckButtons> {
                           },
                           tooltip: 'The rule of this game'))),
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                     icon: const Icon(Icons.view_carousel_outlined,
@@ -481,8 +481,8 @@ class DeckButtonsState extends State<DeckButtons> {
                     tooltip: 'How to Play',
                   ))),
               SizedBox(
-                  width: widget.r(50.0),
-                  height: widget.r(50.0),
+                  width: 32.0,
+                  height: 32.0,
                   child: FittedBox(
                       child: FABActionButton(
                     icon: const Icon(Icons.how_to_vote,
@@ -499,7 +499,7 @@ class DeckButtonsState extends State<DeckButtons> {
           child: Stack(children: <Widget>[
             CarouselSlider.builder(
               options: CarouselOptions(
-                  height: widget.r(700),
+                  height: widget.r(800),
                   aspectRatio: 14 / 9,
                   viewportFraction: 0.75, // 1.0:1つが全体に出る
                   initialPage: 0,
@@ -559,7 +559,6 @@ class DeckButtonsState extends State<DeckButtons> {
                 return buildCarouselImage2(index, messages[index]);
               },
             ),
-            SizedBox(height: widget.r(2.0)),
             buildIndicator(),
             SizedBox(height: widget.r(10.0)),
             ElevatedButton(
@@ -576,7 +575,7 @@ class DeckButtonsState extends State<DeckButtons> {
   }
 
   Widget buildCarouselImage(int index, dynamic card) => Padding(
-        padding: EdgeInsets.only(left: widget.r(80.0)),
+        padding: EdgeInsets.only(left: widget.r(5.0)),
         child: Row(children: <Widget>[
           card == null
               ? Container()
@@ -626,12 +625,15 @@ class DeckButtonsState extends State<DeckButtons> {
           children: cells.map((cell) {
         return TableCell(
             child: high && cell != 'Ability'
-                ? Center(
-                    child: SizedBox(
-                        height: widget.r(165.0),
-                        width: widget.r(750.0),
-                        child: Text(cell,
-                            style: TextStyle(fontSize: widget.r(28.0)))))
+                ? Padding(
+                    padding: EdgeInsets.fromLTRB(
+                        widget.r(12), widget.r(12), widget.r(20), widget.r(12)),
+                    child: Center(
+                        child: SizedBox(
+                            height: widget.r(200.0),
+                            width: widget.r(750.0),
+                            child: Text(cell,
+                                style: TextStyle(fontSize: widget.r(22.0))))))
                 : Padding(
                     padding: EdgeInsets.all(widget.r(12)),
                     child: Text(cell,

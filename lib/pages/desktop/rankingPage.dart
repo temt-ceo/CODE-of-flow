@@ -33,6 +33,9 @@ external dynamic getTestnetTotalScores();
 @JS('getRewardRaceBattleCount')
 external dynamic getRewardRaceBattleCount();
 
+@JS('getCurrentRunkingWinners')
+external dynamic getCurrentRunkingWinners();
+
 @JS('jsonToString')
 external String jsonToString(dynamic obj);
 
@@ -114,6 +117,9 @@ class _NestedTabBarState extends State<NestedTabBar>
   int battleCount = 0;
   String imagePath = envFlavor == 'prod' ? 'assets/image/' : 'image/';
   double _r = 1.0;
+  String rank1stPlayerName = '';
+  String rank2ndPlayerName = '';
+  String rank3rdPlayerName = '';
 
   void setRankingScores(dynamic rankingScores) {
     var objStr = jsonToString(rankingScores);
@@ -122,18 +128,23 @@ class _NestedTabBarState extends State<NestedTabBar>
         .sort((a, b) => int.parse(b['point']).compareTo(int.parse(a['point'])));
     setState(() {
       for (int i = 0; i < objJs.length; i++) {
+        print(objJs[i]);
         rankings.add(RankingInfo(
-          rank: i + 1,
-          point: int.parse(objJs[i]['point']),
-          playerName: objJs[i]['player_name'],
-          win: int.parse(objJs[i]['period_win_count']),
-          icon:
-              '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
-          onPressed: () {
-            debugPrint(objJs[i]['player_name']);
-          },
-          wRes: _r,
-        ));
+            rank: i + 1,
+            point: int.parse(objJs[i]['point']),
+            playerName: objJs[i]['player_name'],
+            win: int.parse(objJs[i]['period_win_count']),
+            icon:
+                '${imagePath}button/rank${i < 3 ? (i + 1) : (i < 6 ? 'ing' : 'ing_below')}.png',
+            onPressed: () {
+              debugPrint(objJs[i]['player_name']);
+            },
+            wRes: _r,
+            prizePosition: rank1stPlayerName == objJs[i]['player_name']
+                ? 1
+                : (rank2ndPlayerName == objJs[i]['player_name']
+                    ? 2
+                    : (rank3rdPlayerName == objJs[i]['player_name'] ? 3 : 0))));
       }
     });
   }
@@ -193,6 +204,13 @@ class _NestedTabBarState extends State<NestedTabBar>
   }
 
   Future<void> getRewardRaceBattles() async {
+    var currentWinners = await promiseToFuture(getCurrentRunkingWinners());
+    var objStr = jsonToString(currentWinners);
+    var objJs = jsonDecode(objStr);
+    rank1stPlayerName = objJs[0];
+    rank2ndPlayerName = objJs[1];
+    rank3rdPlayerName = objJs[2];
+    print(objJs);
     var ret = await promiseToFuture(getRewardRaceBattleCount());
     if (widget.chain == 'Mainnet') {
       setState(() => battleCount = int.parse(ret));
@@ -246,7 +264,7 @@ class _NestedTabBarState extends State<NestedTabBar>
                                       alignment: Alignment.center,
                                       child: Text(
                                           widget.isEnglish
-                                              ? 'Reward Ranking Race (Last ${1000 - battleCount} games)'
+                                              ? 'Reward Ranking Race (${1000 - battleCount} games left)'
                                               : 'リワード ランキング レース (残り ${1000 - battleCount} games)',
                                           style: const TextStyle(
                                             fontSize: 13.0,

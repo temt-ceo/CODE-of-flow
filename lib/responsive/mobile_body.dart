@@ -55,7 +55,7 @@ class MobileBodyState extends State<MobileBody> {
                   flexibleSpace: Stack(children: <Widget>[
                     Positioned(
                         top: r(30.0),
-                        right: r(10.0),
+                        right: r(50.0),
                         child: SizedBox(
                             width: r(100),
                             height: r(70),
@@ -71,7 +71,7 @@ class MobileBodyState extends State<MobileBody> {
                                 )))),
                     Positioned(
                       top: r(33.0),
-                      right: r(120.0),
+                      right: r(160.0),
                       child: Text(activeLocale == true ? 'EN' : 'JP',
                           style: TextStyle(
                             color: Colors.white,
@@ -96,13 +96,13 @@ class MobileBodyState extends State<MobileBody> {
                         icon: const Icon(Icons.reply, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
-                      title: Text("👑 Player's Ranking COF.ninja 👑",
+                      title: Text("👑 COF.ninja Player's Ranking 👑",
                           style: TextStyle(
                               color: Colors.white, fontSize: r(60.0))),
                       flexibleSpace: Stack(children: <Widget>[
                         Positioned(
                             top: r(13.0),
-                            right: r(10.0),
+                            right: r(30.0),
                             child: SizedBox(
                                 width: r(100),
                                 height: r(70),
@@ -118,7 +118,7 @@ class MobileBodyState extends State<MobileBody> {
                                     )))),
                         Positioned(
                           top: r(15.0),
-                          right: r(120.0),
+                          right: r(140.0),
                           child: Text(activeLocale == true ? 'EN' : 'JP',
                               style: TextStyle(
                                 color: Colors.white,
@@ -140,7 +140,7 @@ class MobileBodyState extends State<MobileBody> {
                           flexibleSpace: Stack(children: <Widget>[
                             Positioned(
                                 top: r(30.0),
-                                right: r(10.0),
+                                right: r(30.0),
                                 child: SizedBox(
                                     width: r(100),
                                     height: r(70),
@@ -156,7 +156,7 @@ class MobileBodyState extends State<MobileBody> {
                                         )))),
                             Positioned(
                               top: r(33.0),
-                              right: r(120.0),
+                              right: r(140.0),
                               child: Text(activeLocale == true ? 'EN' : 'JP',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -179,7 +179,7 @@ class MobileBodyState extends State<MobileBody> {
                               flexibleSpace: Stack(children: <Widget>[
                                 Positioned(
                                     top: r(30.0),
-                                    right: r(10.0),
+                                    right: r(30.0),
                                     child: SizedBox(
                                         width: r(100),
                                         height: r(70),
@@ -196,7 +196,7 @@ class MobileBodyState extends State<MobileBody> {
                                             )))),
                                 Positioned(
                                   top: r(33.0),
-                                  right: r(120.0),
+                                  right: r(140.0),
                                   child:
                                       Text(activeLocale == true ? 'EN' : 'JP',
                                           style: TextStyle(

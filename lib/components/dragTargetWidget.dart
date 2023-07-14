@@ -536,39 +536,39 @@ class DragTargetState extends State<DragTargetWidget> {
                           // フィールド
                           ? Stack(children: <Widget>[
                               // 攻撃シグナル画像
-                              Visibility(
-                                  visible: attackSignalPosition != null,
-                                  child: Positioned(
-                                    left: widget.r((attackSignalPosition !=
-                                                    null &&
-                                                attackSignalPosition! >= 2
-                                            ? widget.r(-40.0)
-                                            : widget.r(50.0)) +
-                                        (attackSignalPosition != null
-                                            ? widget.r(attackSignalPosition! *
-                                                widget.r(180.0))
-                                            : 0)),
-                                    top: widget.r(-5.0),
-                                    child: Container(
-                                      width: widget.r(
-                                          attackSignalPosition != null &&
+                              attackSignalPosition != null
+                                  ? Positioned(
+                                      left: widget.r((attackSignalPosition !=
+                                                      null &&
                                                   attackSignalPosition! >= 2
-                                              ? widget.r(340.0)
-                                              : widget.r(180.0)),
-                                      height: widget.r(240.0),
-                                      decoration: BoxDecoration(
-                                        color: Colors.transparent,
-                                        image: DecorationImage(
-                                            opacity: 0.8,
-                                            image: AssetImage(attackSignalPosition !=
-                                                        null &&
+                                              ? widget.r(-40.0)
+                                              : widget.r(50.0)) +
+                                          (attackSignalPosition != null
+                                              ? widget.r(attackSignalPosition! *
+                                                  widget.r(180.0))
+                                              : 0)),
+                                      top: widget.r(-5.0),
+                                      child: Container(
+                                        width: widget.r(
+                                            attackSignalPosition != null &&
                                                     attackSignalPosition! >= 2
-                                                ? '${imagePath}unit/attackSignal2.png'
-                                                : '${imagePath}unit/attackSignal.png'),
-                                            fit: BoxFit.contain),
+                                                ? widget.r(340.0)
+                                                : widget.r(180.0)),
+                                        height: widget.r(240.0),
+                                        decoration: BoxDecoration(
+                                          color: Colors.transparent,
+                                          image: DecorationImage(
+                                              opacity: 0.8,
+                                              image: AssetImage(attackSignalPosition !=
+                                                          null &&
+                                                      attackSignalPosition! >= 2
+                                                  ? '${imagePath}unit/attackSignal2.png'
+                                                  : '${imagePath}unit/attackSignal.png'),
+                                              fit: BoxFit.contain),
+                                        ),
                                       ),
-                                    ),
-                                  )),
+                                    )
+                                  : const SizedBox.shrink(),
                               // 敵ユニット
                               Stack(children: dropedListEnemy),
                               // 味方ユニット

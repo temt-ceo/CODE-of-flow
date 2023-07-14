@@ -186,7 +186,7 @@ class OnGoingGameInfoState extends State<OnGoingGameInfo> {
     } else if (battleReactionUpdateTime != null &&
         now.difference(battleReactionUpdateTime!).inSeconds > 0) {
       reactionLimitTime =
-          7 - now.difference(battleReactionUpdateTime!).inSeconds;
+          10 - now.difference(battleReactionUpdateTime!).inSeconds;
       if (reactionLimitTime != null && reactionLimitTime! < 0) {
         // 時間制限を超えた場合、バトル判定処理実行へ
         battleResultDecided();

@@ -848,9 +848,8 @@ class StartButtonsState extends State<StartButtons> {
     return Stack(alignment: Alignment.topRight, children: <Widget>[
       Row(mainAxisAlignment: MainAxisAlignment.start, children: <Widget>[
         SizedBox(width: widget.r(310.0)),
-        Visibility(
-            visible: gameStarted == false,
-            child: Padding(
+        gameStarted == false
+            ? Padding(
                 padding:
                     EdgeInsets.only(right: widget.r(10.0), top: widget.r(7.0)),
                 child: Text(
@@ -859,10 +858,10 @@ class StartButtonsState extends State<StartButtons> {
                       : (player.uuid == '' ? '' : ''),
                   style:
                       TextStyle(color: Colors.white, fontSize: widget.r(26.0)),
-                ))),
-        Visibility(
-            visible: walletUser.addr == '',
-            child: SizedBox(
+                ))
+            : const SizedBox.shrink(),
+        walletUser.addr == ''
+            ? SizedBox(
                 width: widget.isMobile ? 26.0 : widget.r(45.0),
                 height: widget.isMobile ? 26.0 : widget.r(45.0),
                 child: const FittedBox(
@@ -870,12 +869,10 @@ class StartButtonsState extends State<StartButtons> {
                   onPressed: authenticate,
                   tooltip: 'Authenticate',
                   child: Icon(Icons.key_outlined, size: 30.0),
-                )))),
-        Visibility(
-            visible: walletUser.addr != '' &&
-                player.uuid != '' &&
-                gameStarted == false,
-            child: Padding(
+                )))
+            : const SizedBox.shrink(),
+        walletUser.addr != '' && player.uuid != '' && gameStarted == false
+            ? Padding(
                 padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
                     width: widget.r(144.0),
@@ -902,17 +899,13 @@ class StartButtonsState extends State<StartButtons> {
                             height: widget.r(48.0),
                             '${imagePath}button/playButton.png',
                           ),
-                        ))))),
-        Visibility(
-            visible: walletUser.addr != '' &&
-                player.uuid != '' &&
-                gameStarted == false,
-            child: SizedBox(width: widget.r(2))),
-        Visibility(
-            visible: walletUser.addr != '' &&
-                player.uuid != '' &&
-                gameStarted == false,
-            child: Padding(
+                        ))))
+            : const SizedBox.shrink(),
+        walletUser.addr != '' && player.uuid != '' && gameStarted == false
+            ? SizedBox(width: widget.r(2))
+            : const SizedBox.shrink(),
+        walletUser.addr != '' && player.uuid != '' && gameStarted == false
+            ? Padding(
                 padding: EdgeInsets.only(top: widget.r(10.0)),
                 child: SizedBox(
                     width: widget.r(50.0),
@@ -931,11 +924,11 @@ class StartButtonsState extends State<StartButtons> {
                                 '${imagePath}button/editDeck.png',
                                 fit: BoxFit.cover,
                               ),
-                            )))))),
+                            )))))
+            : const SizedBox.shrink(),
         SizedBox(width: widget.r(12)),
-        Visibility(
-            visible: walletUser.addr != '',
-            child: Padding(
+        walletUser.addr != ''
+            ? Padding(
                 padding:
                     EdgeInsets.only(top: widget.r(16.0), left: widget.r(30.0)),
                 child: SizedBox(
@@ -948,12 +941,12 @@ class StartButtonsState extends State<StartButtons> {
                       child: Icon(Icons.logout,
                           color:
                               gameStarted == true ? Colors.amber : Colors.grey),
-                    ))))),
+                    ))))
+            : const SizedBox.shrink(),
         SizedBox(width: widget.r(85)),
       ]),
-      Visibility(
-          visible: balance != null && walletUser.addr != '',
-          child: Positioned(
+      balance != null && walletUser.addr != ''
+          ? Positioned(
               left: widget.r(75.0),
               top: 0,
               child: Stack(children: <Widget>[
@@ -979,84 +972,99 @@ class StartButtonsState extends State<StartButtons> {
                                   AssetImage('${imagePath}button/flowLogo.png'),
                               fit: BoxFit.contain),
                         ))),
-              ]))),
-      Visibility(
-          visible: cyberEnergy != null && walletUser.addr != '',
-          child: Positioned(
-            left: widget.r(75.0),
-            top: widget.r(32.0),
-            child: SizedBox(
-                width: 300.0,
-                child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'EN:  ',
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 32, 243, 102),
-                            fontSize: widget.r(16.0)),
-                      ),
-                      Text(
-                        '${cyberEnergy.toString()} / 200',
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 32, 243, 102),
-                            fontSize: widget.r(16.0)),
-                      ),
-                      SizedBox(width: widget.r(20.0)),
-                      Visibility(
-                          visible: gameStarted != true,
-                          child: Text(
-                            yourScore,
-                            style: TextStyle(
-                                color: const Color.fromARGB(255, 247, 245, 245),
-                                fontSize: widget.r(16.0)),
-                          )),
-                    ])),
-          )),
-      Visibility(
-        visible: gameStarted == true,
-        child: Stack(children: [
-          Positioned(
-              left: 0.0,
-              top: widget.r(85.0),
-              child: Text(
-                '$enemyName :',
-                style: TextStyle(
-                    color: const Color.fromARGB(255, 247, 245, 245),
-                    fontSize: widget.r(20.0)),
-              )),
-          Positioned(
-            left: widget.r(295.0),
-            top: widget.r(87.0),
-            child: Text(
-              enemyScore,
-              style: TextStyle(
-                  color: const Color.fromARGB(255, 247, 245, 245),
-                  fontSize: widget.r(16.0)),
-            ),
-          ),
-          // PlayerName
-          Positioned(
-              left: 0.0,
-              top: widget.r(218.0),
-              child: Text(
-                '$yourName :',
-                style: TextStyle(
-                    color: const Color.fromARGB(255, 247, 245, 245),
-                    fontSize: widget.r(20.0)),
-              )),
-          Positioned(
-            left: widget.r(340.0),
-            top: widget.r(220.0),
-            child: Text(
-              yourScore,
-              style: TextStyle(
-                  color: const Color.fromARGB(255, 247, 245, 245),
-                  fontSize: widget.r(16.0)),
-            ),
-          ),
-        ]),
-      ),
+              ]))
+          : const SizedBox.shrink(),
+      cyberEnergy != null && walletUser.addr != ''
+          ? Positioned(
+              left: widget.r(75.0),
+              top: widget.r(32.0),
+              child: SizedBox(
+                  width: 300.0,
+                  child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          'EN:  ',
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 32, 243, 102),
+                              fontSize: widget.r(16.0)),
+                        ),
+                        Text(
+                          '${cyberEnergy.toString()} / 200',
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 32, 243, 102),
+                              fontSize: widget.r(16.0)),
+                        ),
+                        SizedBox(width: widget.r(20.0)),
+                        Visibility(
+                            visible: gameStarted != true,
+                            child: Text(
+                              yourScore,
+                              style: TextStyle(
+                                  color:
+                                      const Color.fromARGB(255, 247, 245, 245),
+                                  fontSize: widget.r(16.0)),
+                            )),
+                      ])),
+            )
+          : const SizedBox.shrink(),
+      gameStarted == false && yourName != '' && walletUser.addr != ''
+          ? Stack(children: [
+              // PlayerName
+              Positioned(
+                  left: widget.r(75.0),
+                  top: widget.r(52.0),
+                  child: Text(
+                    'Player : $yourName',
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 247, 245, 245),
+                        fontSize: widget.r(20.0)),
+                  )),
+            ])
+          : const SizedBox.shrink(),
+      gameStarted == true
+          ? Stack(children: [
+              Positioned(
+                  left: 0.0,
+                  top: widget.r(85.0),
+                  child: Text(
+                    '$enemyName :',
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 247, 245, 245),
+                        fontSize: widget.r(20.0)),
+                  )),
+              Positioned(
+                left: widget.r(295.0),
+                top: widget.r(87.0),
+                child: Text(
+                  enemyScore,
+                  style: TextStyle(
+                      color: const Color.fromARGB(255, 247, 245, 245),
+                      fontSize: widget.r(16.0)),
+                ),
+              ),
+              // PlayerName
+              Positioned(
+                  left: 0.0,
+                  top: widget.r(218.0),
+                  child: Text(
+                    '$yourName :',
+                    style: TextStyle(
+                        color: const Color.fromARGB(255, 247, 245, 245),
+                        fontSize: widget.r(20.0)),
+                  )),
+              Positioned(
+                left: widget.r(340.0),
+                top: widget.r(220.0),
+                child: Text(
+                  yourScore,
+                  style: TextStyle(
+                      color: const Color.fromARGB(255, 247, 245, 245),
+                      fontSize: widget.r(16.0)),
+                ),
+              ),
+            ])
+          : const SizedBox.shrink(),
       Stack(children: <Widget>[
         Positioned(
             left: widget.r(0),
@@ -1100,87 +1108,87 @@ class StartButtonsState extends State<StartButtons> {
                   ))),
             ])),
       ]),
-      Visibility(
-          visible: showCarousel == true,
-          child: Stack(children: <Widget>[
-            CarouselSlider.builder(
-              options: CarouselOptions(
-                  height: widget.r(700),
-                  aspectRatio: 14 / 9,
-                  viewportFraction: 0.75, // 1.0:1つが全体に出る
-                  initialPage: 0,
-                  enableInfiniteScroll: true,
-                  enlargeCenterPage: true,
-                  scrollDirection: Axis.vertical),
-              itemCount: 26,
-              itemBuilder: (context, index, realIndex) {
-                dynamic card = cardList != null
-                    ? cardList[index >= 11
-                        ? (index + 2).toString()
-                        : (index + 1).toString()]
-                    : null;
-                return buildCarouselImage(index, card);
-              },
-            ),
-            Positioned(
-                top: widget.r(8.0),
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      showCarousel = false;
-                    });
-                  },
-                  child: const Text('Close',
-                      style: TextStyle(color: Colors.black, fontSize: 22.0)),
-                )),
-          ])),
-      Visibility(
-          visible: showCarousel2 == true,
-          child: Column(children: <Widget>[
-            CarouselSlider.builder(
-              carouselController: cController,
-              options: CarouselOptions(
-                  height: widget.r(520.0),
-                  // aspectRatio: 9 / 9,
-                  viewportFraction: 0.4, // 1.0:1つが全体に出る
-                  initialPage: 0,
-                  enableInfiniteScroll: true,
-                  enlargeCenterPage: true,
-                  scrollDirection: Axis.horizontal,
-                  autoPlay: true,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      activeIndex = index;
-                    });
-                  }),
-              itemCount: 9,
-              itemBuilder: (context, index, realIndex) {
-                List<String> messages = [
-                  L10n.of(context)!.tutorial1,
-                  L10n.of(context)!.tutorial2,
-                  L10n.of(context)!.tutorial3,
-                  L10n.of(context)!.tutorial4,
-                  L10n.of(context)!.tutorial5,
-                  L10n.of(context)!.tutorial6,
-                  L10n.of(context)!.tutorial7,
-                  L10n.of(context)!.tutorial8,
-                  L10n.of(context)!.tutorial9
-                ];
-                return buildCarouselImage2(index, messages[index]);
-              },
-            ),
-            buildIndicator(),
-            SizedBox(height: widget.r(5.0)),
-            ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  showCarousel2 = false;
-                });
-              },
-              child: const Text('Close',
-                  style: TextStyle(color: Colors.black, fontSize: 22.0)),
-            ),
-          ]))
+      showCarousel == true
+          ? Stack(children: <Widget>[
+              CarouselSlider.builder(
+                options: CarouselOptions(
+                    height: widget.r(700),
+                    aspectRatio: 14 / 9,
+                    viewportFraction: 0.75, // 1.0:1つが全体に出る
+                    initialPage: 0,
+                    enableInfiniteScroll: true,
+                    enlargeCenterPage: true,
+                    scrollDirection: Axis.vertical),
+                itemCount: 26,
+                itemBuilder: (context, index, realIndex) {
+                  dynamic card = cardList != null
+                      ? cardList[index >= 11
+                          ? (index + 2).toString()
+                          : (index + 1).toString()]
+                      : null;
+                  return buildCarouselImage(index, card);
+                },
+              ),
+              Positioned(
+                  top: widget.r(8.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        showCarousel = false;
+                      });
+                    },
+                    child: const Text('Close',
+                        style: TextStyle(color: Colors.black, fontSize: 22.0)),
+                  )),
+            ])
+          : const SizedBox.shrink(),
+      showCarousel2 == true
+          ? Column(children: <Widget>[
+              CarouselSlider.builder(
+                carouselController: cController,
+                options: CarouselOptions(
+                    height: widget.r(520.0),
+                    // aspectRatio: 9 / 9,
+                    viewportFraction: 0.4, // 1.0:1つが全体に出る
+                    initialPage: 0,
+                    enableInfiniteScroll: true,
+                    enlargeCenterPage: true,
+                    scrollDirection: Axis.horizontal,
+                    autoPlay: true,
+                    onPageChanged: (index, reason) {
+                      setState(() {
+                        activeIndex = index;
+                      });
+                    }),
+                itemCount: 9,
+                itemBuilder: (context, index, realIndex) {
+                  List<String> messages = [
+                    L10n.of(context)!.tutorial1,
+                    L10n.of(context)!.tutorial2,
+                    L10n.of(context)!.tutorial3,
+                    L10n.of(context)!.tutorial4,
+                    L10n.of(context)!.tutorial5,
+                    L10n.of(context)!.tutorial6,
+                    L10n.of(context)!.tutorial7,
+                    L10n.of(context)!.tutorial8,
+                    L10n.of(context)!.tutorial9
+                  ];
+                  return buildCarouselImage2(index, messages[index]);
+                },
+              ),
+              buildIndicator(),
+              SizedBox(height: widget.r(5.0)),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    showCarousel2 = false;
+                  });
+                },
+                child: const Text('Close',
+                    style: TextStyle(color: Colors.black, fontSize: 22.0)),
+              ),
+            ])
+          : const SizedBox.shrink()
     ]);
   }
 

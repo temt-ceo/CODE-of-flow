@@ -731,7 +731,7 @@ class HomePageState extends State<HomePage> {
           });
         }
         // 新しいカードをドローしているケース
-        if (data!.newlyDrawedCards.isNotEmpty) {
+        if (data.newlyDrawedCards.isNotEmpty) {
           for (var i = 0; i < data.newlyDrawedCards.length; i++) {
             if (gameObject!.newlyDrawedCards.length < i + 1) {
               // 新しくドローしたカードをセット
@@ -745,6 +745,44 @@ class HomePageState extends State<HomePage> {
           setState(() {
             handCards = handCards;
           });
+        }
+        if ((data.yourLife == 1 &&
+                data.isFirst != data.isFirstTurn &&
+                gameObject!.yourLife > 1) ||
+            (data.opponentLife == 1 &&
+                data.isFirst == data.isFirstTurn &&
+                gameObject!.opponentLife > 1)) {
+          // Detect Yggdrasill
+          bool existFieldUnit = false;
+          for (int i = 1; i <= 5; i++) {
+            if (data.yourFieldUnit[i.toString()] != null) {
+              existFieldUnit = true;
+              break;
+            }
+            if (data.opponentFieldUnit[i.toString()] != null) {
+              existFieldUnit = true;
+              break;
+            }
+          }
+          if (existFieldUnit == false) {
+            // Check Trigger card is decreased
+            bool yggdrasillUsed = false;
+            if (data.opponentTriggerCards < gameObject!.opponentTriggerCards &&
+                data.isFirst == data.isFirstTurn) {
+              yggdrasillUsed = true;
+            } else if (data.isFirst != data.isFirstTurn) {
+              for (int i = 1; i <= 4; i++) {
+                if (gameObject!.yourTriggerCards[i.toString()] != null &&
+                    data.yourTriggerCards[i.toString()] == null) {
+                  yggdrasillUsed = true;
+                }
+              }
+            }
+            if (yggdrasillUsed == true) {
+              showMessage(
+                  5, 'Yggdrasill${L10n.of(context)!.activatedEffect}!', null);
+            }
+          }
         }
       }
     }

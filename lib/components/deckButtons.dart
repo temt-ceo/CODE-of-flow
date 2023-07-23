@@ -506,7 +506,7 @@ class DeckButtonsState extends State<DeckButtons> {
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   scrollDirection: Axis.vertical),
-              itemCount: 26,
+              itemCount: 28,
               itemBuilder: (context, index, realIndex) {
                 dynamic card = cardList != null
                     ? cardList[index >= 11
@@ -548,13 +548,18 @@ class DeckButtonsState extends State<DeckButtons> {
                       activeIndex = index;
                     });
                   }),
-              itemCount: 4,
+              itemCount: 9,
               itemBuilder: (context, index, realIndex) {
                 List<String> messages = [
                   L10n.of(context)!.tutorial1,
                   L10n.of(context)!.tutorial2,
                   L10n.of(context)!.tutorial3,
-                  L10n.of(context)!.tutorial4
+                  L10n.of(context)!.tutorial4,
+                  L10n.of(context)!.tutorial5,
+                  L10n.of(context)!.tutorial6,
+                  L10n.of(context)!.tutorial7,
+                  L10n.of(context)!.tutorial8,
+                  L10n.of(context)!.tutorial9
                 ];
                 return buildCarouselImage2(index, messages[index]);
               },
@@ -658,7 +663,7 @@ class DeckButtonsState extends State<DeckButtons> {
 
   Widget buildIndicator() => AnimatedSmoothIndicator(
         activeIndex: activeIndex,
-        count: 4,
+        count: 9,
         onDotClicked: (index) {
           cController.animateToPage(index);
         },

@@ -245,6 +245,16 @@ class DeckButtonsState extends State<DeckButtons> {
     }
   }
 
+  Future<void> editCardInfo() async {
+    showGameLoading();
+    // Call GraphQL method.
+    await apiService.saveGameServerProcess(
+        'edit_card_info', '', player.playerId);
+    await Future.delayed(const Duration(seconds: 3));
+    closeGameLoading();
+    showAlertWindow('success');
+  }
+
   Future<void> resetUserDeck() async {
     showGameLoading();
     var userDeck = await promiseToFuture(
@@ -417,6 +427,27 @@ class DeckButtonsState extends State<DeckButtons> {
                             fit: BoxFit.cover,
                           ),
                         )))),
+            /* ADMIN only */
+            // SizedBox(
+            //     width: widget.r(65.0),
+            //     height: widget.r(40.0),
+            //     child: Visibility(
+            //         visible: player.playerId == '11',
+            //         child: FloatingActionButton(
+            //             backgroundColor: Colors.transparent,
+            //             onPressed: () {
+            //               editCardInfo();
+            //             },
+            //             tooltip: 'Edit Card Info',
+            //             child: ClipRRect(
+            //               borderRadius: BorderRadius.circular(widget.r(7.0)),
+            //               child: Image.asset(
+            //                 width: widget.r(65.0),
+            //                 height: widget.r(25.0),
+            //                 '${imagePath}button/save.png',
+            //                 fit: BoxFit.cover,
+            //               ),
+            //             )))),
             SizedBox(width: widget.r(10.0)),
             SizedBox(
                 width: widget.r(65.0),

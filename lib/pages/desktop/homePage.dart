@@ -264,7 +264,7 @@ class HomePageState extends State<HomePage> {
                 // Judge
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   showMessage(5, '',
-                      'Judge ${L10n.of(context)!.activatedEffect} Cannot Block!');
+                      'Judgement ${L10n.of(context)!.activatedEffect} Cannot Block!');
                 });
                 yourDefendableUnitPositions = [];
                 messageAlreadyShown = true;
@@ -1118,12 +1118,15 @@ class HomePageState extends State<HomePage> {
             }
           } else if (cardTriggerAbilityCase == 2) {
             // Fighter,Lilim
-            var unit = cardId == 2 ? 'Fighter' : 'Lilim';
+            var unit =
+                cardId == 2 ? 'Fighter' : (cardId == 6 ? 'Valkyrie' : 'Lilim');
             var ability = cardId == 2
                 ? '- Augmented Power! -'
-                : (gameObject!.opponentTriggerCards > 0
-                    ? '- Trigger Card Lost! -'
-                    : '');
+                : (cardId == 6
+                    ? 'This unit is not blocked!'
+                    : (gameObject!.opponentTriggerCards > 0
+                        ? '- Trigger Card Lost! -'
+                        : ''));
             skillMessage =
                 '$unit ${L10n.of(context)!.activatedAbility} $ability';
           }
@@ -1390,8 +1393,8 @@ class HomePageState extends State<HomePage> {
               // Judge
               setState(() {
                 skillMessage = skillMessage != ''
-                    ? '$skillMessage \nJudge ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
-                    : 'Judge ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
+                    ? '$skillMessage \Judgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
+                    : 'Judgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
               });
             }
           }

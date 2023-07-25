@@ -264,7 +264,7 @@ class HomePageState extends State<HomePage> {
                 // Judge
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   showMessage(5, '',
-                      'Judge ${L10n.of(context)!.activatedEffect} Cannot Block!');
+                      'Judgement ${L10n.of(context)!.activatedEffect} Cannot Block!');
                 });
                 yourDefendableUnitPositions = [];
                 messageAlreadyShown = true;
@@ -285,6 +285,7 @@ class HomePageState extends State<HomePage> {
             }
             bool canBlock = msg['canBlock'];
             if (canBlock == true) {
+              activeIndex = 0;
               showDefenceUnitsCarousel = true;
             }
             String enemyAbility = '';
@@ -328,14 +329,13 @@ class HomePageState extends State<HomePage> {
           } else if (ret.type == 'battle_reaction') {
             if (isBattling == true) {
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-              _timer.countdownStart(3, () {
+              _timer.countdownStart(4, () {
                 isBattling = false;
                 attackStatusBloc.canAttackEventSink
                     .add(CanNotUseTriggerEvent());
                 attackStatusBloc.canAttackEventSink.add(BattleFinishingEvent());
               });
               var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-              print(msg);
               bool enemyHasBlocked = false;
               // isEnemyAttackがnullの場合はfalseをセットする。
               if (isEnemyAttack == null) {
@@ -731,7 +731,7 @@ class HomePageState extends State<HomePage> {
           });
         }
         // 新しいカードをドローしているケース
-        if (data!.newlyDrawedCards.isNotEmpty) {
+        if (data.newlyDrawedCards.isNotEmpty) {
           for (var i = 0; i < data.newlyDrawedCards.length; i++) {
             if (gameObject!.newlyDrawedCards.length < i + 1) {
               // 新しくドローしたカードをセット
@@ -745,6 +745,46 @@ class HomePageState extends State<HomePage> {
           setState(() {
             handCards = handCards;
           });
+        }
+        if ((data.yourLife == 1 &&
+                data.isFirst != data.isFirstTurn &&
+                gameObject!.yourLife > 1) ||
+            (data.opponentLife == 1 &&
+                data.isFirst == data.isFirstTurn &&
+                gameObject!.opponentLife > 1)) {
+          // Detect Yggdrasill
+          bool existFieldUnit = false;
+          for (int i = 1; i <= 5; i++) {
+            if (data.yourFieldUnit[i.toString()] != null) {
+              existFieldUnit = true;
+              break;
+            }
+            if (data.opponentFieldUnit[i.toString()] != null) {
+              existFieldUnit = true;
+              break;
+            }
+          }
+          if (existFieldUnit == false) {
+            // Check Trigger card is decreased
+            // bool yggdrasillUsed = false;
+            // if (data.opponentTriggerCards < gameObject!.opponentTriggerCards &&
+            //     data.isFirst != data.isFirstTurn) {
+            //   yggdrasillUsed = true;
+            // } else if (data.isFirst == data.isFirstTurn) {
+            //   for (int i = 1; i <= 4; i++) {
+            //     if (gameObject!.yourTriggerCards[i.toString()] != null &&
+            //         data.yourTriggerCards[i.toString()] == null) {
+            //       yggdrasillUsed = true;
+            //     }
+            //   }
+            // }
+            // if (yggdrasillUsed == true) {
+            showMessage(
+                7,
+                'Yggdrasill${L10n.of(context)!.activatedEffect}. All the unit on the field are destroyed!',
+                null);
+            // }
+          }
         }
       }
     }
@@ -977,6 +1017,7 @@ class HomePageState extends State<HomePage> {
               // Lilim
               skillMessage =
                   'Lilim ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -991,6 +1032,7 @@ class HomePageState extends State<HomePage> {
               // Lancer
               skillMessage =
                   'Lancer ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1015,6 +1057,7 @@ class HomePageState extends State<HomePage> {
               if (cannotDefendUnitPositions.isNotEmpty) {
                 skillMessage =
                     'Allie ${L10n.of(context)!.activatedAbility} - Remove Action Right! -';
+                activeIndex = 0;
                 showUnitTargetCarousel = true;
                 showMessage(
                     4,
@@ -1044,6 +1087,7 @@ class HomePageState extends State<HomePage> {
             if (cannotDefendUnitPositions.isNotEmpty) {
               skillMessage =
                   'Rairyu ${L10n.of(context)!.activatedAbility} - Dmage Acted-up Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1080,12 +1124,15 @@ class HomePageState extends State<HomePage> {
             }
           } else if (cardTriggerAbilityCase == 2) {
             // Fighter,Lilim
-            var unit = cardId == 2 ? 'Fighter' : 'Lilim';
+            var unit =
+                cardId == 2 ? 'Fighter' : (cardId == 6 ? 'Valkyrie' : 'Lilim');
             var ability = cardId == 2
                 ? '- Augmented Power! -'
-                : (gameObject!.opponentTriggerCards > 0
-                    ? '- Trigger Card Lost! -'
-                    : '');
+                : (cardId == 6
+                    ? 'This unit is not blocked!'
+                    : (gameObject!.opponentTriggerCards > 0
+                        ? '- Trigger Card Lost! -'
+                        : ''));
             skillMessage =
                 '$unit ${L10n.of(context)!.activatedAbility} $ability';
           }
@@ -1238,6 +1285,7 @@ class HomePageState extends State<HomePage> {
                     ? '$skillMessage \nTRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -'
                     : 'TRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -';
                 if (enemySkillTarget == 0) {
+                  activeIndex = 0;
                   showUnitTargetCarousel = true;
                   showMessage(
                       4,
@@ -1302,7 +1350,7 @@ class HomePageState extends State<HomePage> {
       setCanOperateTmp(false);
       showMessage(5, L10n.of(context)!.interceptAbailable, null);
 
-      _timer.countdownStart(5, () async {
+      _timer.countdownStart(6, () async {
         canUseIntercept = false;
         setCanOperateTmp(true);
         attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
@@ -1336,6 +1384,7 @@ class HomePageState extends State<HomePage> {
                       : "Titan's Lock ${L10n.of(context)!.activatedAbility} - Remove Action Right! -";
                 });
                 if (enemySkillTarget == 0) {
+                  activeIndex = 0;
                   showUnitTargetCarousel = true;
                   showMessage(
                       4,
@@ -1352,8 +1401,8 @@ class HomePageState extends State<HomePage> {
               // Judge
               setState(() {
                 skillMessage = skillMessage != ''
-                    ? '$skillMessage \nJudge ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
-                    : 'Judge ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
+                    ? '$skillMessage \nJudgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
+                    : 'Judgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
               });
             }
           }
@@ -1393,6 +1442,7 @@ class HomePageState extends State<HomePage> {
           skillMessage =
               'Breaker ${L10n.of(context)!.activatedAbility}  - Damage One Unit! -';
           if (enemySkillTarget == 0) {
+            activeIndex = 0;
             showUnitTargetCarousel = true;
             showMessage(
                 4,
@@ -1415,6 +1465,7 @@ class HomePageState extends State<HomePage> {
             skillMessage =
                 'Photon ${L10n.of(context)!.activatedAbility} - Damage Acted-up Unit! -';
             if (enemySkillTarget == 0) {
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1427,6 +1478,11 @@ class HomePageState extends State<HomePage> {
             }
             return;
           }
+        } else if (usedTriggers[i] == 28) {
+          // RainyFlame
+          skillMessage = skillMessage != ''
+              ? '$skillMessage \nRainyFlame ${L10n.of(context)!.activatedAbility} Damage to all unit on the field!'
+              : 'RainyFlame ${L10n.of(context)!.activatedAbility} Damage to all unit on the field!';
         }
       }
     }
@@ -1767,7 +1823,7 @@ class HomePageState extends State<HomePage> {
                               left: r(20.0),
                               bottom: r(800.0),
                               child: Text(
-                                'You will own 78 cards to start with, so you can decide which cards you want \nto use in the game. You will be provided with a starter deck, so you can start \nplaying right away.\n\nYou can play 10 times for 3 \$FLOW, and if you win 10 games, you get 5 \$FLOW.\n\n',
+                                'You will own 84 cards to start with, so you can decide which cards you want \nto use in the game. You will be provided with a starter deck, so you can start \nplaying right away.\n\nYou can play 10 times for 3 \$FLOW, and if you win 10 games, you get 5 \$FLOW.\n\n',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: r(38.0)),
                               )),
@@ -1837,7 +1893,7 @@ class HomePageState extends State<HomePage> {
                               left: r(20.0),
                               bottom: r(800.0),
                               child: Text(
-                                '最初に78枚のカードを所有していますので、どのカードをゲームに使用するか\n決める事が出来ます。最初にスターターデッキがセットされていますので、いき\nなりゲームする事も出来ます。\n3 \$FLOWで10回プレイ出来、10回ゲームに勝利すると5 \$FLOWを得る事が出来\nます。\n\n',
+                                '最初に84枚のカードを所有していますので、どのカードをゲームに使用するか\n決める事が出来ます。最初にスターターデッキがセットされていますので、いき\nなりゲームする事も出来ます。\n3 \$FLOWで10回プレイ出来、10回ゲームに勝利すると5 \$FLOWを得る事が出来\nます。\n\n',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: r(38.0)),
                               )),
@@ -3276,8 +3332,17 @@ class HomePageState extends State<HomePage> {
                                   ? cannotDefendUnitPositions.length > 1
                                   : opponentFieldUnitPositions.length > 1,
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    cController.animateToPage(activeIndex + 1),
+                                onPressed: () => cController.animateToPage(
+                                    activeIndex >
+                                            (cannotDefendUnitPositions
+                                                        .isNotEmpty
+                                                    ? cannotDefendUnitPositions
+                                                        .length
+                                                    : opponentFieldUnitPositions
+                                                        .length) -
+                                                1
+                                        ? 0
+                                        : activeIndex + 1),
                                 child: Text('Next->',
                                     style: TextStyle(
                                         color: Colors.black,
@@ -3330,8 +3395,12 @@ class HomePageState extends State<HomePage> {
                           SizedBox(
                               height: r35,
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    cController.animateToPage(activeIndex + 1),
+                                onPressed: () => cController.animateToPage(
+                                    activeIndex >
+                                            yourDefendableUnitPositions.length -
+                                                1
+                                        ? 0
+                                        : activeIndex + 1),
                                 child: Text('Next->',
                                     style: TextStyle(
                                         color: Colors.black,

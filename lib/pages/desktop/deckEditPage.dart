@@ -129,7 +129,7 @@ class DeckEditPageState extends State<DeckEditPage> {
                             padding: EdgeInsets.only(top: r(5.0)),
                             child: Row(
                               children: [
-                                for (int cardId = 1; cardId <= 27; cardId++)
+                                for (int cardId = 1; cardId <= 29; cardId++)
                                   cardInfos == null || cardId == 12
                                       ? Container()
                                       : Row(children: [

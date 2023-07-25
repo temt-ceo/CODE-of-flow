@@ -131,6 +131,20 @@ const FlowTransactions = {
       }
     }
   `,
+  editCardInfo: `
+    import CodeOfFlow from 0x24466f7fc36e3388
+
+    transaction() {
+      prepare(signer: AuthAccount) {
+        let admin = signer.borrow<&CodeOfFlow.Admin>(from: CodeOfFlow.AdminStoragePath)
+          ?? panic("Could not borrow reference to the Administrator Resource.")
+        admin.edit_card_info()
+      }
+      execute {
+        log("success")
+      }
+    }
+  `,
   claimWin: `
     import CodeOfFlow from 0x24466f7fc36e3388
 
@@ -421,6 +435,22 @@ exports.handler = async function (event) {
       })
       console.log(`TransactionId: ${transactionId}`)
       message = `Transaction[surrender] is On Going. TransactionId: ${transactionId}`
+      fcl.tx(transactionId).subscribe(res => {
+        console.log(res);
+      })
+    // Add new card line-up / revise card info.
+    } else if (input.type === "edit_card_info") {
+      transactionId = await fcl.mutate({
+        cadence: FlowTransactions.editCardInfo,
+        args: (arg, t) => [
+        ],
+        proposer: authorizationFunctionProposer,
+        payer: authorizationFunction,
+        authorizations: [authorizationFunction],
+        limit: 999
+      })
+      console.log(`TransactionId: ${transactionId}`)
+      message = `Transaction[game_start] is On Going. TransactionId: ${transactionId}`
       fcl.tx(transactionId).subscribe(res => {
         console.log(res);
       })

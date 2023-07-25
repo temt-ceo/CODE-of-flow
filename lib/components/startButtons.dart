@@ -1119,7 +1119,7 @@ class StartButtonsState extends State<StartButtons> {
                     enableInfiniteScroll: true,
                     enlargeCenterPage: true,
                     scrollDirection: Axis.vertical),
-                itemCount: 26,
+                itemCount: 28,
                 itemBuilder: (context, index, realIndex) {
                   dynamic card = cardList != null
                       ? cardList[index >= 11

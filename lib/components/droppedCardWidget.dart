@@ -65,9 +65,10 @@ class DroppedCardState extends State<DroppedCardWidget> {
             canUseInterept3 = true;
           } else if (snapshot.data == 14) {
             canUseInterept4 = true;
-          } else if (snapshot.data == 15 ||
-              snapshot.data == 3 ||
-              snapshot.data == 4) {
+            // } else if (snapshot.data == 15 ||
+            //     snapshot.data == 3 ||
+            //     snapshot.data == 4) {
+          } else if (snapshot.data == 15) {
             canUseInterept1 = false;
             canUseInterept2 = false;
             canUseInterept3 = false;

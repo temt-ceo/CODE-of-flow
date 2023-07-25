@@ -541,11 +541,11 @@ class DragTargetState extends State<DragTargetWidget> {
                                       left: widget.r((attackSignalPosition !=
                                                       null &&
                                                   attackSignalPosition! >= 2
-                                              ? widget.r(-40.0)
+                                              ? widget.r(-100.0)
                                               : widget.r(50.0)) +
                                           (attackSignalPosition != null
                                               ? widget.r(attackSignalPosition! *
-                                                  widget.r(180.0))
+                                                  widget.r(100.0))
                                               : 0)),
                                       top: widget.r(-5.0),
                                       child: Container(

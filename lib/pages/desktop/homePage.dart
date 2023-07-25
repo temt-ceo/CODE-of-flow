@@ -1808,7 +1808,7 @@ class HomePageState extends State<HomePage> {
                               left: r(20.0),
                               bottom: r(800.0),
                               child: Text(
-                                'You will own 78 cards to start with, so you can decide which cards you want \nto use in the game. You will be provided with a starter deck, so you can start \nplaying right away.\n\nYou can play 10 times for 3 \$FLOW, and if you win 10 games, you get 5 \$FLOW.\n\n',
+                                'You will own 84 cards to start with, so you can decide which cards you want \nto use in the game. You will be provided with a starter deck, so you can start \nplaying right away.\n\nYou can play 10 times for 3 \$FLOW, and if you win 10 games, you get 5 \$FLOW.\n\n',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: r(38.0)),
                               )),
@@ -1878,7 +1878,7 @@ class HomePageState extends State<HomePage> {
                               left: r(20.0),
                               bottom: r(800.0),
                               child: Text(
-                                '最初に78枚のカードを所有していますので、どのカードをゲームに使用するか\n決める事が出来ます。最初にスターターデッキがセットされていますので、いき\nなりゲームする事も出来ます。\n3 \$FLOWで10回プレイ出来、10回ゲームに勝利すると5 \$FLOWを得る事が出来\nます。\n\n',
+                                '最初に84枚のカードを所有していますので、どのカードをゲームに使用するか\n決める事が出来ます。最初にスターターデッキがセットされていますので、いき\nなりゲームする事も出来ます。\n3 \$FLOWで10回プレイ出来、10回ゲームに勝利すると5 \$FLOWを得る事が出来\nます。\n\n',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: r(38.0)),
                               )),

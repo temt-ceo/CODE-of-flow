@@ -285,6 +285,7 @@ class HomePageState extends State<HomePage> {
             }
             bool canBlock = msg['canBlock'];
             if (canBlock == true) {
+              activeIndex = 0;
               showDefenceUnitsCarousel = true;
             }
             String enemyAbility = '';
@@ -328,14 +329,13 @@ class HomePageState extends State<HomePage> {
           } else if (ret.type == 'battle_reaction') {
             if (isBattling == true) {
               attackStatusBloc.canAttackEventSink.add(BattlingEvent());
-              _timer.countdownStart(3, () {
+              _timer.countdownStart(4, () {
                 isBattling = false;
                 attackStatusBloc.canAttackEventSink
                     .add(CanNotUseTriggerEvent());
                 attackStatusBloc.canAttackEventSink.add(BattleFinishingEvent());
               });
               var msg = jsonDecode(ret.message.split(',TransactionID:')[0]);
-              print(msg);
               bool enemyHasBlocked = false;
               // isEnemyAttackがnullの場合はfalseをセットする。
               if (isEnemyAttack == null) {
@@ -766,22 +766,24 @@ class HomePageState extends State<HomePage> {
           }
           if (existFieldUnit == false) {
             // Check Trigger card is decreased
-            bool yggdrasillUsed = false;
-            if (data.opponentTriggerCards < gameObject!.opponentTriggerCards &&
-                data.isFirst == data.isFirstTurn) {
-              yggdrasillUsed = true;
-            } else if (data.isFirst != data.isFirstTurn) {
-              for (int i = 1; i <= 4; i++) {
-                if (gameObject!.yourTriggerCards[i.toString()] != null &&
-                    data.yourTriggerCards[i.toString()] == null) {
-                  yggdrasillUsed = true;
-                }
-              }
-            }
-            if (yggdrasillUsed == true) {
-              showMessage(
-                  5, 'Yggdrasill${L10n.of(context)!.activatedEffect}!', null);
-            }
+            // bool yggdrasillUsed = false;
+            // if (data.opponentTriggerCards < gameObject!.opponentTriggerCards &&
+            //     data.isFirst != data.isFirstTurn) {
+            //   yggdrasillUsed = true;
+            // } else if (data.isFirst == data.isFirstTurn) {
+            //   for (int i = 1; i <= 4; i++) {
+            //     if (gameObject!.yourTriggerCards[i.toString()] != null &&
+            //         data.yourTriggerCards[i.toString()] == null) {
+            //       yggdrasillUsed = true;
+            //     }
+            //   }
+            // }
+            // if (yggdrasillUsed == true) {
+            showMessage(
+                7,
+                'Yggdrasill${L10n.of(context)!.activatedEffect}. All the unit on the field are destroyed!',
+                null);
+            // }
           }
         }
       }
@@ -1015,6 +1017,7 @@ class HomePageState extends State<HomePage> {
               // Lilim
               skillMessage =
                   'Lilim ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1029,6 +1032,7 @@ class HomePageState extends State<HomePage> {
               // Lancer
               skillMessage =
                   'Lancer ${L10n.of(context)!.activatedAbility} - Dmage One Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1053,6 +1057,7 @@ class HomePageState extends State<HomePage> {
               if (cannotDefendUnitPositions.isNotEmpty) {
                 skillMessage =
                     'Allie ${L10n.of(context)!.activatedAbility} - Remove Action Right! -';
+                activeIndex = 0;
                 showUnitTargetCarousel = true;
                 showMessage(
                     4,
@@ -1082,6 +1087,7 @@ class HomePageState extends State<HomePage> {
             if (cannotDefendUnitPositions.isNotEmpty) {
               skillMessage =
                   'Rairyu ${L10n.of(context)!.activatedAbility} - Dmage Acted-up Unit! -';
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1279,6 +1285,7 @@ class HomePageState extends State<HomePage> {
                     ? '$skillMessage \nTRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -'
                     : 'TRIGGER Canon ${L10n.of(context)!.activatedEffect} - Damage One Unit! -';
                 if (enemySkillTarget == 0) {
+                  activeIndex = 0;
                   showUnitTargetCarousel = true;
                   showMessage(
                       4,
@@ -1343,7 +1350,7 @@ class HomePageState extends State<HomePage> {
       setCanOperateTmp(false);
       showMessage(5, L10n.of(context)!.interceptAbailable, null);
 
-      _timer.countdownStart(5, () async {
+      _timer.countdownStart(6, () async {
         canUseIntercept = false;
         setCanOperateTmp(true);
         attackStatusBloc.canAttackEventSink.add(CanNotUseTriggerEvent());
@@ -1377,6 +1384,7 @@ class HomePageState extends State<HomePage> {
                       : "Titan's Lock ${L10n.of(context)!.activatedAbility} - Remove Action Right! -";
                 });
                 if (enemySkillTarget == 0) {
+                  activeIndex = 0;
                   showUnitTargetCarousel = true;
                   showMessage(
                       4,
@@ -1393,7 +1401,7 @@ class HomePageState extends State<HomePage> {
               // Judge
               setState(() {
                 skillMessage = skillMessage != ''
-                    ? '$skillMessage \Judgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
+                    ? '$skillMessage \nJudgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!'
                     : 'Judgement ${L10n.of(context)!.activatedAbility} Remove Action Rights!';
               });
             }
@@ -1434,6 +1442,7 @@ class HomePageState extends State<HomePage> {
           skillMessage =
               'Breaker ${L10n.of(context)!.activatedAbility}  - Damage One Unit! -';
           if (enemySkillTarget == 0) {
+            activeIndex = 0;
             showUnitTargetCarousel = true;
             showMessage(
                 4,
@@ -1456,6 +1465,7 @@ class HomePageState extends State<HomePage> {
             skillMessage =
                 'Photon ${L10n.of(context)!.activatedAbility} - Damage Acted-up Unit! -';
             if (enemySkillTarget == 0) {
+              activeIndex = 0;
               showUnitTargetCarousel = true;
               showMessage(
                   4,
@@ -1468,6 +1478,11 @@ class HomePageState extends State<HomePage> {
             }
             return;
           }
+        } else if (usedTriggers[i] == 28) {
+          // RainyFlame
+          skillMessage = skillMessage != ''
+              ? '$skillMessage \nRainyFlame ${L10n.of(context)!.activatedAbility} Damage to all unit on the field!'
+              : 'RainyFlame ${L10n.of(context)!.activatedAbility} Damage to all unit on the field!';
         }
       }
     }
@@ -3317,8 +3332,17 @@ class HomePageState extends State<HomePage> {
                                   ? cannotDefendUnitPositions.length > 1
                                   : opponentFieldUnitPositions.length > 1,
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    cController.animateToPage(activeIndex + 1),
+                                onPressed: () => cController.animateToPage(
+                                    activeIndex >
+                                            (cannotDefendUnitPositions
+                                                        .isNotEmpty
+                                                    ? cannotDefendUnitPositions
+                                                        .length
+                                                    : opponentFieldUnitPositions
+                                                        .length) -
+                                                1
+                                        ? 0
+                                        : activeIndex + 1),
                                 child: Text('Next->',
                                     style: TextStyle(
                                         color: Colors.black,
@@ -3371,8 +3395,12 @@ class HomePageState extends State<HomePage> {
                           SizedBox(
                               height: r35,
                               child: ElevatedButton(
-                                onPressed: () =>
-                                    cController.animateToPage(activeIndex + 1),
+                                onPressed: () => cController.animateToPage(
+                                    activeIndex >
+                                            yourDefendableUnitPositions.length -
+                                                1
+                                        ? 0
+                                        : activeIndex + 1),
                                 child: Text('Next->',
                                     style: TextStyle(
                                         color: Colors.black,

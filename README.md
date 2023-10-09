@@ -1,7 +1,5 @@
 # CodeOfFlow(COF.ninja)
 
-This game is paying an homage to the SEGA's arcade game, Code Of Joker.<br><br>
-
 COF.ninja is a tribute to SEGA's Code Of Joker.  So let's enjoy the game COF.ninja and wait the revival of Code Of Joker which runs on the Flow! <br><br>
 
 <h3>The following webpage describes how to call blockchain wallet from within Dart.</h3>

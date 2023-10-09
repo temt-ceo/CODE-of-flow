@@ -4,13 +4,38 @@ This game is paying an homage to the SEGA's arcade game, Code Of Joker.<br><br>
 
 COF.ninja is a tribute to SEGA's Code Of Joker.  So let's enjoy the game COF.ninja and wait the revival of Code Of Joker which runs on the Flow! <br><br>
 
-<h3>The following webpage describes how to call Javascript from within Dart.</h3>
+<h3>The following webpage describes how to call blockchain wallet from within Dart.</h3>
 https://medium.com/@tickets.on.flow/how-to-call-blockchains-wallet-in-flutter-apps-633416720f23<br>
+
+<h3>The following webpage describes how to setup Direct Lambda Resolver.</h3>
+https://medium.com/@tickets.on.flow/how-to-build-a-wallet-less-blockchain-game-with-graphql-80ab28d099a1<br>
+
+<h3>The diagram of this app's program sequence</h3>
+<h4>Except at battle</h4>
+
+![Direct Lambda Resolver (1)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/dc49ef42-3e14-46e3-a786-e169b80870e2)
+
+<h4>When battling</h4>
+
+![Direct Lambda Resolver (3)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/6c99b93a-7a81-4a53-8500-5fff127232fe)
+
+<h4>Youtube Channel</h4>
+https://www.youtube.com/watch?v=brActSNMiZk<br>
+
+<h4>Babeled js file ↓</h4>
+https://github.com/temt-ceo/CODE-of-flow/blob/master/web/index.js<br>
+
+<h4>Lambda file used for GraphQL Server using Direct Lambda Resolver with AWS AppSync.</h4>
+https://github.com/temt-ceo/CODE-of-flow/blob/master/aws_lambda/src/index.js
+
+<h4>Smart Contract</h4>
+https://github.com/temt-ceo/game-built-on-flow/blob/hackathon/cadence/contracts/CODEOfFlow.cdc<br>
+https://flow-view-source.com/mainnet/account/0x24466f7fc36e3388/contract/CodeOfFlow<br>
+
+<h2>How to build web app</h2>
 
 <h3>Install Flutter SDK</h3>
 https://docs.flutter.dev/get-started/install/macos
-
-<h3>How to build web app</h3>
 
 ```
 flutter build web
@@ -55,29 +80,3 @@ or type below after "command + shift + p"
 ```
 > devtools
 ```
-
-<h3>The following webpage describes how to setup Direct Lambda Resolver.</h3>
-https://medium.com/@tickets.on.flow/how-to-build-a-wallet-less-blockchain-game-with-graphql-80ab28d099a1<br>
-
-<h3>The diagram of this app's program sequence</h3>
-<h4>Except at battle</h4>
-
-![Direct Lambda Resolver (1)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/dc49ef42-3e14-46e3-a786-e169b80870e2)
-
-<h4>When battling</h4>
-
-![Direct Lambda Resolver (3)](https://github.com/temt-ceo/CODE-of-flow/assets/58613670/6c99b93a-7a81-4a53-8500-5fff127232fe)
-
-<h4>Youtube Channel</h4>
-https://www.youtube.com/watch?v=brActSNMiZk<br>
-
-<h4>Babeled js file ↓</h4>
-https://github.com/temt-ceo/CODE-of-flow/blob/master/web/index.js<br>
-
-<h4>Lambda file used for GraphQL Server using Direct Lambda Resolver with AWS AppSync.</h4>
-https://github.com/temt-ceo/CODE-of-flow/blob/master/aws_lambda/src/index.js
-
-<h4>Smart Contract</h4>
-https://github.com/temt-ceo/game-built-on-flow/blob/hackathon/cadence/contracts/CODEOfFlow.cdc<br>
-https://flow-view-source.com/mainnet/account/0x24466f7fc36e3388/contract/CodeOfFlow<br>
-

@@ -4,7 +4,7 @@ Flutterアプリは１つのコードでデスクトップアプリ、iPhoneア�
 JavascriptのメソッドをDartコードから呼びたい場合は以下のライブラリを使用して実行することができます。<br><br>
 https://pub.dev/packages/js
 <br><br>
-最近のライブラリはDartにも対応していものもありますが、そうでない場合、Javascriptの関数をデバッグのためにFlutterアプリの中から呼ぶ必要があります。
+最近のライブラリはDartにも対応していものもありますが、そうでない場合、Javascriptの関数をFlutterアプリの中から呼ぶ必要があります。
 <br><br>
 しかし、大半のJavascriptライブラリはNPMで配布されており、このNPMパッケージがimportやrequireなどのシンタックスを必要とする場合、packages:jsは使用できません。
 <br><br>
